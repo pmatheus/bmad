@@ -118,6 +118,26 @@
       "name": "retrospective",
       "description": "Run epic retrospective with team discussion",
       "path": ".claude/commands/phase-4/retrospective.md"
+    },
+    {
+      "name": "cis/innovation-strategy",
+      "description": "Identify disruption opportunities and business model innovation",
+      "path": ".claude/commands/cis/innovation-strategy.md"
+    },
+    {
+      "name": "cis/design-thinking",
+      "description": "Human-centered design using 5-phase design thinking process",
+      "path": ".claude/commands/cis/design-thinking.md"
+    },
+    {
+      "name": "cis/problem-solving",
+      "description": "Systematic problem-solving with TRIZ and proven frameworks",
+      "path": ".claude/commands/cis/problem-solving.md"
+    },
+    {
+      "name": "cis/storytelling",
+      "description": "Craft compelling narratives using proven story frameworks",
+      "path": ".claude/commands/cis/storytelling.md"
     }
   ],
   "agents": [
