@@ -1,28 +1,245 @@
 {
-  "name": "bmad-method",
+  "name": "bmad",
   "version": "2.0.0",
-  "description": "BMAD Method - Complete AI-assisted software development methodology with workflows, agents, and skills for all project levels",
-  "author": {
-    "name": "pmatheus",
-    "email": "pmatheus@users.noreply.github.com",
-    "url": "https://github.com/pmatheus"
-  },
-  "homepage": "https://github.com/pmatheus/bmad",
-  "repository": "https://github.com/pmatheus/bmad",
+  "description": "BMAD Method - A comprehensive AI-native software development framework for Claude Code. Includes workflows for product planning, architecture, story generation, and implementation.",
+  "author": "BMAD Method Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pmatheus/bmad"
+  },
   "keywords": [
-    "bmad",
-    "methodology",
     "agile",
-    "workflow",
-    "prd",
+    "software-development",
+    "product-management",
     "architecture",
-    "development",
     "testing",
-    "retrospective",
-    "brownfield",
-    "documentation"
+    "workflows",
+    "ai-development",
+    "bmad"
   ],
-  "commands": "./src/commands/",
-  "agents": "./src/subagents/"
+  "commands": [
+    {
+      "name": "workflow-status",
+      "description": "Check workflow status and next recommended actions",
+      "path": "commands/workflow-status.md"
+    },
+    {
+      "name": "workflow-init",
+      "description": "Initialize BMAD Method for a new project",
+      "path": "commands/meta/workflow-init.md"
+    },
+    {
+      "name": "product-brief",
+      "description": "Create interactive product brief with vision and goals",
+      "path": "commands/phase-1/product-brief.md"
+    },
+    {
+      "name": "research",
+      "description": "Adaptive research workflow (market, technical, competitive, user)",
+      "path": "commands/phase-1/research.md"
+    },
+    {
+      "name": "domain-research",
+      "description": "Domain-specific research for regulated industries",
+      "path": "commands/phase-1/domain-research.md"
+    },
+    {
+      "name": "brainstorm-project",
+      "description": "Interactive project brainstorming sessions",
+      "path": "commands/phase-1/brainstorm-project.md"
+    },
+    {
+      "name": "document-project",
+      "description": "Analyze and document brownfield projects",
+      "path": "commands/phase-1/document-project.md"
+    },
+    {
+      "name": "prd",
+      "description": "Create Product Requirements Document with strategic vision",
+      "path": "commands/phase-2/prd.md"
+    },
+    {
+      "name": "tech-spec",
+      "description": "Create technical specification for Level 0 projects",
+      "path": "commands/phase-2/tech-spec.md"
+    },
+    {
+      "name": "create-epics-and-stories",
+      "description": "Transform PRD into epics and user stories",
+      "path": "commands/phase-2/create-epics-and-stories.md"
+    },
+    {
+      "name": "architecture",
+      "description": "Collaborative architectural decision facilitation",
+      "path": "commands/phase-3/architecture.md"
+    },
+    {
+      "name": "sprint-planning",
+      "description": "Generate and manage sprint status tracking",
+      "path": "commands/phase-4/sprint-planning.md"
+    },
+    {
+      "name": "epic-tech-context",
+      "description": "Generate comprehensive technical specification from PRD",
+      "path": "commands/phase-4/epic-tech-context.md"
+    },
+    {
+      "name": "create-story",
+      "description": "Create next user story from epics and architecture",
+      "path": "commands/phase-4/create-story.md"
+    },
+    {
+      "name": "story-context",
+      "description": "Assemble dynamic Story Context XML for implementation",
+      "path": "commands/phase-4/story-context.md"
+    },
+    {
+      "name": "story-ready",
+      "description": "Mark story as ready for development",
+      "path": "commands/phase-4/story-ready.md"
+    },
+    {
+      "name": "dev-story",
+      "description": "Execute story implementation with tests and validation",
+      "path": "commands/phase-4/dev-story.md"
+    },
+    {
+      "name": "code-review",
+      "description": "Senior Developer code review for completed stories",
+      "path": "commands/phase-4/code-review.md"
+    },
+    {
+      "name": "story-done",
+      "description": "Mark story as done and advance sprint queue",
+      "path": "commands/phase-4/story-done.md"
+    },
+    {
+      "name": "retrospective",
+      "description": "Run epic retrospective with team discussion",
+      "path": "commands/phase-4/retrospective.md"
+    },
+    {
+      "name": "cis/innovation-strategy",
+      "description": "Identify disruption opportunities and business model innovation",
+      "path": "commands/cis/innovation-strategy.md"
+    },
+    {
+      "name": "cis/design-thinking",
+      "description": "Human-centered design using 5-phase design thinking process",
+      "path": "commands/cis/design-thinking.md"
+    },
+    {
+      "name": "cis/problem-solving",
+      "description": "Systematic problem-solving with TRIZ and proven frameworks",
+      "path": "commands/cis/problem-solving.md"
+    },
+    {
+      "name": "cis/storytelling",
+      "description": "Craft compelling narratives using proven story frameworks",
+      "path": "commands/cis/storytelling.md"
+    }
+  ],
+  "agents": [
+    {
+      "name": "bmad-pm",
+      "description": "Product Manager - PRD creation, requirements, user stories",
+      "path": "agents/bmad-pm.md"
+    },
+    {
+      "name": "bmad-architect",
+      "description": "Software Architect - System design and technical decisions",
+      "path": "agents/bmad-architect.md"
+    },
+    {
+      "name": "bmad-dev",
+      "description": "Developer - Story implementation and code quality",
+      "path": "agents/bmad-dev.md"
+    },
+    {
+      "name": "bmad-tea",
+      "description": "Test Engineer - Test strategy and quality assurance",
+      "path": "agents/bmad-tea.md"
+    },
+    {
+      "name": "bmad-analyst",
+      "description": "Business Analyst - Research and domain analysis",
+      "path": "agents/bmad-analyst.md"
+    },
+    {
+      "name": "bmad-sm",
+      "description": "Scrum Master - Sprint planning and team coordination",
+      "path": "agents/bmad-sm.md"
+    },
+    {
+      "name": "bmad-ux",
+      "description": "UX Designer - User experience and interface design",
+      "path": "agents/bmad-ux.md"
+    },
+    {
+      "name": "bmad-tech-writer",
+      "description": "Technical Writer - Documentation and API specs",
+      "path": "agents/bmad-tech-writer.md"
+    },
+    {
+      "name": "bmad-innovation-strategist",
+      "description": "Innovation Strategist - Business model innovation and disruption",
+      "path": "agents/bmad-innovation-strategist.md"
+    },
+    {
+      "name": "bmad-creative-problem-solver",
+      "description": "Creative Problem Solver - Systematic problem solving with TRIZ",
+      "path": "agents/bmad-creative-problem-solver.md"
+    },
+    {
+      "name": "bmad-design-thinking-coach",
+      "description": "Design Thinking Coach - Human-centered design facilitation",
+      "path": "agents/bmad-design-thinking-coach.md"
+    },
+    {
+      "name": "bmad-brainstorming-coach",
+      "description": "Brainstorming Coach - Elite ideation and breakthrough sessions",
+      "path": "agents/bmad-brainstorming-coach.md"
+    },
+    {
+      "name": "bmad-storyteller",
+      "description": "Storyteller - Narrative frameworks and compelling communication",
+      "path": "agents/bmad-storyteller.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "bmad-verified-research",
+      "description": "Anti-hallucination research protocol with source verification"
+    },
+    {
+      "name": "bmad-story-context-generation",
+      "description": "Story Context XML assembly with acceptance criteria and constraints"
+    },
+    {
+      "name": "bmad-subagent-patterns",
+      "description": "When and how to delegate to specialized subagents"
+    },
+    {
+      "name": "bmad-test-architecture",
+      "description": "Test strategy generation with BMad TEA patterns"
+    },
+    {
+      "name": "bmad-workflow-orchestration",
+      "description": "Execute BMad workflows with YAML configs and variable resolution"
+    }
+  ],
+  "configuration": {
+    "config_file": ".bmad/config.yaml",
+    "output_folders": {
+      "docs": ".bmad/docs",
+      "stories": ".bmad/stories",
+      "epics": ".bmad/epics",
+      "architecture": ".bmad/architecture",
+      "research": ".bmad/research"
+    }
+  },
+  "requirements": {
+    "claude_code": ">=1.0.0"
+  }
 }

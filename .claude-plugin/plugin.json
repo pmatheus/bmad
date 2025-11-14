@@ -22,189 +22,189 @@
     {
       "name": "workflow-status",
       "description": "Check workflow status and next recommended actions",
-      "path": ".claude/commands/workflow-status.md"
+      "path": "commands/workflow-status.md"
     },
     {
       "name": "workflow-init",
       "description": "Initialize BMAD Method for a new project",
-      "path": ".claude/commands/meta/workflow-init.md"
+      "path": "commands/meta/workflow-init.md"
     },
     {
       "name": "product-brief",
       "description": "Create interactive product brief with vision and goals",
-      "path": ".claude/commands/phase-1/product-brief.md"
+      "path": "commands/phase-1/product-brief.md"
     },
     {
       "name": "research",
       "description": "Adaptive research workflow (market, technical, competitive, user)",
-      "path": ".claude/commands/phase-1/research.md"
+      "path": "commands/phase-1/research.md"
     },
     {
       "name": "domain-research",
       "description": "Domain-specific research for regulated industries",
-      "path": ".claude/commands/phase-1/domain-research.md"
+      "path": "commands/phase-1/domain-research.md"
     },
     {
       "name": "brainstorm-project",
       "description": "Interactive project brainstorming sessions",
-      "path": ".claude/commands/phase-1/brainstorm-project.md"
+      "path": "commands/phase-1/brainstorm-project.md"
     },
     {
       "name": "document-project",
       "description": "Analyze and document brownfield projects",
-      "path": ".claude/commands/phase-1/document-project.md"
+      "path": "commands/phase-1/document-project.md"
     },
     {
       "name": "prd",
       "description": "Create Product Requirements Document with strategic vision",
-      "path": ".claude/commands/phase-2/prd.md"
+      "path": "commands/phase-2/prd.md"
     },
     {
       "name": "tech-spec",
       "description": "Create technical specification for Level 0 projects",
-      "path": ".claude/commands/phase-2/tech-spec.md"
+      "path": "commands/phase-2/tech-spec.md"
     },
     {
       "name": "create-epics-and-stories",
       "description": "Transform PRD into epics and user stories",
-      "path": ".claude/commands/phase-2/create-epics-and-stories.md"
+      "path": "commands/phase-2/create-epics-and-stories.md"
     },
     {
       "name": "architecture",
       "description": "Collaborative architectural decision facilitation",
-      "path": ".claude/commands/phase-3/architecture.md"
+      "path": "commands/phase-3/architecture.md"
     },
     {
       "name": "sprint-planning",
       "description": "Generate and manage sprint status tracking",
-      "path": ".claude/commands/phase-4/sprint-planning.md"
+      "path": "commands/phase-4/sprint-planning.md"
     },
     {
       "name": "epic-tech-context",
       "description": "Generate comprehensive technical specification from PRD",
-      "path": ".claude/commands/phase-4/epic-tech-context.md"
+      "path": "commands/phase-4/epic-tech-context.md"
     },
     {
       "name": "create-story",
       "description": "Create next user story from epics and architecture",
-      "path": ".claude/commands/phase-4/create-story.md"
+      "path": "commands/phase-4/create-story.md"
     },
     {
       "name": "story-context",
       "description": "Assemble dynamic Story Context XML for implementation",
-      "path": ".claude/commands/phase-4/story-context.md"
+      "path": "commands/phase-4/story-context.md"
     },
     {
       "name": "story-ready",
       "description": "Mark story as ready for development",
-      "path": ".claude/commands/phase-4/story-ready.md"
+      "path": "commands/phase-4/story-ready.md"
     },
     {
       "name": "dev-story",
       "description": "Execute story implementation with tests and validation",
-      "path": ".claude/commands/phase-4/dev-story.md"
+      "path": "commands/phase-4/dev-story.md"
     },
     {
       "name": "code-review",
       "description": "Senior Developer code review for completed stories",
-      "path": ".claude/commands/phase-4/code-review.md"
+      "path": "commands/phase-4/code-review.md"
     },
     {
       "name": "story-done",
       "description": "Mark story as done and advance sprint queue",
-      "path": ".claude/commands/phase-4/story-done.md"
+      "path": "commands/phase-4/story-done.md"
     },
     {
       "name": "retrospective",
       "description": "Run epic retrospective with team discussion",
-      "path": ".claude/commands/phase-4/retrospective.md"
+      "path": "commands/phase-4/retrospective.md"
     },
     {
       "name": "cis/innovation-strategy",
       "description": "Identify disruption opportunities and business model innovation",
-      "path": ".claude/commands/cis/innovation-strategy.md"
+      "path": "commands/cis/innovation-strategy.md"
     },
     {
       "name": "cis/design-thinking",
       "description": "Human-centered design using 5-phase design thinking process",
-      "path": ".claude/commands/cis/design-thinking.md"
+      "path": "commands/cis/design-thinking.md"
     },
     {
       "name": "cis/problem-solving",
       "description": "Systematic problem-solving with TRIZ and proven frameworks",
-      "path": ".claude/commands/cis/problem-solving.md"
+      "path": "commands/cis/problem-solving.md"
     },
     {
       "name": "cis/storytelling",
       "description": "Craft compelling narratives using proven story frameworks",
-      "path": ".claude/commands/cis/storytelling.md"
+      "path": "commands/cis/storytelling.md"
     }
   ],
   "agents": [
     {
       "name": "bmad-pm",
       "description": "Product Manager - PRD creation, requirements, user stories",
-      "path": ".claude/agents/bmad-pm.md"
+      "path": "agents/bmad-pm.md"
     },
     {
       "name": "bmad-architect",
       "description": "Software Architect - System design and technical decisions",
-      "path": ".claude/agents/bmad-architect.md"
+      "path": "agents/bmad-architect.md"
     },
     {
       "name": "bmad-dev",
       "description": "Developer - Story implementation and code quality",
-      "path": ".claude/agents/bmad-dev.md"
+      "path": "agents/bmad-dev.md"
     },
     {
       "name": "bmad-tea",
       "description": "Test Engineer - Test strategy and quality assurance",
-      "path": ".claude/agents/bmad-tea.md"
+      "path": "agents/bmad-tea.md"
     },
     {
       "name": "bmad-analyst",
       "description": "Business Analyst - Research and domain analysis",
-      "path": ".claude/agents/bmad-analyst.md"
+      "path": "agents/bmad-analyst.md"
     },
     {
       "name": "bmad-sm",
       "description": "Scrum Master - Sprint planning and team coordination",
-      "path": ".claude/agents/bmad-sm.md"
+      "path": "agents/bmad-sm.md"
     },
     {
       "name": "bmad-ux",
       "description": "UX Designer - User experience and interface design",
-      "path": ".claude/agents/bmad-ux.md"
+      "path": "agents/bmad-ux.md"
     },
     {
       "name": "bmad-tech-writer",
       "description": "Technical Writer - Documentation and API specs",
-      "path": ".claude/agents/bmad-tech-writer.md"
+      "path": "agents/bmad-tech-writer.md"
     },
     {
       "name": "bmad-innovation-strategist",
       "description": "Innovation Strategist - Business model innovation and disruption",
-      "path": ".claude/agents/bmad-innovation-strategist.md"
+      "path": "agents/bmad-innovation-strategist.md"
     },
     {
       "name": "bmad-creative-problem-solver",
       "description": "Creative Problem Solver - Systematic problem solving with TRIZ",
-      "path": ".claude/agents/bmad-creative-problem-solver.md"
+      "path": "agents/bmad-creative-problem-solver.md"
     },
     {
       "name": "bmad-design-thinking-coach",
       "description": "Design Thinking Coach - Human-centered design facilitation",
-      "path": ".claude/agents/bmad-design-thinking-coach.md"
+      "path": "agents/bmad-design-thinking-coach.md"
     },
     {
       "name": "bmad-brainstorming-coach",
       "description": "Brainstorming Coach - Elite ideation and breakthrough sessions",
-      "path": ".claude/agents/bmad-brainstorming-coach.md"
+      "path": "agents/bmad-brainstorming-coach.md"
     },
     {
       "name": "bmad-storyteller",
       "description": "Storyteller - Narrative frameworks and compelling communication",
-      "path": ".claude/agents/bmad-storyteller.md"
+      "path": "agents/bmad-storyteller.md"
     }
   ],
   "skills": [
