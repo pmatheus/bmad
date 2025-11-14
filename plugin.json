@@ -120,46 +120,46 @@
       "path": ".claude/commands/phase-4/retrospective.md"
     }
   ],
-  "subagents": [
+  "agents": [
     {
       "name": "bmad-pm",
       "description": "Product Manager - PRD creation, requirements, user stories",
-      "path": ".claude/subagents/bmad-pm.md"
+      "path": ".claude/agents/bmad-pm.md"
     },
     {
       "name": "bmad-architect",
       "description": "Software Architect - System design and technical decisions",
-      "path": ".claude/subagents/bmad-architect.md"
+      "path": ".claude/agents/bmad-architect.md"
     },
     {
       "name": "bmad-dev",
       "description": "Developer - Story implementation and code quality",
-      "path": ".claude/subagents/bmad-dev.md"
+      "path": ".claude/agents/bmad-dev.md"
     },
     {
       "name": "bmad-tea",
       "description": "Test Engineer - Test strategy and quality assurance",
-      "path": ".claude/subagents/bmad-tea.md"
+      "path": ".claude/agents/bmad-tea.md"
     },
     {
       "name": "bmad-analyst",
       "description": "Business Analyst - Research and domain analysis",
-      "path": ".claude/subagents/bmad-analyst.md"
+      "path": ".claude/agents/bmad-analyst.md"
     },
     {
       "name": "bmad-sm",
       "description": "Scrum Master - Sprint planning and team coordination",
-      "path": ".claude/subagents/bmad-sm.md"
+      "path": ".claude/agents/bmad-sm.md"
     },
     {
       "name": "bmad-ux",
       "description": "UX Designer - User experience and interface design",
-      "path": ".claude/subagents/bmad-ux.md"
+      "path": ".claude/agents/bmad-ux.md"
     },
     {
       "name": "bmad-tech-writer",
       "description": "Technical Writer - Documentation and API specs",
-      "path": ".claude/subagents/bmad-tech-writer.md"
+      "path": ".claude/agents/bmad-tech-writer.md"
     }
   ],
   "skills": [

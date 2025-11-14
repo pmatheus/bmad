@@ -91,7 +91,7 @@ Verify subagents are available (they're invoked automatically by workflows):
 
 ```bash
 # Check subagents directory
-ls ~/.claude/plugins/bmad/subagents/
+ls ~/.claude/plugins/bmad/agents/
 ```
 
 **Expected:**
@@ -224,11 +224,11 @@ This creates `.bmad/config.yaml` in your project directory.
 
 **Solution: Verify subagent files**
 ```bash
-ls ~/.claude/plugins/bmad/subagents/
+ls ~/.claude/plugins/bmad/agents/
 # Should show all 8 .md files
 
 # Check a subagent file has proper frontmatter:
-head -10 ~/.claude/plugins/bmad/subagents/bmad-pm.md
+head -10 ~/.claude/plugins/bmad/agents/bmad-pm.md
 ```
 
 **Expected frontmatter:**
@@ -273,7 +273,7 @@ rm -rf ~/.claude/plugins/bmad
 A: Yes! Edit files in `~/.claude/plugins/bmad/commands/`
 
 **Q: Can I add my own subagents?**
-A: Yes! Add `.md` files to `~/.claude/plugins/bmad/subagents/`
+A: Yes! Add `.md` files to `~/.claude/plugins/bmad/agents/`
 
 **Q: Where are project files stored?**
 A: In `.bmad/` directory within your project

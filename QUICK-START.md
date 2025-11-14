@@ -185,7 +185,7 @@ testing_framework: "Jest"
 ls ~/.claude/plugins/bmad
 
 # Should show:
-# commands/  subagents/  skills/
+# commands/  agents/  skills/
 ```
 
 ### Config file missing
@@ -206,7 +206,7 @@ ls ~/.claude/plugins/bmad
 
 - Read [README.md](./README.md) for complete documentation
 - Explore individual command files in `.claude/commands/`
-- Check out specialized agents in `.claude/subagents/`
+- Check out specialized agents in `.claude/agents/`
 - See [INSTALLATION.md](./INSTALLATION.md) for advanced setup
 
 ## Support
