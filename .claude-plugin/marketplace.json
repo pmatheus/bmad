@@ -7,7 +7,7 @@
   "description": "Official BMAD Method plugin marketplace for Claude Code",
   "plugins": [
     {
-      "name": "bmad-method",
+      "name": "bmad",
       "version": "2.0.0",
       "source": "github:pmatheus/bmad",
       "description": "Complete BMAD Method with 20 workflows, 8 specialized agents, and 5 skills for AI-assisted software development",

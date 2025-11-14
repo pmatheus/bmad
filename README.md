@@ -32,7 +32,7 @@ See **[TESTING_GUIDE.md](TESTING_GUIDE.md)** for complete installation and testi
 /plugin marketplace add pmatheus/bmad
 
 # Install the plugin
-/plugin install bmad-method
+/plugin install bmad
 
 # Verify
 /workflow-status
@@ -46,7 +46,7 @@ git clone https://github.com/pmatheus/bmad.git
 cd bmad
 
 # Copy to Claude Code plugins directory
-cp -r .claude ~/.claude/plugins/bmad-method
+cp -r .claude ~/.claude/plugins/bmad
 
 # Verify in Claude Code
 /workflow-status

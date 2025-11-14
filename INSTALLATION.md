@@ -15,7 +15,7 @@ The easiest way to install BMAD Method:
 /plugin marketplace add pmatheus/bmad
 
 # Install the plugin
-/plugin install bmad-method
+/plugin install bmad
 
 # Verify installation
 /workflow-status
@@ -38,7 +38,7 @@ git clone https://github.com/pmatheus/bmad.git
 cd bmad
 
 # 2. Copy to Claude Code plugins directory
-cp -r .claude ~/.claude/plugins/bmad-method
+cp -r .claude ~/.claude/plugins/bmad
 
 # 3. Restart Claude Code if already running
 
@@ -91,7 +91,7 @@ Verify subagents are available (they're invoked automatically by workflows):
 
 ```bash
 # Check subagents directory
-ls ~/.claude/plugins/bmad-method/subagents/
+ls ~/.claude/plugins/bmad/subagents/
 ```
 
 **Expected:**
@@ -172,7 +172,7 @@ ls .bmad/output/
 
 ## Troubleshooting
 
-### Issue: "Plugin 'bmad-method' not found in any marketplace"
+### Issue: "Plugin 'bmad' not found in any marketplace"
 
 **Solution 1: Verify marketplace**
 ```bash
@@ -185,7 +185,7 @@ ls .bmad/output/
 ```bash
 /plugin marketplace remove bmad
 /plugin marketplace add pmatheus/bmad
-/plugin install bmad-method
+/plugin install bmad
 ```
 
 **Solution 3: Use manual installation** (see Method 2 above)
@@ -196,7 +196,7 @@ ls .bmad/output/
 
 **Solution 1: Verify plugin directory**
 ```bash
-ls ~/.claude/plugins/bmad-method/commands/
+ls ~/.claude/plugins/bmad/commands/
 # Should show: meta/ phase-1/ phase-2/ phase-3/ phase-4/ workflow-status.md
 ```
 
@@ -224,11 +224,11 @@ This creates `.bmad/config.yaml` in your project directory.
 
 **Solution: Verify subagent files**
 ```bash
-ls ~/.claude/plugins/bmad-method/subagents/
+ls ~/.claude/plugins/bmad/subagents/
 # Should show all 8 .md files
 
 # Check a subagent file has proper frontmatter:
-head -10 ~/.claude/plugins/bmad-method/subagents/bmad-pm.md
+head -10 ~/.claude/plugins/bmad/subagents/bmad-pm.md
 ```
 
 **Expected frontmatter:**
@@ -247,14 +247,14 @@ subagent_type: bmad-pm
 
 ```bash
 # In Claude Code:
-/plugin uninstall bmad-method
+/plugin uninstall bmad
 /plugin marketplace remove bmad
 ```
 
 ### Manual Removal
 
 ```bash
-rm -rf ~/.claude/plugins/bmad-method
+rm -rf ~/.claude/plugins/bmad
 ```
 
 ---
@@ -270,10 +270,10 @@ rm -rf ~/.claude/plugins/bmad-method
 ### Common Questions
 
 **Q: Can I customize workflows?**
-A: Yes! Edit files in `~/.claude/plugins/bmad-method/commands/`
+A: Yes! Edit files in `~/.claude/plugins/bmad/commands/`
 
 **Q: Can I add my own subagents?**
-A: Yes! Add `.md` files to `~/.claude/plugins/bmad-method/subagents/`
+A: Yes! Add `.md` files to `~/.claude/plugins/bmad/subagents/`
 
 **Q: Where are project files stored?**
 A: In `.bmad/` directory within your project

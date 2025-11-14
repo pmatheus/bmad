@@ -10,7 +10,7 @@ git clone https://github.com/pmatheus/bmad.git
 cd BMAD-METHOD/claude-code-plugin
 
 # 2. Install to Claude Code
-cp -r .claude ~/.claude/plugins/bmad-method
+cp -r .claude ~/.claude/plugins/bmad
 
 # 3. Verify
 claude
@@ -182,7 +182,7 @@ testing_framework: "Jest"
 ### Commands not found
 ```bash
 # Verify installation
-ls ~/.claude/plugins/bmad-method
+ls ~/.claude/plugins/bmad
 
 # Should show:
 # commands/  subagents/  skills/
