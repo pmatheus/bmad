@@ -9,10 +9,13 @@
     {
       "name": "bmad",
       "version": "2.0.0",
-      "source": "github:pmatheus/bmad",
+      "source": "./",
       "description": "Complete BMAD Method with 20 workflows, 8 specialized agents, and 5 skills for AI-assisted software development",
       "keywords": ["agile", "software-development", "product-management", "architecture", "testing", "workflows", "bmad"],
-      "author": "BMAD Method Team",
+      "author": {
+        "name": "BMAD Method Team",
+        "email": "contact@bmad.dev"
+      },
       "license": "MIT"
     }
   ]
