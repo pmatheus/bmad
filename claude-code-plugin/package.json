@@ -1,0 +1,45 @@
+{
+  "name": "@bmad/claude-code-plugin",
+  "version": "2.0.0",
+  "description": "BMAD Method - Claude Code Native Plugin for AI-Assisted Software Development",
+  "main": "tools/install-plugin.js",
+  "bin": {
+    "bmad-install": "./tools/install-plugin.js"
+  },
+  "scripts": {
+    "install-plugin": "node tools/install-plugin.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "claude-code",
+    "ai-assisted-development",
+    "agile",
+    "product-management",
+    "software-development",
+    "workflows",
+    "bmad-method"
+  ],
+  "author": "BMAD Method Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/bmad-method.git"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.1.1",
+    "inquirer": "^8.2.5",
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "src/",
+    "tools/",
+    "templates/",
+    "docs/",
+    "README.md",
+    "LICENSE"
+  ]
+}

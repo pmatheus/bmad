@@ -1,68 +1,35 @@
-# Dependencies
-node_modules/
-pnpm-lock.yaml
-bun.lock
-deno.lock
-pnpm-workspace.yaml
-package-lock.json
-
-
-test-output/*
-coverage/
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-
-# Build output
-build/*.txt
-
-# Environment variables
-.env
-
-# System files
+# OS files
 .DS_Store
 Thumbs.db
 
-# Development tools and configs
-.prettierrc
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# IDE and editor configs
-.windsurf/
-.trae/
-.bmad*/.cursor/
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
 
-# AI assistant files
-CLAUDE.md
-.ai/*
-cursor
-.gemini
-.mcp.json
-CLAUDE.local.md
-.serena/
-.claude/settings.local.json
+# Logs
+*.log
+logs/
 
-# Project-specific
-.bmad-core
-.bmad-creator-tools
-test-project-install/*
-sample-project/*
-flattened-codebase.xml
-*.stats.md
-.internal-docs/
-#UAT template testing output files
-tools/template-test-generator/test-scenarios/
+# Node modules
+node_modules/
 
-# Bundler temporary files and generated bundles
-.bundler-temp/
+# Test projects
+test-project/
+test-projects/
 
-# Generated web bundles (built by CI, not committed)
-src/modules/bmm/sub-modules/
-src/modules/bmb/sub-modules/
-src/modules/cis/sub-modules/
-src/modules/bmgd/sub-modules/
+# Old/backup files
+*-old.md
+*-backup.md
+*.bak
 
-# Test Install Output
-
-z*/.claude/settings.local.json
+# Local marketplace (not needed in GitHub, .claude-plugin/marketplace.json is at root)
+bmad-marketplace/

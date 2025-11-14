@@ -1,0 +1,28 @@
+{
+  "name": "bmad-method",
+  "version": "2.0.0",
+  "description": "BMAD Method - Complete AI-assisted software development methodology with workflows, agents, and skills for all project levels",
+  "author": {
+    "name": "pmatheus",
+    "email": "pmatheus@users.noreply.github.com",
+    "url": "https://github.com/pmatheus"
+  },
+  "homepage": "https://github.com/pmatheus/bmad",
+  "repository": "https://github.com/pmatheus/bmad",
+  "license": "MIT",
+  "keywords": [
+    "bmad",
+    "methodology",
+    "agile",
+    "workflow",
+    "prd",
+    "architecture",
+    "development",
+    "testing",
+    "retrospective",
+    "brownfield",
+    "documentation"
+  ],
+  "commands": "./src/commands/",
+  "agents": "./src/subagents/"
+}

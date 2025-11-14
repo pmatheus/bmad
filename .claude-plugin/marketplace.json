@@ -1,0 +1,15 @@
+{
+  "name": "bmad",
+  "owner": {
+    "name": "pmatheus",
+    "email": "pmatheus@users.noreply.github.com"
+  },
+  "description": "Official BMAD Method plugin marketplace for Claude Code",
+  "plugins": [
+    {
+      "name": "bmad-method",
+      "source": "./claude-code-plugin",
+      "description": "Complete BMAD Method with 20 workflows, 8 specialized agents, and 5 skills for AI-assisted software development"
+    }
+  ]
+}
