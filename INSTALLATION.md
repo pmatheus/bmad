@@ -81,9 +81,14 @@ Type `/` in Claude Code and look for BMAD commands:
 /code-review            ✓ Phase 4
 /story-done             ✓ Phase 4
 /retrospective          ✓ Phase 4
+
+/cis/innovation-strategy ✓ Creative Intelligence
+/cis/design-thinking     ✓ Creative Intelligence
+/cis/problem-solving     ✓ Creative Intelligence
+/cis/storytelling        ✓ Creative Intelligence
 ```
 
-**Total: 20 commands** ✓
+**Total: 24 commands** ✓
 
 ### Check Subagents
 
