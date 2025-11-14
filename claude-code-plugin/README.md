@@ -22,20 +22,27 @@ BMAD (Build, Measure, Adapt, Deliver) Method is a complete AI-native software de
 ### Installation
 
 ```bash
-# Start Claude Code in your project
-claude
+# Clone the repository
+git clone https://github.com/pmatheus/bmad.git
 
-# Add BMAD marketplace
-/plugin marketplace add /path/to/BMAD-METHOD/bmad-marketplace
+# Navigate to the plugin directory
+cd BMAD-METHOD/claude-code-plugin
 
-# Install plugin
-/plugin install bmad-method@bmad-marketplace
+# Copy plugin to Claude Code directory
+cp -r .claude ~/.claude/plugins/bmad-method
 
-# Verify
+# Restart Claude Code if already running
+
+# Verify installation
 /workflow-status
 ```
 
-See [INSTALLATION.md](./INSTALLATION.md) for detailed instructions.
+**Alternative: Symlink for Development**
+```bash
+ln -s $(pwd)/.claude ~/.claude/plugins/bmad-method
+```
+
+See [INSTALLATION.md](./INSTALLATION.md) for detailed instructions and troubleshooting.
 
 ### Your First Project
 
