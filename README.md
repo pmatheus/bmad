@@ -25,29 +25,30 @@ See **[TESTING_GUIDE.md](TESTING_GUIDE.md)** for complete installation and testi
 
 ### Installation
 
+**Option 1: Via GitHub Marketplace (Recommended)**
+
+```bash
+# In Claude Code:
+/plugin marketplace add pmatheus/bmad
+
+# Install the plugin
+/plugin install bmad-method
+
+# Verify
+/workflow-status
+```
+
+**Option 2: Manual Installation**
+
 ```bash
 # Clone the repository
 git clone https://github.com/pmatheus/bmad.git
 cd bmad
 
-# Create test project
-mkdir -p /tmp/bmad-test-project
-cd /tmp/bmad-test-project
+# Copy to Claude Code plugins directory
+cp -r .claude ~/.claude/plugins/bmad-method
 
-# Start Claude Code
-claude
-```
-
-Inside Claude Code:
-
-```bash
-# Add the marketplace
-/plugin marketplace add /path/to/bmad/bmad-marketplace
-
-# Install plugin
-/plugin install bmad-method@bmad-marketplace
-
-# Verify
+# Verify in Claude Code
 /workflow-status
 ```
 
