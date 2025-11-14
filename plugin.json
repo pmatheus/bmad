@@ -160,6 +160,31 @@
       "name": "bmad-tech-writer",
       "description": "Technical Writer - Documentation and API specs",
       "path": ".claude/agents/bmad-tech-writer.md"
+    },
+    {
+      "name": "bmad-innovation-strategist",
+      "description": "Innovation Strategist - Business model innovation and disruption",
+      "path": ".claude/agents/bmad-innovation-strategist.md"
+    },
+    {
+      "name": "bmad-creative-problem-solver",
+      "description": "Creative Problem Solver - Systematic problem solving with TRIZ",
+      "path": ".claude/agents/bmad-creative-problem-solver.md"
+    },
+    {
+      "name": "bmad-design-thinking-coach",
+      "description": "Design Thinking Coach - Human-centered design facilitation",
+      "path": ".claude/agents/bmad-design-thinking-coach.md"
+    },
+    {
+      "name": "bmad-brainstorming-coach",
+      "description": "Brainstorming Coach - Elite ideation and breakthrough sessions",
+      "path": ".claude/agents/bmad-brainstorming-coach.md"
+    },
+    {
+      "name": "bmad-storyteller",
+      "description": "Storyteller - Narrative frameworks and compelling communication",
+      "path": ".claude/agents/bmad-storyteller.md"
     }
   ],
   "skills": [

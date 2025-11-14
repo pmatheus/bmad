@@ -96,17 +96,25 @@ ls ~/.claude/plugins/bmad/agents/
 
 **Expected:**
 ```
-bmad-analyst.md       ✓ Business Analyst
-bmad-architect.md     ✓ Software Architect
-bmad-dev.md           ✓ Developer
-bmad-pm.md            ✓ Product Manager
-bmad-sm.md            ✓ Scrum Master
-bmad-tea.md           ✓ Test Engineer
-bmad-tech-writer.md   ✓ Technical Writer
-bmad-ux.md            ✓ UX Designer
+# BMAD Method Managers (8)
+bmad-analyst.md              ✓ Business Analyst
+bmad-architect.md            ✓ Software Architect
+bmad-dev.md                  ✓ Developer
+bmad-pm.md                   ✓ Product Manager
+bmad-sm.md                   ✓ Scrum Master
+bmad-tea.md                  ✓ Test Engineer
+bmad-tech-writer.md          ✓ Technical Writer
+bmad-ux.md                   ✓ UX Designer
+
+# Creative Intelligence System (5)
+bmad-brainstorming-coach.md  ✓ Brainstorming Coach
+bmad-creative-problem-solver.md ✓ Creative Problem Solver
+bmad-design-thinking-coach.md   ✓ Design Thinking Coach
+bmad-innovation-strategist.md   ✓ Innovation Strategist
+bmad-storyteller.md             ✓ Storyteller
 ```
 
-**Total: 8 subagents** ✓
+**Total: 13 agents** ✓
 
 ---
 

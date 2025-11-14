@@ -13,7 +13,7 @@
 BMAD (Build, Measure, Adapt, Deliver) Method is a comprehensive AI-native software development methodology for Claude Code, providing:
 
 - ✅ **20 Production Workflows** - From ideation to retrospectives
-- ✅ **8 Specialized AI Agents** - Product Manager, Architect, Developer, Test Engineer, and more
+- ✅ **13 Specialized AI Agents** - Product Manager, Architect, Developer, Test Engineer, and more
 - ✅ **5 Core Skills** - Anti-hallucination research, test architecture, delegation patterns
 - ✅ **3 Project Levels** - Quick Flow (30min), BMad Method (weeks), Enterprise (months)
 
@@ -102,16 +102,24 @@ cp -r .claude ~/.claude/plugins/bmad
 **Meta (2)**
 - `/workflow-init`, `/workflow-status`
 
-### 8 Specialized Agents
+### 13 Specialized Agents
 
-- **bmad-pm** - Product Manager
-- **bmad-architect** - Software Architect  
-- **bmad-dev** - Developer
-- **bmad-tea** - Test Engineer
-- **bmad-analyst** - Business Analyst
-- **bmad-sm** - Scrum Master
-- **bmad-ux** - UX Designer
-- **bmad-tech-writer** - Technical Writer
+**BMAD Method Managers (8)**
+- **bmad-pm** - Product Manager (requirements, PRD)
+- **bmad-architect** - Software Architect (system design)
+- **bmad-dev** - Developer (implementation, testing)
+- **bmad-tea** - Test Engineer (quality assurance)
+- **bmad-analyst** - Business Analyst (research)
+- **bmad-sm** - Scrum Master (sprint planning)
+- **bmad-ux** - UX Designer (user experience)
+- **bmad-tech-writer** - Technical Writer (documentation)
+
+**Creative Intelligence System (5)**
+- **bmad-innovation-strategist** - Innovation Strategist (disruption, business models)
+- **bmad-creative-problem-solver** - Creative Problem Solver (TRIZ, systematic innovation)
+- **bmad-design-thinking-coach** - Design Thinking Coach (human-centered design)
+- **bmad-brainstorming-coach** - Brainstorming Coach (ideation facilitation)
+- **bmad-storyteller** - Storyteller (narrative frameworks, communication)
 
 ### Brownfield Documentation
 
