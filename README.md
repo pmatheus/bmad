@@ -12,10 +12,11 @@
 
 BMAD (Build, Measure, Adapt, Deliver) Method is a comprehensive AI-native software development methodology for Claude Code, providing:
 
-- ✅ **24 Production Workflows** - From ideation to retrospectives
-- ✅ **13 Specialized AI Agents** - Product Manager, Architect, Developer, Test Engineer, and more
+- ✅ **25 Production Workflows** - From ideation to security testing
+- ✅ **22 Specialized AI Agents** - Product, Architecture, Development, Testing, and Security
 - ✅ **5 Core Skills** - Anti-hallucination research, test architecture, delegation patterns
 - ✅ **3 Project Levels** - Quick Flow (30min), BMad Method (weeks), Enterprise (months)
+- 🔒 **Security Testing** - OWASP Top 10 coverage with 8 CTF specialist agents
 
 ---
 
