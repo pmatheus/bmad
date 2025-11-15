@@ -14,6 +14,7 @@
     "product-management",
     "architecture",
     "testing",
+    "security",
     "workflows",
     "ai-development",
     "bmad"
@@ -120,6 +121,11 @@
       "path": "commands/phase-4/retrospective.md"
     },
     {
+      "name": "security-test",
+      "description": "Comprehensive security testing using specialized CTF agents",
+      "path": "commands/phase-4/security-test.md"
+    },
+    {
       "name": "cis/innovation-strategy",
       "description": "Identify disruption opportunities and business model innovation",
       "path": "commands/cis/innovation-strategy.md"
@@ -205,6 +211,51 @@
       "name": "bmad-storyteller",
       "description": "Storyteller - Narrative frameworks and compelling communication",
       "path": "agents/bmad-storyteller.md"
+    },
+    {
+      "name": "bmad-security-engineer",
+      "description": "Security Engineer - Coordinates security testing and vulnerability assessment",
+      "path": "agents/bmad-security-engineer.md"
+    },
+    {
+      "name": "ctf-auth-analyst",
+      "description": "Authentication and authorization security analyst for CTF",
+      "path": "agents/ctf-auth-analyst.md"
+    },
+    {
+      "name": "ctf-burp-web-expert",
+      "description": "Elite web application security specialist using Burp Suite",
+      "path": "agents/ctf-burp-web-expert.md"
+    },
+    {
+      "name": "ctf-sql-injection-expert",
+      "description": "SQL injection master for CTF web challenges",
+      "path": "agents/ctf-sql-injection-expert.md"
+    },
+    {
+      "name": "ctf-xss-expert",
+      "description": "XSS exploitation master for CTF challenges",
+      "path": "agents/ctf-xss-expert.md"
+    },
+    {
+      "name": "ctf-idor-expert",
+      "description": "IDOR exploitation specialist for CTF challenges",
+      "path": "agents/ctf-idor-expert.md"
+    },
+    {
+      "name": "ctf-ssrf-expert",
+      "description": "SSRF exploitation master for CTF challenges",
+      "path": "agents/ctf-ssrf-expert.md"
+    },
+    {
+      "name": "ctf-ai-prompt-injection-agent",
+      "description": "Prompt injection master for AI/LLM CTF challenges",
+      "path": "agents/ctf-ai-prompt-injection-agent.md"
+    },
+    {
+      "name": "ctf-ai-jailbreak-agent",
+      "description": "LLM jailbreak master for CTF challenges",
+      "path": "agents/ctf-ai-jailbreak-agent.md"
     }
   ],
   "skills": [
@@ -236,7 +287,8 @@
       "stories": ".bmad/stories",
       "epics": ".bmad/epics",
       "architecture": ".bmad/architecture",
-      "research": ".bmad/research"
+      "research": ".bmad/research",
+      "security_reports": ".bmad/output/security-reports"
     }
   },
   "requirements": {
