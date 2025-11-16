@@ -262,22 +262,32 @@ WHILE (remaining_context_percentage > 20%):
   continue
 ```
 
-### Step 3A: Find Available Backlog Stories (Parallel)
+### Step 3A: Find Available Backlog Stories (Dependency-Aware)
 
-**Read sprint-status.yaml and find multiple unlocked stories:**
+**Read sprint-status.yaml and find multiple unlocked stories WITH dependency checking:**
 
 ```yaml
 development_status:
-  1-3-password-reset: backlog      # ✅ Available
-  1-4-mfa-setup: backlog           # ✅ Available
+  1-3-password-reset: backlog      # ✅ Available (no dependencies)
+  1-4-mfa-setup: backlog           # ✅ Available (no dependencies)
   2-1-profile: locked-worker-1     # ❌ Locked (skip)
-  2-2-settings: backlog            # ✅ Available
-  2-3-preferences: backlog         # ✅ Available
+  2-2-settings: backlog            # ✅ Available (no dependencies)
+  2-3-preferences: done            # ✅ Complete
+  2-4-gamification: backlog        # ❌ Depends on 2-2 (not done yet)
+  2-5-leaderboard: backlog         # ❌ Depends on 2-2, 2-4 (not done)
 ```
 
-**Selection logic:**
+**Selection logic with dependency detection:**
 ```python
-def find_available_backlog_stories(limit=4):
+def find_available_backlog_stories_with_dependencies(limit=4):
+    """
+    Intelligent story selection that respects dependencies:
+    1. Only select backlog stories (not locked/done/etc)
+    2. Parse story files for 'depends_on' metadata field
+    3. Check if ALL dependencies are 'done' in sprint-status.yaml
+    4. Detect epic-level sequential dependencies
+    5. Prefer stories from different epics when possible (better parallelism)
+    """
     stories = []
     sprint_status = read_sprint_status()
 
@@ -287,20 +297,99 @@ def find_available_backlog_stories(limit=4):
             continue
 
         # Only select backlog stories (not locked)
-        if status == "backlog":
+        if status != "backlog":
+            continue
+
+        # Read story file to check for dependencies
+        story_file = f"{sprint_artifacts}/stories/{key}.md"
+
+        # CRITICAL: Check if story file has 'depends_on' metadata
+        dependencies = extract_dependencies_from_story(story_file)
+        # Format: depends_on: ["2-2", "2-3"] or null/empty
+
+        # Check if ALL dependencies are satisfied (status = 'done')
+        dependencies_satisfied = True
+        blocked_by = []
+
+        for dep_key in dependencies:
+            dep_status = sprint_status['development_status'].get(dep_key, 'unknown')
+            if dep_status != 'done':
+                dependencies_satisfied = False
+                blocked_by.append(f"{dep_key} ({dep_status})")
+
+        # Only add story if dependencies satisfied
+        if dependencies_satisfied:
             stories.append({
                 'key': key,
                 'epic': extract_epic(key),
-                'story': extract_story(key)
+                'story': extract_story(key),
+                'dependencies': dependencies,
+                'parallel_safe': len(dependencies) == 0  # Stories with no deps are safest
             })
 
             if len(stories) >= limit:
                 break
+        else:
+            # Log why story was skipped (for transparency)
+            print(f"⏸️  Skipping {key}: Dependencies not satisfied: {', '.join(blocked_by)}")
 
-    return stories
+    # Prioritize parallel-safe stories (no dependencies)
+    # This maximizes effective parallelism
+    stories.sort(key=lambda s: (not s['parallel_safe'], s['key']))
+
+    return stories[:limit]
+
+def extract_dependencies_from_story(story_file_path):
+    """
+    Extract 'depends_on' field from story metadata.
+
+    Expected format in story file:
+    ---
+    story_key: 2-4
+    title: Gamification System
+    depends_on: ["2-2"]  # ← This field
+    ---
+
+    Returns: List of dependency story keys, e.g., ["2-2"] or []
+    """
+    if not os.path.exists(story_file_path):
+        return []
+
+    content = read_file(story_file_path)
+
+    # Parse YAML frontmatter
+    match = re.search(r'^---\n(.*?)\n---', content, re.DOTALL)
+    if not match:
+        return []
+
+    frontmatter = yaml.safe_load(match.group(1))
+    depends_on = frontmatter.get('depends_on', [])
+
+    # Handle various formats: ["2-2"], "2-2", null
+    if isinstance(depends_on, str):
+        return [depends_on]
+    elif isinstance(depends_on, list):
+        return depends_on
+    else:
+        return []
 ```
 
-**Returns:** List of up to N available backlog stories
+**Returns:** List of up to N available backlog stories with satisfied dependencies
+
+**Dependency Detection Strategy:**
+
+1. **Story-level dependencies** (explicit):
+   - Story file has `depends_on: ["2-2", "2-3"]` in metadata
+   - These must be 'done' before story can be selected
+
+2. **Epic-level dependencies** (implicit):
+   - If Epic 2 has sequential dependencies (2-2 → 2-4 → 2-5)
+   - Stories should have explicit `depends_on` metadata set during epic creation
+
+3. **Parallel-safe prioritization**:
+   - Stories with NO dependencies are selected first
+   - Maximizes effective parallelism
+   - Reduces risk of workers waiting on dependencies
 
 **If no stories available:**
 ```
@@ -382,15 +471,71 @@ Execute complete story lifecycle for story: {story_1_key}
       → CRITICAL: Wait for the entire auto-continue chain to complete
       → DO NOT manually run dev-story - it's auto-triggered by story-context
 
-   c. Handle review outcome (after auto-continue chain completes):
-      - APPROVED: Run /bmad:phase-4:story-done
-      - CHANGES: Re-run dev-story to address action items, then re-review
-      - BLOCKED: Report blocker, stop
+   c. ⚠️ MANDATORY REVIEW OUTCOME LOOP (CRITICAL - DO NOT SKIP):
+
+      RETRY_COUNT = 0
+      MAX_RETRIES = 3
+
+      WHILE RETRY_COUNT < MAX_RETRIES:
+
+        # Read code review outcome from story file
+        outcome = read_code_review_outcome_from_story_file()
+
+        IF outcome == "APPROVED":
+          → Run /bmad:phase-4:story-done
+          → BREAK (success - story complete!)
+
+        ELIF outcome == "CHANGES_REQUESTED":
+          → CRITICAL: DO NOT mark story as done
+          → Extract action items from code review findings
+          → Re-run /bmad:phase-4:dev-story with explicit instructions:
+            - "Address the following action items from code review:"
+            - List each action item
+            - "Then trigger code review again"
+          → Dev-story will re-implement and auto-continue to code-review
+          → RETRY_COUNT += 1
+          → Wait for auto-continue chain to complete
+          → CONTINUE loop (check outcome again)
+
+        ELIF outcome == "BLOCKED":
+          → Read blocker details from story file
+          → Report blocker (see step 4 below)
+          → BREAK (blocked - cannot continue)
+
+      END WHILE
+
+      # After loop exits
+      IF RETRY_COUNT >= MAX_RETRIES AND outcome != "APPROVED":
+        → Mark story as BLOCKED (reason: "Too many review cycles - {MAX_RETRIES} attempts")
+        → Report failure with review findings
+        → DO NOT mark as done
+
+      **CRITICAL ENFORCEMENT:**
+      - You MUST implement this loop exactly as specified
+      - DO NOT skip the loop and mark story done prematurely
+      - DO NOT accept incomplete implementations (commented code, TODOs, etc.)
+      - Each retry MUST address ALL action items from code review
+      - If code review says "CHANGES_REQUESTED", you MUST retry
+      - Only mark story done when outcome == "APPROVED"
 
 3. RELEASE LOCK: Update sprint-status.yaml:
-   {story_1_key}: "done" (or "blocked" if blocker)
+   {story_1_key}: "done" (ONLY if approved) OR "blocked" (if blocker or max retries)
 
-4. REPORT: Return completion status and any blockers
+4. REPORT: Return completion status with details:
+   ```json
+   {
+     "worker_id": "worker-1",
+     "story_key": "{story_1_key}",
+     "status": "completed" | "blocked",
+     "outcome": "approved" | "blocked" | "max_retries_exceeded",
+     "retry_count": <number>,
+     "blocker": null | {
+       "type": "review_failure" | "missing_info" | "technical_issue",
+       "description": "<details>",
+       "action_items": ["item1", "item2", ...]
+     }
+   }
+   ```
 
 **CRITICAL:**
 - You are running in PARALLEL with other workers
@@ -400,6 +545,8 @@ Execute complete story lifecycle for story: {story_1_key}
 - Update sprint-status.yaml atomically (read-modify-write)
 - Report any errors or blockers clearly
 - DO NOT wait for other workers - execute independently
+- ENFORCE the review outcome loop - this is NON-NEGOTIABLE
+- NEVER mark a story as done if code review found issues
 """
 )
 
@@ -563,41 +710,69 @@ Execute: `/bmad:phase-4:story-context`
 - Skip this story
 - Continue to next story
 
-#### 5C: Handle Review Outcome (After Auto-Continue Chain)
+#### 5C: Handle Review Outcome (MANDATORY Retry Loop - Now Enforced by Worker)
+
+**⚠️ CRITICAL CHANGE: This step is now ENFORCED in the worker prompt (Step 3B).**
 
 **Note:** This step happens AFTER the auto-continue chain completes (story-context → dev-story → code-review).
 
-**Review Outcome Handling:**
+**Review Outcome Handling (MANDATORY LOOP - enforced in worker):**
 
-After the auto-continue chain (story-context → dev-story → code-review) completes, handle the code review outcome:
+The worker MUST implement this exact loop (see Step 3B worker prompt for details):
 
-**If APPROVED:**
-- Status: review → ready for story-done
-- Proceed to Step 5D (story-done)
-- Story is complete!
+```python
+RETRY_COUNT = 0
+MAX_RETRIES = 3
 
-**If CHANGES REQUESTED:**
-- Status: review → in-progress
-- Action items added to story file by code-review
-- Re-run dev-story to address action items
-- Dev-story will auto-continue to code-review again
-- Repeat until APPROVED or BLOCKED
+WHILE RETRY_COUNT < MAX_RETRIES:
+  outcome = read_code_review_outcome_from_story_file()
 
-**If BLOCKED:**
-- Status: stays "review"
-- High severity blockers logged
-- Critical blocker (missing info, ambiguous requirement):
-  - Save checkpoint
-  - Exit loop
-  - Notify user of blocker
-- Minor blocker (test failure, fixable issue):
-  - Attempt to resolve
-  - Continue if resolved
+  IF outcome == "APPROVED":
+    → Run /bmad:phase-4:story-done
+    → Status: review → done
+    → Story is complete!
+    → BREAK (success)
 
-**Maximum iterations:** 3 review cycles per story
-- If story still not approved after 3 cycles → Mark as BLOCKED
-- Log to checkpoint
-- Skip to next story
+  ELIF outcome == "CHANGES_REQUESTED":
+    → Status: stays "review" (or back to "in-progress")
+    → Action items extracted from code review findings
+    → MANDATORY: Re-run dev-story to address ALL action items
+    → Dev-story will auto-continue to code-review again
+    → RETRY_COUNT += 1
+    → CONTINUE loop (re-check outcome)
+
+  ELIF outcome == "BLOCKED":
+    → Status: stays "review"
+    → High severity blockers logged
+    → Critical blocker (missing info, ambiguous requirement):
+      - Worker reports blocker
+      - Worker stops
+      - Main orchestrator saves checkpoint
+      - Notify user of blocker
+    → BREAK (blocked)
+
+END WHILE
+
+# After loop exits
+IF RETRY_COUNT >= MAX_RETRIES AND outcome != "APPROVED":
+  → Mark story as BLOCKED (reason: "Too many review cycles")
+  → Worker reports failure with review findings
+  → Main orchestrator logs to checkpoint
+  → Main orchestrator continues to next story
+```
+
+**CRITICAL ENFORCEMENT (in worker prompt):**
+- Worker MUST NOT skip this loop
+- Worker MUST NOT mark story as done if outcome != "APPROVED"
+- Worker MUST NOT accept incomplete implementations (commented code, TODOs, etc.)
+- Each retry MUST address ALL action items from code review
+- Only mark story done when outcome == "APPROVED" OR max retries exceeded
+
+**This ensures:**
+- No incomplete code gets through (commented implementations rejected)
+- Workers automatically fix issues found in code review
+- No manual intervention needed unless truly blocked
+- Quality loop runs until code is actually complete
 
 #### 5D: Mark Story Done (If Approved)
 
@@ -1291,6 +1466,79 @@ Starting fresh bring-to-life workflow
 ✅ **No manual intervention** required (until context depletion or blocker)
 
 ✅ **Session summary** comprehensive and actionable
+
+---
+
+## Migration Guide: Adding Story Dependencies
+
+**For existing projects, you need to add dependency metadata to story files.**
+
+### Step 1: Identify Story Dependencies
+
+Review your epics and identify which stories depend on others:
+
+```markdown
+Epic 2: User Gamification
+- Story 2-2: Core gamification store (no dependencies)
+- Story 2-4: Achievement system (depends on 2-2) ← Add depends_on
+- Story 2-5: Leaderboard (depends on 2-2, 2-4) ← Add depends_on
+```
+
+### Step 2: Add `depends_on` Metadata to Story Files
+
+For each story with dependencies, update the story file frontmatter:
+
+**Before (no dependency tracking):**
+```yaml
+---
+story_key: 2-4
+epic_key: 2
+title: Achievement System
+status: backlog
+---
+```
+
+**After (with dependency tracking):**
+```yaml
+---
+story_key: 2-4
+epic_key: 2
+title: Achievement System
+status: backlog
+depends_on: ["2-2"]  # ← ADD THIS FIELD
+---
+```
+
+**Multiple dependencies example:**
+```yaml
+---
+story_key: 2-5
+epic_key: 2
+title: Leaderboard
+status: backlog
+depends_on: ["2-2", "2-4"]  # ← Multiple dependencies
+---
+```
+
+### Step 3: Verify Dependency Detection
+
+Run the bring-to-life workflow and check for dependency messages:
+
+```
+⏸️  Skipping 2-4: Dependencies not satisfied: 2-2 (backlog)
+⏸️  Skipping 2-5: Dependencies not satisfied: 2-2 (backlog), 2-4 (backlog)
+```
+
+This confirms dependency detection is working correctly.
+
+### Step 4: Update Epic Creation Workflow (Future)
+
+**For future epics, the `/bmad:phase-2:create-epics-and-stories` workflow should:**
+1. Ask if stories have dependencies during epic creation
+2. Automatically add `depends_on` metadata to story files
+3. Document dependencies in epic tech spec
+
+**This enhancement will be added in a future update to the epic creation workflow.**
 
 ---
 
