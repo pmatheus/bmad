@@ -4,68 +4,50 @@ description: Create comprehensive Product Requirements Document using intent-dri
 
 # PRD - Product Requirements Document
 
-## What This Does
-
 Creates a comprehensive Product Requirements Document (PRD) through interactive discovery and planning. Uses intent-driven approach that adapts to your product type (API, mobile, SaaS, etc.) and domain complexity (healthcare, finance, etc.).
 
-This workflow delegates to the **bmad-pm** (Product Manager) subagent, which specializes in:
-- Strategic product planning and requirements analysis
-- Market research and competitive analysis
-- Breaking down complex features into clear requirements
-- Creating comprehensive, actionable PRDs
+## Purpose
+
+Delegates to **bmad-pm** (Product Manager) subagent for strategic product planning, requirements analysis, market research, and creating comprehensive, actionable PRDs.
+
+**Key Principle:** Intent-driven discovery, adapt to product type and domain, create living document, ensure comprehensive requirements capture.
+
+## Quick Start
+
+```bash
+# Prerequisites: workflow-init run, on Method or Enterprise track
+/bmad:phase-2:prd
+
+# Workflow will:
+# 1. Check workflow status and validate track
+# 2. Gather existing context (product brief, research)
+# 3. Delegate to bmad-pm (Product Manager agent)
+# 4. Guide interactive discovery (vision, scope, requirements)
+# 5. Create living PRD.md as you discuss
+# 6. Option to continue to epic breakdown or pause
+```
 
 ## Prerequisites
 
-1. BMAD plugin installed and initialized
-2. Run `/bmad:meta:workflow-init` to set up project structure
-3. (Optional but recommended) Product brief created via `/bmad:phase-1:product-brief`
-4. (Optional for complex domains) Domain research via `/bmad:phase-1:domain-research`
+See [shared/prerequisites.md#phase-2-prd](../shared/prerequisites.md)
 
-## How It Works
-
-### Track Routing
-
-BMAD supports three project tracks:
-
-- **BMad Method**: Full product development with comprehensive planning (uses this workflow)
-- **Enterprise Method**: Enterprise-scale projects with extended planning (uses this workflow)
-- **Quick Flow**: Single feature/bug fix (uses `/bmad:phase-2:tech-spec` instead)
-
-**This workflow is for BMad Method and Enterprise Method tracks.**
-
-### Process Overview
-
-1. **Validate readiness**: Check workflow status, ensure correct track
-2. **Delegate to bmad-pm**: Launch Product Manager subagent for PRD creation
-3. **Interactive discovery**: PM agent guides you through product planning
-4. **Living document**: PRD created incrementally as you discuss
-5. **Epic breakdown**: Option to continue with epic decomposition or start fresh session
-
-### What You'll Be Asked
-
-The PM agent will guide you through:
-- **Vision & Context**: What you're building and why
-- **Success Criteria**: How you'll measure success
-- **Scope Definition**: MVP vs growth vs vision features
-- **Domain Requirements**: Special compliance, regulations, standards (if applicable)
-- **Functional Requirements**: What the product must do
-- **Non-Functional Requirements**: Performance, security, scale, etc.
-- **Project-Specific Details**: Adapted to your product type
+**Workflow-specific:**
+- [ ] On BMad Method or Enterprise Method track (not Quick Flow)
+- [ ] (Optional but recommended) Product brief created
+- [ ] (Optional for complex domains) Domain research completed
 
 ## Instructions
 
-### Step 1: Check Workflow Status
+### Track Routing
 
-**Action:** Read workflow status to determine project track and validate PRD hasn't already been completed.
+**This workflow is for BMad Method and Enterprise Method tracks.**
 
-```yaml
-# Read configuration
-config_file: .bmad/config.yaml
-status_file: {output_folder}/bmm-workflow-status.yaml
-```
+**Quick Flow track uses `/bmad:phase-2:tech-spec` instead.**
 
-**Load:**
-- Project configuration from `.bmad/config.yaml`
+### 1. Check Workflow Status and Validate Track
+
+**Read workflow status:**
+- Configuration from `.bmad/config.yaml`
 - Workflow status from `{output_folder}/bmm-workflow-status.yaml`
 
 **Validate:**
@@ -73,34 +55,21 @@ status_file: {output_folder}/bmm-workflow-status.yaml
   - If "Quick Flow" → Redirect to `/bmad:phase-2:tech-spec`
 - Check if PRD workflow already completed
   - If completed → Ask user if they want to overwrite
-  - If "no" → Exit and suggest `/bmad:workflow-status`
 
 **If no status file found:**
 - Set `standalone_mode = true`
 - Continue without status tracking
 - Warn user that workflow tracking is unavailable
 
-### Step 2: Gather Existing Context
-
-**Action:** Check for existing input documents that inform the PRD.
+### 2. Gather Existing Context
 
 **Smart document discovery** (check for both whole and sharded versions):
 
 ```
-Product Brief:
-  - {output_folder}/*brief*.md
-  - {output_folder}/*brief*/index.md
-
-Market Research:
-  - {output_folder}/*research*.md
-  - {output_folder}/*research*/index.md
-
-Domain Research:
-  - {output_folder}/*domain*.md
-  - {output_folder}/*domain*/index.md
-
-Project Documentation:
-  - {output_folder}/docs/index.md
+Product Brief: {output_folder}/*brief*.md or *brief*/index.md
+Market Research: {output_folder}/*research*.md or *research*/index.md
+Domain Research: {output_folder}/*domain*.md or *domain*/index.md
+Project Docs: {output_folder}/docs/index.md
 ```
 
 **For each found document:**
@@ -108,18 +77,18 @@ Project Documentation:
 - Summarize key insights for PM agent
 - Note file path for reference section
 
-### Step 3: Launch Product Manager Subagent
+### 3. Delegate to Product Manager Subagent
 
-**Action:** Delegate PRD creation to the bmad-pm subagent.
+See [shared/common-operations.md#delegate-to-subagent](../shared/common-operations.md)
 
-**Use the Task tool with these parameters:**
+**Task Configuration:**
+- **subagent_type:** `"bmad-pm"`
+- **description:** `"Create comprehensive PRD"`
+- **prompt:** Delegation prompt (see template below)
 
-```javascript
-{
-  "subagent_type": "bmad-pm",
-  "description": "Create comprehensive PRD",
-  "prompt": `Create a comprehensive Product Requirements Document (PRD) for this project.
+**Delegation Prompt Template:**
 
+```
 **Project Context:**
 - Project Name: {project_name}
 - Project Track: {project_track}
@@ -147,309 +116,206 @@ Project Documentation:
    - Document non-functional requirements
    - Adapt questions to project type and domain
 
-2. **Create Living PRD**: Write to {output_folder}/PRD.md continuously as you discover information. Use the PRD template structure from your agent instructions.
+2. **Create Living PRD**: Write to {output_folder}/PRD.md continuously as you discover information. Use the PRD template structure.
 
-3. **Intent-Driven Approach**:
-   - Adapt organically to the product type and context
-   - Only include sections that matter for THIS product
-   - Skip generic content
-   - Weave the "product magic" throughout
+3. **Intent-Driven Approach**: Ask open-ended questions, listen actively, probe for deeper understanding, adapt to user's communication style.
 
-4. **After PRD Complete**: Offer the user two options:
-   a) Start a new session for epic breakdown (recommended for complex projects)
-   b) Continue here with epic breakdown
+4. **Domain Adaptation**: If healthcare/HIPAA → ask about PHI, consent, audit. If finance → ask about PCI-DSS, transactions, fraud. Adapt to detected domain.
 
-   If option (b), proceed to break down requirements into epics and stories.
+5. **Comprehensive Coverage**: Ensure all PRD sections completed:
+   - Product Vision & Context
+   - Success Criteria & Metrics
+   - Scope Definition (MVP/Growth/Vision)
+   - Domain Requirements (if applicable)
+   - Functional Requirements (FRs)
+   - Non-Functional Requirements (NFRs)
+   - Assumptions & Constraints
+   - Out of Scope
+   - Risk Assessment
 
-5. **Epic Breakdown** (if user chooses option b):
-   - Transform requirements into implementable epics
-   - Break epics into AI-agent-sized stories
-   - Ensure vertical slicing (not horizontal layers)
-   - Validate no forward dependencies
-   - Create {output_folder}/epics.md with detailed breakdown
-   - Ensure Epic 1 establishes foundation
+6. **Validate Completeness**: Before finishing, review PRD with user, confirm all sections complete, validate FRs are actionable.
 
-**Output Files:**
+**Output File:**
 - {output_folder}/PRD.md (required)
-- {output_folder}/epics.md (optional, if user continues with epic breakdown)
 
-**Validation:**
-Use the PRD validation checklist to ensure completeness before finishing.
+**Template Structure:**
 
-**When complete**, report back:
-- Files created
-- Key insights captured
-- Recommended next steps
-- Whether epic breakdown was included or should be separate session
-`
-}
+```markdown
+# {project_name} - Product Requirements Document
+
+**Author:** {user_name}
+**Date:** {date}
+**Version:** 1.0
+
+## 1. Product Vision & Context
+
+[What you're building and why]
+
+**Product Magic:** [What makes it special/unique]
+
+**Target Users:** [Who will use this]
+
+**Market Context:** [Problem being solved, opportunity]
+
+## 2. Success Criteria & Metrics
+
+[How you'll measure success]
+
+**North Star Metric:** [Primary success indicator]
+
+**Key Metrics:**
+- Metric 1: [description, target]
+- Metric 2: [description, target]
+
+## 3. Scope Definition
+
+**MVP (Must Have):**
+- Feature 1
+- Feature 2
+
+**Growth (Should Have):**
+- Feature 3
+
+**Vision (Could Have):**
+- Feature 4
+
+## 4. Domain Requirements
+
+[If healthcare, finance, etc. - specialized requirements]
+
+**Compliance:**
+- Regulation 1 (e.g., HIPAA, PCI-DSS)
+
+**Standards:**
+- Standard 1
+
+## 5. Functional Requirements
+
+**FR-001:** [Capability description]
+- User action
+- System response
+- Acceptance criteria
+
+**FR-002:** [Next requirement]
+
+[Continue...]
+
+## 6. Non-Functional Requirements
+
+**Performance:**
+- NFR-001: [Performance requirement]
+
+**Security:**
+- NFR-002: [Security requirement]
+
+**Scalability:**
+- NFR-003: [Scale requirement]
+
+**Usability:**
+- NFR-004: [UX requirement]
+
+## 7. Assumptions & Constraints
+
+**Assumptions:**
+- Assumption 1
+
+**Constraints:**
+- Constraint 1 (technical, time, budget)
+
+## 8. Out of Scope
+
+[What we're explicitly NOT building]
+
+## 9. Risk Assessment
+
+**Risk 1:** [Description]
+- Likelihood: High/Med/Low
+- Impact: High/Med/Low
+- Mitigation: [Strategy]
 ```
 
-**The PM agent will:**
-- Load existing context documents
-- Guide interactive discovery session
-- Create comprehensive PRD adapted to project type
-- Optionally create epic breakdown
-- Validate completeness
-- Update workflow status (if not standalone mode)
+**When complete**, report:
+- Number of FRs and NFRs captured
+- Key domain requirements
+- MVP scope clarity
+- Any risks or open questions
+- Recommend next step (epic breakdown)
+```
 
-### Step 4: Update Workflow Status
+### 4. Update Workflow Status and Report
 
-**Action:** After PM agent completes, update workflow status.
-
-**If not standalone_mode:**
+**If workflow status file exists:**
 1. Read `{output_folder}/bmm-workflow-status.yaml`
-2. Update `workflow_status.prd` to file path: `{output_folder}/PRD.md`
-3. If epics created, also update `workflow_status.create-epics-and-stories`
-4. Save file, preserving all comments and structure
+2. Update `workflow_status.prd` to: `{output_folder}/PRD.md`
+3. Update `phase_completion.phase_2_requirements` to: `completed`
+4. Save file, preserving all comments
 
 **Report to user:**
+
 ```
 ✅ PRD Complete!
 
 Created:
 - {output_folder}/PRD.md
-{if_epics_created}
-- {output_folder}/epics.md
-{endif}
+  - {FR_count} Functional Requirements
+  - {NFR_count} Non-Functional Requirements
+  - {domain} domain requirements captured
+
+Summary:
+{PRD_summary}
 
 Next Steps:
-{if_no_epics}
-1. Run /bmad:phase-2:create-epics-and-stories to break down requirements into implementable stories
-{endif}
-2. Run /bmad:phase-3:architecture to create technical architecture
-3. Run /bmad:workflow-status to see your full project status
+1. Run /bmad:phase-2:create-epics-and-stories to break down into implementable stories
+2. Or run /bmad:phase-3:architecture to design technical architecture first
+3. Run /bmad:workflow-status to see your progress
+
+PRD is your requirements foundation - ready for epic breakdown!
 ```
 
-## Key Principles
+### 5. Offer to Continue to Epic Breakdown
 
-### Intent-Driven Planning
+**Ask user:**
+"Would you like to continue to epic breakdown now, or pause here?"
 
-The PRD workflow adapts to your product:
-- **Project Type Detection**: Automatically identifies if you're building an API, mobile app, SaaS platform, etc.
-- **Domain Complexity**: Detects specialized domains (healthcare, finance) and adapts requirements
-- **Adaptive Sections**: Only includes relevant sections (skips irrelevant NFRs, etc.)
+**If continue:**
+```
+🚀 Continuing to epic breakdown...
+```
+Use SlashCommand tool: `/bmad:phase-2:create-epics-and-stories`
 
-### Living Document Approach
+**If pause:**
+```
+✅ PRD saved. Run /bmad:phase-2:create-epics-and-stories when ready.
+```
 
-The PRD is built incrementally:
-- Written continuously during discovery
-- No waiting until the end
-- You can review and refine as you go
-- Product magic woven throughout
+**Note:** Do NOT auto-continue. User may want to review PRD before breaking down into epics.
 
-### Product Magic
+## Key Constraints
 
-Every great product has something special - the "magic moment" that makes users love it:
-- Captured early in discovery
-- Woven throughout all requirements
-- Guides all subsequent work
-- Keeps team focused on what matters
-
-## Validation Checklist
-
-The PM agent will validate the PRD ensures:
-
-**Critical Items:**
-- [ ] No template variables unfilled
-- [ ] All FRs (functional requirements) numbered and traceable
-- [ ] Epic 1 establishes foundation (if epics created)
-- [ ] No forward dependencies between stories
-- [ ] Vertical slicing (not horizontal layers)
-- [ ] All FRs covered by stories (if epics created)
-
-**Completeness:**
-- [ ] Executive summary with vision
-- [ ] Product magic clearly articulated
-- [ ] Project classification (type, domain, complexity)
-- [ ] Success criteria defined
-- [ ] Product scope (MVP, Growth, Vision)
-- [ ] Functional requirements comprehensive
-- [ ] Non-functional requirements (when applicable)
-- [ ] Project-specific sections included
-
-**Quality:**
-- [ ] Language clear and specific
-- [ ] Requirements measurable and testable
-- [ ] No jargon without definitions
-- [ ] Professional polish
-- [ ] References to source documents
-
-## Output Files
-
-### PRD.md
-
-Comprehensive product requirements document including:
-- Executive summary
-- Product magic essence
-- Project classification
-- Success criteria
-- Scope definition (MVP/Growth/Vision)
-- Functional requirements (numbered)
-- Non-functional requirements
-- Project-specific sections (API specs, mobile requirements, etc.)
-- References
-
-### epics.md (Optional)
-
-If user chooses to continue with epic breakdown:
-- Epic list with goals
-- Detailed story breakdown per epic
-- User stories with acceptance criteria
-- Dependencies and prerequisites
-- Coverage mapping to FRs
-
-## Examples
-
-### Example 1: SaaS Project Management Tool
-
-**Input:**
-- User wants to build a project management tool for remote teams
-- Focus on async communication and transparency
-- Target: Small to medium tech teams
-
-**PRD Adapts:**
-- Project Type: SaaS B2B
-- Includes: Multi-tenancy, permission models, subscription tiers
-- Includes: Integration requirements (Slack, GitHub, etc.)
-- Includes: UX principles for async workflows
-- Product Magic: "Transparency by default - everyone knows project status without meetings"
-
-**Output:**
-- PRD.md with SaaS-specific sections
-- Functional requirements for collaboration features
-- NFRs for multi-tenant security and scale
-- Integration specifications
-- Clear MVP scope focused on core transparency features
-
-### Example 2: Healthcare Mobile App
-
-**Input:**
-- User wants health tracking app for diabetes patients
-- Must comply with HIPAA
-- iOS and Android
-
-**PRD Adapts:**
-- Project Type: Mobile (iOS/Android)
-- Domain: Healthcare (complex)
-- Includes: HIPAA compliance requirements
-- Includes: Medical device integration requirements
-- Includes: Data privacy and security (HIPAA-specific)
-- Includes: Platform-specific requirements
-- Product Magic: "Makes daily tracking feel like self-care, not a chore"
-
-**Output:**
-- PRD.md with healthcare compliance sections
-- Detailed privacy/security requirements
-- Medical data handling specifications
-- Platform-specific requirements
-- Clear regulatory boundaries for MVP
-
-### Example 3: Developer CLI Tool
-
-**Input:**
-- User wants CLI for database schema migrations
-- Target: Backend developers using PostgreSQL/MySQL
-- Open source project
-
-**PRD Adapts:**
-- Project Type: CLI Tool / Developer Tool
-- Includes: CLI UX patterns
-- Includes: Developer experience principles
-- Includes: Error handling and debugging
-- Skips: UI/visual design sections
-- Product Magic: "Makes migrations feel safe and reversible"
-
-**Output:**
-- PRD.md focused on developer experience
-- Detailed command specifications
-- Error handling requirements
-- Integration with existing workflows
-- Clear scope for v1.0 open source release
+- **Method/Enterprise only:** This workflow is for comprehensive planning tracks
+- **Quick Flow uses tech-spec:** Single feature projects use tech-spec instead
+- **Intent-driven:** Open-ended discovery, adapt to product type and domain
+- **Living document:** PRD created continuously during discovery
+- **Comprehensive:** All sections completed (vision, scope, FRs, NFRs, risks)
+- **Actionable FRs:** Requirements clear enough to decompose into stories
+- **Domain adaptation:** Questions adapt to healthcare, finance, etc.
 
 ## Notes
 
-### Track Routing
+- **PM agent expertise:** bmad-pm specializes in strategic product planning
+- **Interactive discovery:** Guided conversation, not form-filling
+- **Product magic:** Capture what makes product special/unique
+- **Scope negotiation:** MVP vs Growth vs Vision clarity critical
+- **Domain awareness:** Automatically adapts to healthcare, finance, compliance needs
+- **FR quality:** Requirements must be specific, testable, actionable
+- **No auto-continue:** User reviews PRD before continuing to epic breakdown
 
-- **Quick Flow projects** should use `/bmad:phase-2:tech-spec` instead of this workflow
-- Quick Flow is for single features, bug fixes, or small atomic changes
-- This workflow is for comprehensive product development
+**Philosophy:** Intent-driven discovery reveals true requirements. Adapt to product type and domain. Create living document during conversation. Balance comprehensiveness with clarity. Prepare solid foundation for epic breakdown.
 
-### Epic Breakdown Options
+---
 
-**Option A: New Session (Recommended for Complex Projects)**
-- Keeps sessions focused and manageable
-- Better context window management
-- Clear separation of planning phases
-- User runs `/bmad:phase-2:create-epics-and-stories` separately
-
-**Option B: Continue Here**
-- Good for simpler projects
-- Maintains continuity
-- PM agent continues into epic breakdown
-- Single session for full planning
-
-### Standalone Mode
-
-If no workflow status file exists:
-- Workflow runs without status tracking
-- PRD still created successfully
-- User manages next steps manually
-- Consider running `/bmad:meta:workflow-init` for better tracking
-
-### Session Management
-
-For very complex products:
-- PRD session can be extensive
-- Consider breaking into multiple sessions
-- Save PRD progress frequently
-- Use new session for epic breakdown
-
-## Related Workflows
-
-- `/bmad:meta:workflow-init` - Initialize project structure (run first)
-- `/bmad:phase-1:product-brief` - Quick product vision doc (optional, before PRD)
-- `/bmad:phase-1:domain-research` - Research complex domains (optional, before PRD)
-- `/bmad:phase-2:create-epics-and-stories` - Break PRD into epics (after PRD)
-- `/bmad:phase-3:architecture` - Technical architecture (after PRD or epics)
-- `/bmad:workflow-status` - Check project status (anytime)
-
-## Troubleshooting
-
-**"Quick Flow Track - Redirecting"**
-- Your project is set to Quick Flow track
-- Use `/bmad:phase-2:tech-spec` for focused technical specs
-- PRD is for comprehensive product development
-
-**"PRD already completed"**
-- Workflow detects existing PRD.md
-- Choose to overwrite or exit
-- Consider creating PRD-v2.md manually if you want to keep both
-
-**"No workflow status file"**
-- Running in standalone mode
-- PRD will still be created
-- Run `/bmad:meta:workflow-init` for better project tracking
-
-**Context window concerns**
-- For very complex products, consider multiple sessions
-- Product brief beforehand helps focus the PRD session
-- Can do epic breakdown in separate session
-
-**Domain complexity**
-- If healthcare, finance, aerospace, etc., consider `/bmad:phase-1:domain-research` first
-- PM agent will offer research options if complexity detected
-- Better requirements with domain context loaded
-
-## Success Criteria
-
-PRD workflow succeeds when:
-- [ ] PRD.md created with comprehensive requirements
-- [ ] All critical validation items pass
-- [ ] Product magic clearly articulated
-- [ ] Requirements traceable and testable
-- [ ] Appropriate detail for project type and domain
-- [ ] Clear next steps provided to user
-- [ ] Workflow status updated (if not standalone)
-
-**Next phase:** Architecture or Epic Breakdown, depending on user choice and project needs.
+**References:**
+- Examples: [examples/prd-examples.md](../examples/prd-examples.md)
+- Troubleshooting: [shared/troubleshooting.md#prd](../shared/troubleshooting.md)
+- Philosophy: [shared/design-philosophy.md#intent-driven-planning](../shared/design-philosophy.md)
+- Common Operations: [shared/common-operations.md](../shared/common-operations.md)
