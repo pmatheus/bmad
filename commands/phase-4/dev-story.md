@@ -53,10 +53,10 @@ Check that required files and structure exist:
 cat .bmad/config.yaml
 
 # Sprint status should exist (from sprint-planning workflow)
-cat .bmad/sprint-status.yaml
+cat {sprint_artifacts}/sprint-status.yaml
 
 # At least one story file should exist
-ls .bmad/stories/story-*.md
+ls {sprint_artifacts}/stories/story-*.md
 ```
 
 **If missing:**
@@ -70,7 +70,7 @@ Verify at least one story is ready for development:
 
 ```bash
 # Check sprint status for ready stories
-cat .bmad/sprint-status.yaml | grep -A 1 "ready-for-dev"
+cat {sprint_artifacts}/sprint-status.yaml | grep -A 1 "ready-for-dev"
 ```
 
 A story is "ready-for-dev" when:
@@ -324,7 +324,7 @@ Once the developer reports completion:
 
 ```bash
 # Review the updated story file
-cat .bmad/stories/{story_key}.md
+cat {sprint_artifacts}/stories/{story_key}.md
 
 # Check which files were changed
 # (listed in File List section of story)
@@ -616,7 +616,7 @@ As you work, update the story file:
 6. **User reviews and continues:**
    ```
    # Review the story
-   cat .bmad/stories/story-1.1-user-signup-login.md
+   cat {sprint_artifacts}/stories/story-1.1-user-signup-login.md
 
    # Run code review
    /bmad:phase-4:code-review
@@ -863,7 +863,7 @@ As you work, update the story file:
 **Diagnosis:**
 ```bash
 # Check sprint status
-cat .bmad/sprint-status.yaml | grep -A 1 development_status
+cat {sprint_artifacts}/sprint-status.yaml | grep -A 1 development_status
 ```
 
 **Solutions:**
@@ -935,7 +935,7 @@ interface not provided in Story Context.
 **Diagnosis:**
 ```bash
 # Check if epic tech spec exists
-cat .bmad/epics/epic-{n}-tech-spec.md
+cat {output_folder}/epics/epic-{n}-tech-spec.md
 
 # Check if architecture patterns are documented
 cat .bmad/architecture.md

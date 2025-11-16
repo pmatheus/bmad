@@ -84,7 +84,7 @@ The agent will guide through systematic problem-solving:
 
 ### Step 4: Generate Output Document
 
-Create problem-solving analysis in `.bmad/output/problem-solution-[date].md` with:
+Create problem-solving analysis in `{output_folder}/problem-solution-[date].md` with:
 - Refined problem statement and context
 - Problem boundaries (Is/Is Not Analysis)
 - Root cause analysis and contributing factors
@@ -98,11 +98,11 @@ Create problem-solving analysis in `.bmad/output/problem-solution-[date].md` wit
 ### Step 5: Confirm Completion
 
 Inform the user:
-"Problem-solving analysis complete! Your systematic solution has been saved to `.bmad/output/problem-solution-[date].md`"
+"Problem-solving analysis complete! Your systematic solution has been saved to `{output_folder}/problem-solution-[date].md`"
 
 ## Output Files
 
-- `.bmad/output/problem-solution-[date].md` - Comprehensive problem-solving documentation
+- `{output_folder}/problem-solution-[date].md` - Comprehensive problem-solving documentation
 
 ## Examples
 

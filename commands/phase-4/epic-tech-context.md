@@ -34,8 +34,8 @@ Before running this workflow:
 - `.bmad/config.yaml` - Project configuration
 - `.bmad/PRD.md` (or `.bmad/PRD/index.md` if sharded)
 - `.bmad/architecture.md` (or `.bmad/architecture/index.md` if sharded)
-- `.bmad/epics.md` OR `.bmad/epics/epic-{N}.md` (sharded)
-- `.bmad/sprint-artifacts/sprint-status.yaml` - Epic tracking
+- `{output_folder}/epics.md` OR `{output_folder}/epics/epic-{N}.md` (sharded)
+- `{sprint_artifacts}/sprint-status.yaml` - Epic tracking
 
 ## How It Works
 
@@ -93,7 +93,7 @@ Read project configuration from `.bmad/config.yaml`:
 
 **Read sprint status file:**
 
-Look for: `.bmad/sprint-artifacts/sprint-status.yaml` OR `.bmad/sprint-status.yaml`
+Look for: `{sprint_artifacts}/sprint-status.yaml` OR `{sprint_artifacts}/sprint-status.yaml`
 
 **Find next epic:**
 - Read ALL `development_status` entries
@@ -169,12 +169,12 @@ Priority order:
 **Load Epic (selective):**
 
 If sharded:
-- Read `.bmad/epics/index.md`
-- Load ONLY `.bmad/epics/epic-{epic_id}.md`
+- Read `{output_folder}/epics/index.md`
+- Load ONLY `{output_folder}/epics/epic-{epic_id}.md`
 - Skip other epic files
 
 If whole:
-- Read `.bmad/epics.md`
+- Read `{output_folder}/epics.md`
 - Extract Epic {epic_id} section
 
 **Load UX Design (if exists):**
@@ -451,7 +451,7 @@ Quality: [validation status]
 After architect completes the tech spec:
 
 **Load sprint status file:**
-- Read FULL file: `.bmad/sprint-artifacts/sprint-status.yaml`
+- Read FULL file: `{sprint_artifacts}/sprint-status.yaml`
 
 **Update epic status:**
 ```yaml
@@ -580,7 +580,7 @@ Savings: 570 lines (76% reduction)
 2. **Document loading:**
    - Load `.bmad/PRD.md` (whole document)
    - Load `.bmad/architecture.md` (whole document)
-   - Extract Epic 3 from `.bmad/epics.md`
+   - Extract Epic 3 from `{output_folder}/epics.md`
    - No UX design doc needed (data visualization)
 
 3. **Delegation to bmad-architect:**
@@ -596,7 +596,7 @@ Savings: 570 lines (76% reduction)
      - Traceability: Maps each AC to component and test
 
 4. **Output:**
-   - File: `.bmad/sprint-artifacts/tech-spec-epic-3.md` (450 lines)
+   - File: `{sprint_artifacts}/tech-spec-epic-3.md` (450 lines)
    - Epic status: backlog → contexted
 
 5. **Result:**
@@ -604,7 +604,7 @@ Savings: 570 lines (76% reduction)
    ✅ Tech Spec Generated Successfully!
 
    Epic: Epic 3 - Real-Time Data Visualization
-   File: .bmad/sprint-artifacts/tech-spec-epic-3.md
+   File: {sprint_artifacts}/tech-spec-epic-3.md
    ACs: 12 | Components: 3 | APIs: 8 | Risks: 4
 
    Next: Run /bmad:phase-4:create-story for Epic 3
@@ -631,7 +631,7 @@ Savings: 570 lines (76% reduction)
 2. **Document loading (sharded):**
    - Load `.bmad/PRD/index.md` + all sections (800 lines total)
    - Load `.bmad/architecture/index.md` + all sections (600 lines total)
-   - Load ONLY `.bmad/epics/epic-5.md` (120 lines) ← Selective loading
+   - Load ONLY `{output_folder}/epics/epic-5.md` (120 lines) ← Selective loading
    - Skip loading epic-1.md through epic-4.md (saves ~400 lines)
 
 3. **Delegation to bmad-architect:**
@@ -652,7 +652,7 @@ Savings: 570 lines (76% reduction)
      - Risks: 7 compliance risks with mitigation strategies
 
 4. **Output:**
-   - File: `.bmad/sprint-artifacts/tech-spec-epic-5.md` (650 lines)
+   - File: `{sprint_artifacts}/tech-spec-epic-5.md` (650 lines)
    - Epic status: backlog → contexted
    - Includes explicit HIPAA compliance mappings
 
@@ -661,7 +661,7 @@ Savings: 570 lines (76% reduction)
    ✅ Tech Spec Generated Successfully!
 
    Epic: Epic 5 - HIPAA-Compliant Audit Logging
-   File: .bmad/sprint-artifacts/tech-spec-epic-5.md
+   File: {sprint_artifacts}/tech-spec-epic-5.md
    ACs: 18 | Components: 5 | APIs: 6 | Risks: 7
 
    Compliance: HIPAA requirements mapped
@@ -690,7 +690,7 @@ Savings: 570 lines (76% reduction)
 2. **Document loading:**
    - Load `.bmad/PRD.md` (whole document)
    - Load `.bmad/architecture.md` (whole document)
-   - Extract Epic 2 from `.bmad/epics.md`
+   - Extract Epic 2 from `{output_folder}/epics.md`
    - Load `.bmad/ux-design.md` (UX-heavy project - critical context)
 
 3. **Delegation to bmad-architect:**
@@ -712,7 +712,7 @@ Savings: 570 lines (76% reduction)
      - Risks: Conflict resolution edge cases, battery drain
 
 4. **Output:**
-   - File: `.bmad/sprint-artifacts/tech-spec-epic-2.md` (580 lines)
+   - File: `{sprint_artifacts}/tech-spec-epic-2.md` (580 lines)
    - Epic status: backlog → contexted
    - Includes UX-driven design decisions
 
@@ -721,7 +721,7 @@ Savings: 570 lines (76% reduction)
    ✅ Tech Spec Generated Successfully!
 
    Epic: Epic 2 - Offline-First Workout Sync
-   File: .bmad/sprint-artifacts/tech-spec-epic-2.md
+   File: {sprint_artifacts}/tech-spec-epic-2.md
    ACs: 15 | Components: 4 | APIs: 10 | Risks: 5
 
    UX Design: Integrated (sync indicators, conflict UI)
@@ -887,8 +887,8 @@ project_name: "Project Name"
 ```
 
 **Sprint status file:**
-- Primary: `.bmad/sprint-artifacts/sprint-status.yaml`
-- Fallback: `.bmad/sprint-status.yaml`
+- Primary: `{sprint_artifacts}/sprint-status.yaml`
+- Fallback: `{sprint_artifacts}/sprint-status.yaml`
 
 **Tech spec output:**
-- `.bmad/sprint-artifacts/tech-spec-epic-{epic_id}.md`
+- `{sprint_artifacts}/tech-spec-epic-{epic_id}.md`

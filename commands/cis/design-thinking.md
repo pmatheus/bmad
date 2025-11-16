@@ -75,7 +75,7 @@ The agent will guide through the 5 design thinking phases:
 
 ### Step 4: Generate Output Document
 
-Create design thinking output in `.bmad/output/design-thinking-[date].md` with:
+Create design thinking output in `{output_folder}/design-thinking-[date].md` with:
 - Design challenge statement
 - User insights and empathy findings
 - Problem definition (POV, HMW questions)
@@ -88,11 +88,11 @@ Create design thinking output in `.bmad/output/design-thinking-[date].md` with:
 ### Step 5: Confirm Completion
 
 Inform the user:
-"Design thinking session complete! Your human-centered design work has been saved to `.bmad/output/design-thinking-[date].md`"
+"Design thinking session complete! Your human-centered design work has been saved to `{output_folder}/design-thinking-[date].md`"
 
 ## Output Files
 
-- `.bmad/output/design-thinking-[date].md` - Complete design thinking documentation
+- `{output_folder}/design-thinking-[date].md` - Complete design thinking documentation
 
 ## Examples
 

@@ -32,11 +32,11 @@ Before running this workflow:
 
 **Required files:**
 - `.bmad/config.yaml` - Project configuration
-- `.bmad/sprint-artifacts/sprint-status.yaml` - Story tracking
-- `.bmad/epics.md` OR `.bmad/epics/epic-{N}.md` - Epic files with stories
+- `{sprint_artifacts}/sprint-status.yaml` - Story tracking
+- `{output_folder}/epics.md` OR `{output_folder}/epics/epic-{N}.md` - Epic files with stories
 - `.bmad/PRD.md` (optional) - Product requirements
 - `.bmad/architecture.md` (optional) - Architecture constraints
-- `.bmad/sprint-artifacts/tech-spec-epic-{N}.md` (optional) - Epic tech spec
+- `{sprint_artifacts}/tech-spec-epic-{N}.md` (optional) - Epic tech spec
 
 ## How It Works
 
@@ -179,7 +179,7 @@ Read project configuration from `.bmad/config.yaml`:
 
 **Read sprint status file:**
 
-File: `.bmad/sprint-artifacts/sprint-status.yaml` OR `.bmad/sprint-status.yaml`
+File: `{sprint_artifacts}/sprint-status.yaml` OR `{sprint_artifacts}/sprint-status.yaml`
 
 **Read COMPLETELY from start to end** (order matters)
 
@@ -231,7 +231,7 @@ Run /bmad:phase-4:sprint-planning to resync.
 
 **Check if story file already exists:**
 
-Path: `.bmad/sprint-artifacts/stories/{story_key}.md`
+Path: `{sprint_artifacts}/stories/{story_key}.md`
 
 If exists:
 ```
@@ -264,7 +264,7 @@ Check status: `done`, `review`, `in-progress`
 **If status indicates work done:**
 
 Load COMPLETE previous story file:
-`.bmad/sprint-artifacts/stories/{previous_story_key}.md`
+`{sprint_artifacts}/stories/{previous_story_key}.md`
 
 **Parse ALL sections:**
 
@@ -385,12 +385,12 @@ Set: `previous_story_learnings = "First story in epic"` or `"Previous story not 
 **Priority order:**
 
 1. **Epic Tech Spec** (if exists)
-   - Path: `.bmad/sprint-artifacts/tech-spec-epic-{epic_num}.md`
+   - Path: `{sprint_artifacts}/tech-spec-epic-{epic_num}.md`
    - Most detailed, epic-scoped
 
 2. **Epics File**
-   - Whole: `.bmad/epics.md`
-   - Sharded: `.bmad/epics/epic-{epic_num}.md` (SELECTIVE)
+   - Whole: `{output_folder}/epics.md`
+   - Sharded: `{output_folder}/epics/epic-{epic_num}.md` (SELECTIVE)
    - Has acceptance criteria and story breakdown
 
 3. **PRD** (if exists)
@@ -636,8 +636,8 @@ Extract relevant requirements:
 **Technical Details:**
 - Password requirements: [Source: .bmad/architecture.md#Security]
 - Email service config: [Source: .bmad/architecture.md#Email]
-- Token expiry: [Source: .bmad/sprint-artifacts/tech-spec-epic-1.md#Security]
-- AC definitions: [Source: .bmad/epics.md#Epic-1-Story-3]
+- Token expiry: [Source: {sprint_artifacts}/tech-spec-epic-1.md#Security]
+- AC definitions: [Source: {output_folder}/epics.md#Epic-1-Story-3]
 
 **Previous Story:**
 - AuthService usage: [Source: stories/1-2-user-authentication.md#Completion-Notes]
@@ -645,9 +645,9 @@ Extract relevant requirements:
 
 ### Step 12: Create Story File
 
-**File path:** `.bmad/sprint-artifacts/stories/{story_key}.md`
+**File path:** `{sprint_artifacts}/stories/{story_key}.md`
 
-Example: `.bmad/sprint-artifacts/stories/1-3-password-reset.md`
+Example: `{sprint_artifacts}/stories/1-3-password-reset.md`
 
 **Full structure:**
 
@@ -713,7 +713,7 @@ Claude Sonnet 4.5
 
 **Update sprint-status.yaml:**
 
-File: `.bmad/sprint-artifacts/sprint-status.yaml`
+File: `{sprint_artifacts}/sprint-status.yaml`
 
 1. Load FULL file
 2. Find `development_status[{story_key}]`
@@ -739,7 +739,7 @@ Run /bmad:phase-4:sprint-planning to resync.
 
 - Story ID: 1.3
 - Story Key: 1-3-password-reset
-- File: .bmad/sprint-artifacts/stories/1-3-password-reset.md
+- File: {sprint_artifacts}/stories/1-3-password-reset.md
 - Status: drafted (was backlog)
 
 **Learnings Applied:**
@@ -831,8 +831,8 @@ Use AuthService.hashPassword() - DO NOT recreate hashing logic
    - Set: `previous_story_learnings = "First story in epic"`
 
 3. **Load documents:**
-   - Tech spec: `.bmad/sprint-artifacts/tech-spec-epic-1.md`
-   - Epic: `.bmad/epics.md` (Epic 1 section)
+   - Tech spec: `{sprint_artifacts}/tech-spec-epic-1.md`
+   - Epic: `{output_folder}/epics.md` (Epic 1 section)
    - Architecture: `.bmad/architecture.md`
 
 4. **Extract ACs:**
@@ -918,8 +918,8 @@ Use AuthService.hashPassword() - DO NOT recreate hashing logic
    ```
 
 4. **Load documents:**
-   - Tech spec: `.bmad/sprint-artifacts/tech-spec-epic-2.md`
-   - Epic: `.bmad/epics/epic-2.md` (sharded, selective load)
+   - Tech spec: `{sprint_artifacts}/tech-spec-epic-2.md`
+   - Epic: `{output_folder}/epics/epic-2.md` (sharded, selective load)
    - Previous story: `stories/2-2-appointment-booking.md`
 
 5. **Extract ACs:**
@@ -1250,13 +1250,13 @@ bmad_folder: .bmad
 ```
 
 **Output file:**
-- `.bmad/sprint-artifacts/stories/{epic}-{story}-{title}.md`
-- Example: `.bmad/sprint-artifacts/stories/1-3-password-reset.md`
+- `{sprint_artifacts}/stories/{epic}-{story}-{title}.md`
+- Example: `{sprint_artifacts}/stories/1-3-password-reset.md`
 
 **Input files:**
-- `.bmad/sprint-artifacts/sprint-status.yaml` - Story tracking
-- `.bmad/epics.md` OR `.bmad/epics/epic-{N}.md` - Epic files
-- `.bmad/sprint-artifacts/tech-spec-epic-{N}.md` - Tech spec (optional)
+- `{sprint_artifacts}/sprint-status.yaml` - Story tracking
+- `{output_folder}/epics.md` OR `{output_folder}/epics/epic-{N}.md` - Epic files
+- `{sprint_artifacts}/tech-spec-epic-{N}.md` - Tech spec (optional)
 - `.bmad/PRD.md` - Requirements (optional)
 - `.bmad/architecture.md` - Architecture (optional)
 - Previous story file (for learnings)

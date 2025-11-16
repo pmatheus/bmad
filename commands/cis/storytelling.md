@@ -102,7 +102,7 @@ The agent will guide through narrative development:
 
 ### Step 4: Generate Output Document
 
-Create storytelling output in `.bmad/output/story-[date].md` with:
+Create storytelling output in `{output_folder}/story-[date].md` with:
 - Story purpose and target audience
 - Selected framework and rationale
 - Complete core narrative
@@ -115,11 +115,11 @@ Create storytelling output in `.bmad/output/story-[date].md` with:
 ### Step 5: Confirm Completion
 
 Inform the user:
-"Story complete! Your narrative has been saved to `.bmad/output/story-[date].md`"
+"Story complete! Your narrative has been saved to `{output_folder}/story-[date].md`"
 
 ## Output Files
 
-- `.bmad/output/story-[date].md` - Complete story with all variations and usage guidelines
+- `{output_folder}/story-[date].md` - Complete story with all variations and usage guidelines
 
 ## Examples
 

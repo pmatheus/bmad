@@ -32,8 +32,8 @@ Before running this workflow:
 
 **Required files:**
 - `.bmad/config.yaml` - Project configuration
-- `.bmad/sprint-artifacts/sprint-status.yaml` - Story tracking
-- `.bmad/sprint-artifacts/stories/{story-key}.md` - Drafted story file
+- `{sprint_artifacts}/sprint-status.yaml` - Story tracking
+- `{sprint_artifacts}/stories/{story-key}.md` - Drafted story file
 - Project documentation (PRD, Architecture, Tech Specs, etc.)
 - Existing codebase (for code reference discovery)
 
@@ -74,7 +74,7 @@ Before running this workflow:
 - Generate structured Story Context XML
 - All paths are project-relative (not absolute)
 - Validate against checklist
-- Save to `.bmad/sprint-artifacts/stories/{story-key}.context.xml`
+- Save to `{sprint_artifacts}/stories/{story-key}.context.xml`
 
 **Step 7: Status Update**
 - Update story file: Status → "ready-for-dev"
@@ -165,7 +165,7 @@ Read project configuration from `.bmad/config.yaml`:
 
 **Read sprint status file:**
 
-Look for: `.bmad/sprint-artifacts/sprint-status.yaml` OR `.bmad/sprint-status.yaml`
+Look for: `{sprint_artifacts}/sprint-status.yaml` OR `{sprint_artifacts}/sprint-status.yaml`
 
 **Find first drafted story:**
 
@@ -202,7 +202,7 @@ All stories are either still in backlog or already marked ready/in-progress/done
 
 **If story found:**
 - Store story_key (e.g., "1-2-user-authentication")
-- Find matching story file: `.bmad/sprint-artifacts/stories/{story_key}.md`
+- Find matching story file: `{sprint_artifacts}/stories/{story_key}.md`
 - Read COMPLETE story file
 
 ### Step 3: Parse Story File
@@ -254,7 +254,7 @@ Extract all tasks and subtasks
 ### Step 4: Check for Existing Context File
 
 **Context file path:**
-`.bmad/sprint-artifacts/stories/{story_key}.context.xml`
+`{sprint_artifacts}/stories/{story_key}.context.xml`
 
 **If file exists:**
 ```
@@ -517,7 +517,7 @@ Map each acceptance criterion to initial test ideas:
 
 **Create XML file:**
 
-File path: `.bmad/sprint-artifacts/stories/{story_key}.context.xml`
+File path: `{sprint_artifacts}/stories/{story_key}.context.xml`
 
 **Use this structure:**
 
@@ -607,7 +607,7 @@ File path: `.bmad/sprint-artifacts/stories/{story_key}.context.xml`
 
 **Update story file:**
 
-File: `.bmad/sprint-artifacts/stories/{story_key}.md`
+File: `{sprint_artifacts}/stories/{story_key}.md`
 
 **Changes:**
 1. Update Status line: `Status: drafted` → `Status: ready-for-dev`
@@ -627,7 +627,7 @@ _Will be populated during implementation_
 
 **Update sprint status:**
 
-File: `.bmad/sprint-artifacts/sprint-status.yaml` OR `.bmad/sprint-status.yaml`
+File: `{sprint_artifacts}/sprint-status.yaml` OR `{sprint_artifacts}/sprint-status.yaml`
 
 **Changes:**
 1. Load FULL file
@@ -821,7 +821,7 @@ Story context generation exists specifically to feed the dev agent. Once context
    - Ideas: 12 test scenarios mapped to 4 ACs
 
 6. **Output:**
-   - File: `.bmad/sprint-artifacts/stories/1-2-user-login.context.xml` (280 lines)
+   - File: `{sprint_artifacts}/stories/1-2-user-login.context.xml` (280 lines)
    - Story status: drafted → ready-for-dev
    - Validation: All checks passed
 
@@ -886,7 +886,7 @@ Story context generation exists specifically to feed the dev agent. Once context
    - Special: Compliance test suite must validate all HIPAA requirements
 
 6. **Output:**
-   - File: `.bmad/sprint-artifacts/stories/5-3-audit-trail.context.xml` (450 lines)
+   - File: `{sprint_artifacts}/stories/5-3-audit-trail.context.xml` (450 lines)
    - Story status: drafted → ready-for-dev
    - Validation: All checks passed
    - Note: Context is large due to compliance requirements
@@ -953,7 +953,7 @@ Story context generation exists specifically to feed the dev agent. Once context
    - Special: Test battery drain (must be < 5% per hour during active sync)
 
 6. **Output:**
-   - File: `.bmad/sprint-artifacts/stories/2-4-background-sync.context.xml` (380 lines)
+   - File: `{sprint_artifacts}/stories/2-4-background-sync.context.xml` (380 lines)
    - Story status: drafted → ready-for-dev
    - Validation: All checks passed
 
@@ -988,7 +988,7 @@ Story context generation exists specifically to feed the dev agent. Once context
 
 **Error:**
 ```
-⚠️ Story file not found: .bmad/sprint-artifacts/stories/{story_key}.md
+⚠️ Story file not found: {sprint_artifacts}/stories/{story_key}.md
 ```
 
 **Cause:** Story key in sprint-status doesn't match actual file.
@@ -1163,20 +1163,20 @@ Reads from `.bmad/config.yaml`:
 output_folder: .bmad
 user_name: "Your Name"
 sprint_artifacts: .bmad/sprint-artifacts
-story_path: .bmad/sprint-artifacts/stories
+story_path: {sprint_artifacts}/stories
 bmad_folder: .bmad
 ```
 
 **Story files:**
-- Location: `.bmad/sprint-artifacts/stories/`
+- Location: `{sprint_artifacts}/stories/`
 - Format: `{epic}-{story}-{name}.md`
 - Example: `1-2-user-authentication.md`
 
 **Context files:**
-- Location: `.bmad/sprint-artifacts/stories/`
+- Location: `{sprint_artifacts}/stories/`
 - Format: `{epic}-{story}-{name}.context.xml`
 - Example: `1-2-user-authentication.context.xml`
 
 **Sprint status:**
-- Primary: `.bmad/sprint-artifacts/sprint-status.yaml`
-- Fallback: `.bmad/sprint-status.yaml`
+- Primary: `{sprint_artifacts}/sprint-status.yaml`
+- Fallback: `{sprint_artifacts}/sprint-status.yaml`

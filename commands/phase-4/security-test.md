@@ -22,7 +22,7 @@ Performs comprehensive security testing on a user story or feature using 8 speci
 
 - BMAD plugin installed
 - `/workflow-init` has been run
-- Story exists in `.bmad/stories/`
+- Story exists in `{sprint_artifacts}/stories/`
 - Feature is implemented (code exists)
 - Testing environment available (local/staging)
 
@@ -38,7 +38,7 @@ questions:
     header: "Story"
     multiSelect: false
     options:
-      - label: "Current story (latest in .bmad/stories/)"
+      - label: "Current story (latest in {sprint_artifacts}/stories/)"
         description: "Test the most recently created story"
       - label: "Specific story ID"
         description: "Enter story number (e.g., 001, 002)"
@@ -52,7 +52,7 @@ questions:
 
 ```bash
 # Read story
-cat .bmad/stories/story-{ID}.md
+cat {sprint_artifacts}/stories/story-{ID}.md
 
 # Extract:
 # - Feature name
@@ -85,7 +85,7 @@ security:
 ```
 I need you to perform comprehensive security testing on the following story:
 
-**Story**: .bmad/stories/story-{ID}.md
+**Story**: {sprint_artifacts}/stories/story-{ID}.md
 
 **Story Summary**:
 {Brief summary of feature from story}
@@ -104,7 +104,7 @@ Please:
 3. Coordinate comprehensive security testing
 4. Aggregate findings from all agents
 5. Generate a security test report
-6. Save report to .bmad/output/security-reports/story-{ID}-security-report.md
+6. Save report to {output_folder}/security-reports/story-{ID}-security-report.md
 7. Create fix stories for any Critical/High severity issues found
 8. Provide deployment decision (APPROVED/BLOCKED/CONDITIONAL)
 
@@ -137,7 +137,7 @@ Use the Task tool to delegate to specialized CTF agents as needed.
    ```
    Task: ctf-auth-analyst
    Prompt: Test authentication for [feature] at [endpoint].
-           Story: .bmad/stories/story-XXX.md
+           Story: {sprint_artifacts}/stories/story-XXX.md
            Focus on: JWT validation, session management, password reset
    ```
 
@@ -184,14 +184,14 @@ Use the Task tool to delegate to specialized CTF agents as needed.
 
    ## References
    - OWASP: [Link]
-   - Original Report: .bmad/output/security-reports/story-XXX-security-report.md
+   - Original Report: {output_folder}/security-reports/story-XXX-security-report.md
    ```
 
 ### Step 6: Review Security Report
 
 **Action:** Display security report summary to user
 
-**Report Location:** `.bmad/output/security-reports/story-{ID}-security-report.md`
+**Report Location:** `{output_folder}/security-reports/story-{ID}-security-report.md`
 
 **Display:**
 ```
@@ -216,7 +216,7 @@ NEXT STEPS:
   - {Re-test after fixes}
   - {Update security documentation}
 
-Full Report: .bmad/output/security-reports/story-{ID}-security-report.md
+Full Report: {output_folder}/security-reports/story-{ID}-security-report.md
 ```
 
 ### Step 7: Handle Results
@@ -267,14 +267,14 @@ Use AskUserQuestion:
 - Medium: {X}
 - Low: {X}
 
-**Report**: .bmad/output/security-reports/story-{ID}-security-report.md
+**Report**: {output_folder}/security-reports/story-{ID}-security-report.md
 
 **Deployment Decision**: {APPROVED/BLOCKED/CONDITIONAL}
 ```
 
 ### Step 9: Update Sprint Status
 
-**Action:** Update `.bmad/sprint-status.yaml`
+**Action:** Update `{sprint_artifacts}/sprint-status.yaml`
 
 **If security testing passed:**
 ```yaml
@@ -296,22 +296,22 @@ story-{ID}:
 ## Output Files
 
 **Security Report:**
-- `.bmad/output/security-reports/story-{ID}-security-report.md`
+- `{output_folder}/security-reports/story-{ID}-security-report.md`
 - Comprehensive vulnerability assessment
 - Proof of concepts for each finding
 - Remediation guidance
 
 **Fix Stories (if issues found):**
-- `.bmad/stories/story-{ID}-fix-{vulnerability}.md`
+- `{sprint_artifacts}/stories/story-{ID}-fix-{vulnerability}.md`
 - One story per Critical/High issue
 - Contains remediation steps
 
 **Updated Story:**
-- `.bmad/stories/story-{ID}.md`
+- `{sprint_artifacts}/stories/story-{ID}.md`
 - Appended security test results
 
 **Updated Sprint Status:**
-- `.bmad/sprint-status.yaml`
+- `{sprint_artifacts}/sprint-status.yaml`
 - Reflects security testing status
 
 ## Configuration
@@ -484,7 +484,7 @@ FINDINGS:
 DEPLOYMENT DECISION: BLOCKED
 
 Fix story created: story-006-fix-jwt-secret.md
-Report: .bmad/output/security-reports/story-005-security-report.md
+Report: {output_folder}/security-reports/story-005-security-report.md
 ```
 
 ### Example 2: Test User Profile API

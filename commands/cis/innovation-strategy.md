@@ -58,7 +58,7 @@ The agent will guide through:
 
 ### Step 4: Generate Output Document
 
-Create innovation strategy document in `.bmad/output/innovation-strategy-[date].md` with:
+Create innovation strategy document in `{output_folder}/innovation-strategy-[date].md` with:
 - Strategic context and challenge
 - Market analysis and competitive insights
 - Current business model assessment
@@ -71,11 +71,11 @@ Create innovation strategy document in `.bmad/output/innovation-strategy-[date].
 ### Step 5: Confirm Completion
 
 Inform the user:
-"Innovation strategy complete! Your strategic analysis has been saved to `.bmad/output/innovation-strategy-[date].md`"
+"Innovation strategy complete! Your strategic analysis has been saved to `{output_folder}/innovation-strategy-[date].md`"
 
 ## Output Files
 
-- `.bmad/output/innovation-strategy-[date].md` - Comprehensive innovation strategy document
+- `{output_folder}/innovation-strategy-[date].md` - Comprehensive innovation strategy document
 
 ## Examples
 

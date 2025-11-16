@@ -37,7 +37,7 @@ The workflow automatically detects project type (web, mobile, backend, CLI, libr
 - **Exhaustive Scan** (30-120 min): Reads all source files
 
 ### Comprehensive Output
-Creates structured documentation in `.bmad/output/`:
+Creates structured documentation in `{output_folder}/`:
 - `index.md` - Master documentation index
 - `project-overview.md` - Architecture and structure
 - `source-tree.md` - Directory tree with descriptions
@@ -55,7 +55,7 @@ Creates structured documentation in `.bmad/output/`:
 Read the state file to check for existing work:
 
 ```bash
-cat .bmad/output/project-scan-report.json
+cat {output_folder}/project-scan-report.json
 ```
 
 **The state file contains:**
@@ -87,7 +87,7 @@ questions:
 - Skip project detection (already done)
 
 **If starting fresh:**
-- Archive old state to `.bmad/output/.archive/project-scan-report-[timestamp].json`
+- Archive old state to `{output_folder}/.archive/project-scan-report-[timestamp].json`
 - Proceed to Step 2
 
 ---
@@ -134,7 +134,7 @@ The workflow can run standalone, but typically runs after:
 Check if documentation already exists:
 
 ```bash
-ls -la .bmad/output/index.md
+ls -la {output_folder}/index.md
 ```
 
 **If `index.md` exists:**
@@ -204,7 +204,7 @@ questions:
 
 **Initialize state file:**
 
-Create `.bmad/output/project-scan-report.json`:
+Create `{output_folder}/project-scan-report.json`:
 
 ```json
 {
@@ -628,7 +628,7 @@ Use the Task tool with `subagent_type: bmad-tech-writer`:
 
 > Using all collected data from the project scan, generate comprehensive documentation:
 >
-> **Files to create in `.bmad/output/`:**
+> **Files to create in `{output_folder}/`:**
 >
 > 1. **`index.md`** - Master documentation index linking all generated docs
 > 2. **`project-overview.md`** - High-level architecture, tech stack, structure summary
@@ -716,7 +716,7 @@ Use Task tool with workflow-status:
 **Documentation Generated:**
 - Mode: [workflow_mode]
 - Scan Level: [scan_level]
-- Output: `.bmad/output/index.md` and [N] related files
+- Output: `{output_folder}/index.md` and [N] related files
 
 **Project Classification:**
 - Repository Type: [monolith/monorepo/multi-part]
@@ -724,7 +724,7 @@ Use Task tool with workflow-status:
 - Parts Documented: [count]
 
 **Next Steps:**
-- Review generated documentation in `.bmad/output/`
+- Review generated documentation in `{output_folder}/`
 - Use for brownfield PRD creation with `prd` workflow
 - Reference during architecture and implementation
 
@@ -753,9 +753,9 @@ Use Task tool with workflow-status:
 **Read existing documentation:**
 
 ```bash
-cat .bmad/output/index.md
-cat .bmad/output/project-overview.md
-cat .bmad/output/source-tree.md
+cat {output_folder}/index.md
+cat {output_folder}/project-overview.md
+cat {output_folder}/source-tree.md
 ```
 
 **Extract project structure to understand available areas.**
@@ -969,7 +969,7 @@ Use Task tool with `subagent_type: bmad-tech-writer`:
 
 > Create comprehensive deep-dive documentation for: **[target_name]**
 >
-> **Output file:** `.bmad/output/deep-dive-[sanitized_target_name].md`
+> **Output file:** `{output_folder}/deep-dive-[sanitized_target_name].md`
 >
 > **Include all sections:**
 > 1. Overview and Purpose
@@ -1044,7 +1044,7 @@ Detailed exhaustive analysis of specific areas:
 
 ## Deep-Dive Documentation Complete! ✓
 
-**Generated:** `.bmad/output/deep-dive-[target_name].md`
+**Generated:** `{output_folder}/deep-dive-[target_name].md`
 **Files Analyzed:** [file_count]
 **Lines of Code Scanned:** [total_loc]
 **Time Taken:** ~[duration]
@@ -1057,7 +1057,7 @@ Detailed exhaustive analysis of specific areas:
 - Related code and reuse opportunities
 - Implementation guidance
 
-**Index Updated:** `.bmad/output/index.md` now includes link to this deep-dive
+**Index Updated:** `{output_folder}/index.md` now includes link to this deep-dive
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -1093,7 +1093,7 @@ questions:
 
 ### State File Schema
 
-`.bmad/output/project-scan-report.json`:
+`{output_folder}/project-scan-report.json`:
 
 ```json
 {
@@ -1162,7 +1162,7 @@ questions:
 ### Generated Documentation Structure
 
 ```
-.bmad/output/
+{output_folder}/
 ├── index.md                          # Master index (ALWAYS generated)
 ├── project-overview.md               # High-level architecture
 ├── source-tree.md                    # Annotated directory tree

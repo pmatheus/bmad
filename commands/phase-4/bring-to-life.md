@@ -28,9 +28,9 @@ This workflow creates a **fully automated development pipeline** that:
 - [ ] At least one story in backlog status
 
 **Required files:**
-- `.bmad/config.yaml` - Project configuration
-- `.bmad/sprint-artifacts/sprint-status.yaml` - Story tracking
-- `.bmad/epics.md` OR `.bmad/epics/epic-{N}.md` - Epic files with stories
+- `.bmad/config.yaml` - Project configuration (fixed location)
+- `{sprint_artifacts}/sprint-status.yaml` - Story tracking
+- `{output_folder}/epics.md` OR `{output_folder}/epics/epic-{N}.md` - Epic files with stories
 
 ## How It Works
 
@@ -90,7 +90,7 @@ development_status:
 
 When context drops below 20%:
 1. Update sprint-status.yaml with current story states
-2. Create progress checkpoint: `.bmad/sprint-artifacts/bring-to-life-checkpoint.md`
+2. Create progress checkpoint: `{sprint_artifacts}/bring-to-life-checkpoint.md`
 3. Log completed stories count
 4. Log remaining stories count
 5. Provide clear resumption instructions
@@ -169,8 +169,8 @@ Read project configuration from `.bmad/config.yaml`:
 ```
 
 **Verify required files exist:**
-- `.bmad/sprint-artifacts/sprint-status.yaml`
-- `.bmad/epics.md` OR `.bmad/epics/epic-{N}.md`
+- `{sprint_artifacts}/sprint-status.yaml`
+- `{output_folder}/epics.md` OR `{output_folder}/epics/epic-{N}.md`
 
 **If prerequisites missing:**
 ```
@@ -187,7 +187,7 @@ Missing required files. Please run:
 
 **Check for existing checkpoint:**
 
-File: `.bmad/sprint-artifacts/bring-to-life-checkpoint.md`
+File: `{sprint_artifacts}/bring-to-life-checkpoint.md`
 
 **If checkpoint exists:**
 - Read checkpoint file
@@ -372,12 +372,19 @@ Execute complete story lifecycle for story: {story_1_key}
 
 2. EXECUTE LIFECYCLE:
    a. Run /bmad:phase-4:create-story for {story_1_key}
+      → Verify status changed to "drafted"
+
    b. Run /bmad:phase-4:story-context for {story_1_key}
-   c. Run /bmad:phase-4:dev-story for {story_1_key}
-      (dev-story auto-continues to code-review)
-   d. Handle review outcome:
+      → This will auto-continue through the complete lifecycle:
+         - story-context generates context and auto-continues to dev-story
+         - dev-story implements story and auto-continues to code-review
+         - code-review evaluates and determines outcome
+      → CRITICAL: Wait for the entire auto-continue chain to complete
+      → DO NOT manually run dev-story - it's auto-triggered by story-context
+
+   c. Handle review outcome (after auto-continue chain completes):
       - APPROVED: Run /bmad:phase-4:story-done
-      - CHANGES: Re-run dev-story, then re-review
+      - CHANGES: Re-run dev-story to address action items, then re-review
       - BLOCKED: Report blocker, stop
 
 3. RELEASE LOCK: Update sprint-status.yaml:
@@ -501,7 +508,7 @@ Execute: `/bmad:phase-4:create-story`
 - Update status: backlog → drafted
 
 **Expected outcome:**
-- Story file created: `.bmad/sprint-artifacts/stories/{story_key}.md`
+- Story file created: `{sprint_artifacts}/stories/{story_key}.md`
 - Status updated to "drafted"
 
 **If error:**
@@ -509,93 +516,90 @@ Execute: `/bmad:phase-4:create-story`
 - Skip this story
 - Continue to next story
 
-#### 5B: Generate Story Context
+#### 5B: Generate Story Context (Auto-Continues Through Full Lifecycle)
 
 Execute: `/bmad:phase-4:story-context`
 
-**This workflow will:**
-- Load drafted story
-- Collect relevant documentation
-- Analyze existing code
-- Gather dependencies
-- Generate Story Context XML
-- Update status: drafted → ready-for-dev
+**CRITICAL UNDERSTANDING: This single command triggers the complete story lifecycle:**
 
-**Expected outcome:**
-- Context file created: `.bmad/sprint-artifacts/stories/{story_key}.context.xml`
-- Status updated to "ready-for-dev"
+1. **story-context workflow:**
+   - Load drafted story
+   - Collect relevant documentation
+   - Analyze existing code
+   - Gather dependencies
+   - Generate Story Context XML
+   - Update status: drafted → ready-for-dev
+   - **AUTO-CONTINUE to dev-story** (no manual intervention)
 
-**Critical:** Story Context prevents hallucinations and ensures code reuse
+2. **dev-story workflow (auto-triggered):**
+   - Load story and context
+   - Mark story in-progress
+   - Implement all tasks continuously
+   - Write tests
+   - Validate against ACs
+   - Update status: ready-for-dev → review (when complete)
+   - **AUTO-CONTINUE to code-review** (no manual intervention)
+
+3. **code-review workflow (auto-triggered):**
+   - Systematic AC validation
+   - Task completion verification
+   - Security and quality review
+   - Generate findings and action items
+   - Determine outcome: APPROVE, CHANGES REQUESTED, or BLOCKED
+
+**Expected outcome (after full auto-continue chain):**
+- Context file created: `{sprint_artifacts}/stories/{story_key}.context.xml`
+- Story implemented with tests
+- Code review completed
+- Status: "review" (awaiting story-done) or "in-progress" (if changes requested)
+
+**Critical:**
+- Story Context prevents hallucinations and ensures code reuse
+- DO NOT manually call dev-story after story-context - it's auto-triggered
+- The entire chain (context → dev → review) runs automatically
 
 **If error:**
 - Log error to checkpoint
 - Skip this story
 - Continue to next story
 
-#### 5C: Implement Story
+#### 5C: Handle Review Outcome (After Auto-Continue Chain)
 
-Execute: `/bmad:phase-4:dev-story`
+**Note:** This step happens AFTER the auto-continue chain completes (story-context → dev-story → code-review).
 
-**This workflow will:**
-- Load story and context
-- Mark story in-progress
-- Implement all tasks continuously
-- Write tests
-- Validate against ACs
-- Update status: ready-for-dev → review (when complete)
-- **Auto-continue to code-review** (built into dev-story)
+**Review Outcome Handling:**
 
-**Expected outcome:**
-- Story implemented
-- Tests passing
-- Status updated to "review"
-- Code review automatically triggered
-
-**If blocker encountered:**
-- Developer agent will report blocker
-- Log blocker to checkpoint
-- **Decision point:**
-  - If blocker is critical (missing info, ambiguous requirement):
-    - Save checkpoint
-    - Exit loop
-    - Notify user of blocker
-  - If blocker is minor (test failure, fixable issue):
-    - Attempt to resolve
-    - Continue if resolved
-
-#### 5D: Code Review (Auto-triggered by dev-story)
-
-**Note:** Code review is automatically triggered by dev-story workflow
-
-Execute: `/bmad:phase-4:code-review`
-
-**This workflow will:**
-- Systematic AC validation
-- Task completion verification
-- Security and quality review
-- Generate findings and action items
-- Determine outcome: APPROVE, CHANGES REQUESTED, or BLOCKED
-
-**Expected outcomes:**
+After the auto-continue chain (story-context → dev-story → code-review) completes, handle the code review outcome:
 
 **If APPROVED:**
-- Status: review → done (ready for story-done)
-- Proceed to Step 5E
+- Status: review → ready for story-done
+- Proceed to Step 5D (story-done)
+- Story is complete!
 
 **If CHANGES REQUESTED:**
 - Status: review → in-progress
-- Action items added to story file
-- **Auto-continue:** Re-run dev-story to address action items
-- Loop back to Step 5C
+- Action items added to story file by code-review
+- Re-run dev-story to address action items
+- Dev-story will auto-continue to code-review again
+- Repeat until APPROVED or BLOCKED
 
 **If BLOCKED:**
 - Status: stays "review"
 - High severity blockers logged
-- Save checkpoint
-- Exit loop
-- Notify user of blockers
+- Critical blocker (missing info, ambiguous requirement):
+  - Save checkpoint
+  - Exit loop
+  - Notify user of blocker
+- Minor blocker (test failure, fixable issue):
+  - Attempt to resolve
+  - Continue if resolved
 
-#### 5E: Mark Story Done (If Approved)
+**Maximum iterations:** 3 review cycles per story
+- If story still not approved after 3 cycles → Mark as BLOCKED
+- Log to checkpoint
+- Skip to next story
+
+#### 5D: Mark Story Done (If Approved)
 
 **Only if code review outcome = APPROVED:**
 
@@ -639,29 +643,11 @@ Remaining context: {remaining_percentage}%
 ✅ Story {story_key} complete - continuing to next story...
 ```
 
-### Step 7: Handle Review Feedback Loop
-
-**If code review requests changes:**
-
-1. **Parse action items** from review notes
-2. **Re-run dev-story** to address action items
-   - Developer agent will detect code review continuation
-   - Prioritize review action items
-   - Implement fixes
-   - Re-run tests
-3. **Re-run code-review** for re-review
-4. **Repeat until APPROVED or BLOCKED**
-
-**Maximum iterations:** 3 review cycles per story
-- If story still not approved after 3 cycles → Mark as BLOCKED
-- Log to checkpoint
-- Skip to next story
-
-### Step 8: Save Progress Checkpoint
+### Step 7: Save Progress Checkpoint
 
 **When context < 20% or blocker encountered:**
 
-Create checkpoint file: `.bmad/sprint-artifacts/bring-to-life-checkpoint.md`
+Create checkpoint file: `{sprint_artifacts}/bring-to-life-checkpoint.md`
 
 **Checkpoint structure:**
 
@@ -724,7 +710,7 @@ To resume the bring-to-life workflow:
 
 **Save checkpoint file**
 
-### Step 9: Report Session Summary
+### Step 8: Report Session Summary
 
 **Display final summary:**
 
@@ -781,7 +767,7 @@ Required action:
 After resolving blocker:
 - Re-run: /bmad:phase-4:bring-to-life to resume
 
-**Checkpoint saved:** .bmad/sprint-artifacts/bring-to-life-checkpoint.md
+**Checkpoint saved:** {sprint_artifacts}/bring-to-life-checkpoint.md
 ```
 
 ## Key Principles
@@ -1043,7 +1029,7 @@ Before any step, analyze:
    3. Workflow will resume from checkpoint
    4. Remaining 3 stories will complete in final batch
 
-   Checkpoint saved: .bmad/sprint-artifacts/bring-to-life-checkpoint.md
+   Checkpoint saved: {sprint_artifacts}/bring-to-life-checkpoint.md
    ```
 
 **User action:** Clear conversation, re-run workflow to complete remaining 3 stories
@@ -1261,7 +1247,7 @@ Starting fresh bring-to-life workflow
 **Solutions:**
 1. **Check checkpoint file exists:**
    ```bash
-   cat .bmad/sprint-artifacts/bring-to-life-checkpoint.md
+   cat {sprint_artifacts}/bring-to-life-checkpoint.md
    ```
 2. **Verify sprint-status.yaml** has correct story statuses
 3. **Re-run sprint-planning** to refresh tracking
@@ -1320,13 +1306,13 @@ bmad_folder: .bmad
 ```
 
 **Checkpoint file:**
-- `.bmad/sprint-artifacts/bring-to-life-checkpoint.md`
+- `{sprint_artifacts}/bring-to-life-checkpoint.md`
 
 **Story files:**
-- `.bmad/sprint-artifacts/stories/{story-key}.md`
+- `{sprint_artifacts}/stories/{story-key}.md`
 
 **Sprint status:**
-- `.bmad/sprint-artifacts/sprint-status.yaml`
+- `{sprint_artifacts}/sprint-status.yaml`
 
 ---
 

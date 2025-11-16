@@ -28,8 +28,8 @@ Before running this workflow:
 - [ ] Epics created (`/bmad:phase-2:create-epics-and-stories`)
 
 **Required files:**
-- `.bmad/config.yaml` - Project configuration
-- `.bmad/epics.md` OR `.bmad/epics/epic-{N}.md` - Epic files with stories
+- `.bmad/config.yaml` - Project configuration (fixed location)
+- `{output_folder}/epics.md` OR `{output_folder}/epics/epic-{N}.md` - Epic files with stories
 
 ## How It Works
 
@@ -38,8 +38,8 @@ Before running this workflow:
 **Find epic files:**
 
 Priority order:
-1. Whole document: `.bmad/epics.md`
-2. Sharded documents: `.bmad/epics/index.md` + all epic files
+1. Whole document: `{output_folder}/epics.md`
+2. Sharded documents: `{output_folder}/epics/index.md` + all epic files
 
 **Extract work items:**
 
@@ -56,14 +56,14 @@ From epic files, extract:
 ### Intelligent Status Detection
 
 **For each epic:**
-- Check if tech spec exists: `.bmad/sprint-artifacts/tech-spec-epic-{N}.md`
+- Check if tech spec exists: `{sprint_artifacts}/tech-spec-epic-{N}.md`
 - If exists → status: `contexted`
 - If not → status: `backlog`
 
 **For each story:**
-- Check if story file exists: `.bmad/sprint-artifacts/stories/{story-key}.md`
+- Check if story file exists: `{sprint_artifacts}/stories/{story-key}.md`
   - If exists → upgrade to at least `drafted`
-- Check if context exists: `.bmad/sprint-artifacts/stories/{story-key}.context.xml`
+- Check if context exists: `{sprint_artifacts}/stories/{story-key}.context.xml`
   - If exists → upgrade to at least `ready-for-dev`
 
 **Preservation rule:**
@@ -95,7 +95,7 @@ optional ↔ completed
 # project: My Project
 # project_key: my-project
 # tracking_system: file-system
-# story_location: .bmad/sprint-artifacts/stories
+# story_location: {sprint_artifacts}/stories
 
 # STATUS DEFINITIONS:
 # [Full definitions included for reference]
@@ -104,7 +104,7 @@ generated: 2025-11-13
 project: My Project
 project_key: my-project
 tracking_system: file-system
-story_location: .bmad/sprint-artifacts/stories
+story_location: {sprint_artifacts}/stories
 
 development_status:
   epic-1: contexted
@@ -140,15 +140,15 @@ Read project configuration from `.bmad/config.yaml`:
 **Search for epic files:**
 
 Priority order:
-1. **Whole document:** `.bmad/epics.md` OR `.bmad/bmm-epics.md`
-2. **Sharded documents:** `.bmad/epics/index.md`
+1. **Whole document:** `{output_folder}/epics.md` OR `{output_folder}/bmm-epics.md`
+2. **Sharded documents:** `{output_folder}/epics/index.md`
 
 **If whole document found:**
 - Read entire file
 - Process all epics and stories
 
 **If sharded version found:**
-- Read `.bmad/epics/index.md`
+- Read `{output_folder}/epics/index.md`
 - Read ALL epic section files (e.g., `epic-1.md`, `epic-2.md`, etc.)
 - Combine content
 
@@ -230,7 +230,7 @@ Conversion:
 Check if epic tech spec exists:
 
 ```
-.bmad/sprint-artifacts/tech-spec-epic-{epic_num}.md
+{sprint_artifacts}/tech-spec-epic-{epic_num}.md
 ```
 
 - If file exists → status: `contexted`
@@ -242,21 +242,21 @@ Start with default: `backlog`
 
 **Check 1: Story file exists?**
 ```
-.bmad/sprint-artifacts/stories/{story-key}.md
+{sprint_artifacts}/stories/{story-key}.md
 ```
 
 If exists → upgrade to `drafted` (if not already higher)
 
 **Check 2: Story context exists?**
 ```
-.bmad/sprint-artifacts/stories/{story-key}.context.xml
+{sprint_artifacts}/stories/{story-key}.context.xml
 ```
 
 If exists → upgrade to `ready-for-dev` (if not already higher)
 
 **Check 3: Existing status file?**
 
-If `.bmad/sprint-artifacts/sprint-status.yaml` exists:
+If `{sprint_artifacts}/sprint-status.yaml` exists:
 - Read existing status for this story
 - If existing status is more advanced, keep it
 - Never downgrade
@@ -317,7 +317,7 @@ development_status:
 
 ### Step 6: Generate Sprint Status File
 
-**File path:** `.bmad/sprint-artifacts/sprint-status.yaml`
+**File path:** `{sprint_artifacts}/sprint-status.yaml`
 
 **Full structure:**
 
@@ -326,7 +326,7 @@ development_status:
 # project: {project_name}
 # project_key: {project_key}
 # tracking_system: file-system
-# story_location: .bmad/sprint-artifacts/stories
+# story_location: {sprint_artifacts}/stories
 
 # STATUS DEFINITIONS:
 # ==================
@@ -357,7 +357,7 @@ generated: {current_date}
 project: {project_name}
 project_key: {project_key or project_name_kebab}
 tracking_system: file-system
-story_location: .bmad/sprint-artifacts/stories
+story_location: {sprint_artifacts}/stories
 
 development_status:
   {epic entries in order}
@@ -379,7 +379,7 @@ development_status:
    - Keep STATUS DEFINITIONS
    - Keep WORKFLOW NOTES
 
-**Write to file:** `.bmad/sprint-artifacts/sprint-status.yaml`
+**Write to file:** `{sprint_artifacts}/sprint-status.yaml`
 
 ### Step 7: Validate and Report
 
@@ -412,7 +412,7 @@ development_status:
 ```
 ✅ Sprint Status Generated Successfully
 
-**File Location:** .bmad/sprint-artifacts/sprint-status.yaml
+**File Location:** {sprint_artifacts}/sprint-status.yaml
 
 **Inventory:**
 - Total Epics: {total_epics}
@@ -570,7 +570,7 @@ development_status:
 **Workflow execution:**
 
 1. **Find epic files:**
-   - Found: `.bmad/epics.md` (whole document)
+   - Found: `{output_folder}/epics.md` (whole document)
    - Load entire file
 
 2. **Parse epics:**
@@ -598,7 +598,7 @@ development_status:
    generated: 2025-11-13
    project: SaaS Analytics Platform
    tracking_system: file-system
-   story_location: .bmad/sprint-artifacts/stories
+   story_location: {sprint_artifacts}/stories
 
    development_status:
      epic-1: backlog
@@ -646,7 +646,7 @@ development_status:
 **Workflow execution:**
 
 1. **Find epic files:**
-   - Found: `.bmad/epics/index.md` (sharded)
+   - Found: `{output_folder}/epics/index.md` (sharded)
    - Load all: epic-1.md through epic-5.md
 
 2. **Parse epics:**
@@ -679,7 +679,7 @@ development_status:
    generated: 2025-11-13
    project: Healthcare Patient Portal
    tracking_system: file-system
-   story_location: .bmad/sprint-artifacts/stories
+   story_location: {sprint_artifacts}/stories
 
    development_status:
      epic-1: contexted
@@ -744,7 +744,7 @@ development_status:
 **Workflow execution:**
 
 1. **Find epic files:**
-   - Found: `.bmad/epics.md` (updated with Epic 3)
+   - Found: `{output_folder}/epics.md` (updated with Epic 3)
 
 2. **Parse epics:**
    - Epic 1: Workout Tracking (6 stories) - all done
@@ -767,7 +767,7 @@ development_status:
    generated: 2025-11-13
    project: Fitness Tracker
    tracking_system: file-system
-   story_location: .bmad/sprint-artifacts/stories
+   story_location: {sprint_artifacts}/stories
 
    development_status:
      epic-1: contexted
@@ -958,8 +958,8 @@ bmad_folder: .bmad
 ```
 
 **Output file:**
-- `.bmad/sprint-artifacts/sprint-status.yaml`
+- `{sprint_artifacts}/sprint-status.yaml`
 
 **Input files:**
-- `.bmad/epics.md` (whole document)
-- OR `.bmad/epics/epic-*.md` (sharded)
+- `{output_folder}/epics.md` (whole document)
+- OR `{output_folder}/epics/epic-*.md` (sharded)

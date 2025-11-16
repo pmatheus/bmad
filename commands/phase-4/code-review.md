@@ -30,10 +30,10 @@ Before running this workflow:
 - [ ] Epic tech spec available (for architecture validation)
 
 **For story review mode:**
-- `.bmad/sprint-artifacts/sprint-status.yaml` - Story tracking
-- `.bmad/sprint-artifacts/stories/{story-key}.md` - Story file with status "review"
-- `.bmad/sprint-artifacts/stories/{story-key}.context.xml` - Story context
-- `.bmad/sprint-artifacts/tech-spec-epic-{N}.md` - Epic specification
+- `{sprint_artifacts}/sprint-status.yaml` - Story tracking
+- `{sprint_artifacts}/stories/{story-key}.md` - Story file with status "review"
+- `{sprint_artifacts}/stories/{story-key}.context.xml` - Story context
+- `{sprint_artifacts}/tech-spec-epic-{N}.md` - Epic specification
 
 **For ad-hoc review mode:**
 - Code files to review
@@ -119,7 +119,7 @@ Read project configuration from `.bmad/config.yaml`:
 
 **Read sprint status file:**
 
-Look for: `.bmad/sprint-artifacts/sprint-status.yaml` OR `.bmad/sprint-status.yaml`
+Look for: `{sprint_artifacts}/sprint-status.yaml` OR `{sprint_artifacts}/sprint-status.yaml`
 
 **Find first story with status "review":**
 
@@ -185,7 +185,7 @@ Set `ad_hoc_review_mode = true` and skip to Step 4 (validation) with custom scop
 
 **If story found:**
 - Store `story_key`
-- Find story file: `.bmad/sprint-artifacts/stories/{story_key}.md`
+- Find story file: `{sprint_artifacts}/stories/{story_key}.md`
 - Read COMPLETE story file
 
 ### Step 3: Parse Story File and Load Context
@@ -213,7 +213,7 @@ Set `ad_hoc_review_mode = true` and skip to Step 4 (validation) with custom scop
 
 From Dev Agent Record → Context Reference, read path(s).
 
-If missing, search for: `.bmad/sprint-artifacts/stories/{epic}-{story}-*.context.xml`
+If missing, search for: `{sprint_artifacts}/stories/{epic}-{story}-*.context.xml`
 
 **If no context file found:**
 ```
@@ -225,7 +225,7 @@ Continuing review, but context is limited.
 
 **Locate epic tech spec:**
 
-Search `.bmad/sprint-artifacts/tech-spec-epic-{epic_num}.md`
+Search `{sprint_artifacts}/tech-spec-epic-{epic_num}.md`
 
 **If no tech spec found:**
 ```
@@ -690,7 +690,7 @@ Output: `Review saved to: .bmad/code-review-{date}.md`
 
 **Update story file:**
 
-File: `.bmad/sprint-artifacts/stories/{story_key}.md`
+File: `{sprint_artifacts}/stories/{story_key}.md`
 
 **Append new section at end:**
 
@@ -733,7 +733,7 @@ File: `.bmad/sprint-artifacts/stories/{story_key}.md`
 
 **Update sprint-status.yaml:**
 
-File: `.bmad/sprint-artifacts/sprint-status.yaml` OR `.bmad/sprint-status.yaml`
+File: `{sprint_artifacts}/sprint-status.yaml` OR `{sprint_artifacts}/sprint-status.yaml`
 
 1. Load FULL file
 2. Find `development_status[{story_key}]`
@@ -1377,15 +1377,15 @@ bmad_folder: .bmad
 ```
 
 **Story files:**
-- Location: `.bmad/sprint-artifacts/stories/`
+- Location: `{sprint_artifacts}/stories/`
 - Format: `{epic}-{story}-{name}.md`
 - Must have status "review"
 
 **Context files:**
-- `.bmad/sprint-artifacts/stories/{story-key}.context.xml`
+- `{sprint_artifacts}/stories/{story-key}.context.xml`
 
 **Tech specs:**
-- `.bmad/sprint-artifacts/tech-spec-epic-{N}.md`
+- `{sprint_artifacts}/tech-spec-epic-{N}.md`
 
 **Ad-hoc reviews:**
 - Output: `.bmad/code-review-{date}.md`

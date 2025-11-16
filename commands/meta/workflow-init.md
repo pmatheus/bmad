@@ -30,8 +30,19 @@ This creates `.bmad/config.yaml` in your project.
 Read configuration from `.bmad/config.yaml`:
 ```yaml
 output_folder: bmad-output
+sprint_artifacts: bmad-output/sprint-artifacts
+bmad_folder: .bmad
+document_output_language: "English"
+communication_language: "English"
 user_name: Your Name
+project_name: "My Project"
+user_skill_level: "intermediate"
 ```
+
+**Validation:**
+- Verify `.bmad/config.yaml` exists
+- Verify required fields present: `output_folder`, `document_output_language`
+- If config incomplete, warn user to reinstall BMAD plugin
 
 Store these values for use throughout the workflow.
 

@@ -51,7 +51,7 @@ Read `.bmad/config.yaml` to get:
 **Load sprint status file:**
 
 Read the sprint status file from either:
-- `.bmad/sprint-artifacts/sprint-status.yaml` (primary)
+- `{sprint_artifacts}/sprint-status.yaml` (primary)
 - `{output_folder}/sprint-status.yaml` (fallback)
 
 **Detect completed epic:**
@@ -146,7 +146,7 @@ Charlie (Senior Dev): "Good idea - those dev notes always have gold in them."
 
 **For each story in epic, read the complete story file:**
 
-Read all story files matching pattern: `.bmad/sprint-artifacts/{epic_number}-*-*.md`
+Read all story files matching pattern: `{sprint_artifacts}/{epic_number}-*-*.md`
 
 **Extract and analyze from each story:**
 
@@ -222,7 +222,7 @@ prev_epic_num = epic_number - 1
 **If prev_epic_num >= 1:**
 
 Search for previous retrospective file:
-- Pattern: `.bmad/sprint-artifacts/epic-{prev_epic_num}-retro-*.md`
+- Pattern: `{sprint_artifacts}/epic-{prev_epic_num}-retro-*.md`
 
 **If previous retro found:**
 
@@ -360,7 +360,7 @@ Set next_epic_exists = false
 
 **Load agent manifest:**
 
-Read `.bmad/_cfg/agent-manifest.csv` to identify which agents participated in Epic {epic_number}.
+Read `{bmad_folder}/_cfg/agent-manifest.csv` to identify which agents participated in Epic {epic_number}.
 
 **Ensure key roles present:**
 - Product Owner
@@ -1192,7 +1192,7 @@ Bob (Scrum Master): "See you all when prep work is done. Meeting adjourned!"
 
 **Ensure retrospectives folder exists:**
 
-Check if `.bmad/sprint-artifacts/` folder exists. Create if needed.
+Check if `{sprint_artifacts}/` folder exists. Create if needed.
 
 **Generate comprehensive retrospective summary document including:**
 
@@ -1214,14 +1214,14 @@ Check if `.bmad/sprint-artifacts/` folder exists. Create if needed.
 
 **Set filename:**
 
-Use format: `.bmad/sprint-artifacts/epic-{epic_number}-retro-{YYYY-MM-DD}.md`
+Use format: `{sprint_artifacts}/epic-{epic_number}-retro-{YYYY-MM-DD}.md`
 
-Example: `.bmad/sprint-artifacts/epic-1-retro-2025-01-14.md`
+Example: `{sprint_artifacts}/epic-1-retro-2025-01-14.md`
 
 **Save retrospective document using Write tool.**
 
 ```
-✅ Retrospective document saved: .bmad/sprint-artifacts/epic-{epic_number}-retro-{date}.md
+✅ Retrospective document saved: {sprint_artifacts}/epic-{epic_number}-retro-{date}.md
 ```
 
 **Update sprint status file:**
@@ -1259,7 +1259,7 @@ Present final summary:
 **Epic Review:**
 - Epic {epic_number}: {epic_title} reviewed
 - Retrospective Status: completed
-- Retrospective saved: .bmad/sprint-artifacts/epic-{epic_number}-retro-{date}.md
+- Retrospective saved: {sprint_artifacts}/epic-{epic_number}-retro-{date}.md
 
 **Commitments Made:**
 - Action Items: {action_count}
@@ -1268,7 +1268,7 @@ Present final summary:
 
 **Next Steps:**
 
-1. **Review retrospective summary**: .bmad/sprint-artifacts/epic-{epic_number}-retro-{date}.md
+1. **Review retrospective summary**: {sprint_artifacts}/epic-{epic_number}-retro-{date}.md
 
 2. **Execute preparation sprint** (Est: {prep_days} days)
    - Complete {critical_count} critical path items
@@ -1324,7 +1324,7 @@ Charlie (Senior Dev): "Time to knock out that prep work."
 6. **Preparation:** Team identifies need for auth refactoring (4 hours), testing infrastructure (6 hours) before Epic 2
 7. **Action items:** 3 process improvements, 2 tech debt items, 1 documentation need
 8. **Readiness check:** Testing complete, deployed to staging, stakeholders happy, no blockers
-9. **Save:** Retrospective document saved to `.bmad/sprint-artifacts/epic-1-retro-2025-01-14.md`
+9. **Save:** Retrospective document saved to `{sprint_artifacts}/epic-1-retro-2025-01-14.md`
 
 **Outcome:** Team has clear preparation plan (10 hours work) and 6 action items before starting Epic 2.
 
@@ -1401,11 +1401,11 @@ Charlie (Senior Dev): "Time to knock out that prep work."
 - Prefer "Add error handling validation to PR checklist by next sprint"
 
 **File locations:**
-- Sprint status: `.bmad/sprint-artifacts/sprint-status.yaml` or `{output_folder}/sprint-status.yaml`
-- Story files: `.bmad/sprint-artifacts/{epic_number}-{story_number}-*.md`
+- Sprint status: `{sprint_artifacts}/sprint-status.yaml` or `{output_folder}/sprint-status.yaml`
+- Story files: `{sprint_artifacts}/{epic_number}-{story_number}-*.md`
 - Epic files: `{output_folder}/*epic*/epic-{epic_number}.md` (sharded) or `{output_folder}/*epic*.md` (whole)
-- Previous retro: `.bmad/sprint-artifacts/epic-{prev_epic_num}-retro-*.md`
-- Output retro: `.bmad/sprint-artifacts/epic-{epic_number}-retro-{YYYY-MM-DD}.md`
+- Previous retro: `{sprint_artifacts}/epic-{prev_epic_num}-retro-*.md`
+- Output retro: `{sprint_artifacts}/epic-{epic_number}-retro-{YYYY-MM-DD}.md`
 
 ## Troubleshooting
 
@@ -1452,5 +1452,5 @@ Charlie (Senior Dev): "Time to knock out that prep work."
 
 ## Output Files
 
-- `.bmad/sprint-artifacts/epic-{epic_number}-retro-{YYYY-MM-DD}.md` - Comprehensive retrospective summary
-- `.bmad/sprint-artifacts/sprint-status.yaml` - Updated with retrospective marked as "done"
+- `{sprint_artifacts}/epic-{epic_number}-retro-{YYYY-MM-DD}.md` - Comprehensive retrospective summary
+- `{sprint_artifacts}/sprint-status.yaml` - Updated with retrospective marked as "done"

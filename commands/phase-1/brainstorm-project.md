@@ -38,7 +38,20 @@ Facilitates interactive brainstorming sessions specifically for software/product
 
 ## Instructions
 
-### Step 1: Choose Your Approach
+### Step 1: Load Configuration
+
+Read configuration from `.bmad/config.yaml`:
+
+```yaml
+output_folder: .bmad
+document_output_language: "English"
+communication_language: "English"
+user_name: "Your Name"
+```
+
+Store these values for use throughout the workflow.
+
+### Step 2: Choose Your Approach
 
 **Option A: Use Existing Brainstorming Slash Command (Recommended)**
 
@@ -75,7 +88,7 @@ prompt: |
   Please facilitate an interactive brainstorming session and capture the results.
 ```
 
-### Step 2: Participate in Brainstorming Session
+### Step 3: Participate in Brainstorming Session
 
 The facilitator (slash command or Business Analyst) will:
 
@@ -84,9 +97,9 @@ The facilitator (slash command or Business Analyst) will:
 3. **Ask thought-provoking questions** to stimulate creativity
 4. **Capture all ideas** without judgment
 5. **Organize findings** in structured format
-6. **Save session results** to `.bmad/output/brainstorming-session-{date}.md`
+6. **Save session results** to `{output_folder}/brainstorming-session-{date}.md`
 
-### Step 3: Review Brainstorming Results
+### Step 4: Review Brainstorming Results
 
 The session output will include:
 
@@ -298,7 +311,7 @@ Facilitator: "Now let's reverse these into positive requirements:"
 - **research** - Brainstorm research questions before conducting research
 
 **Output location:**
-- Brainstorming sessions saved to `.bmad/output/brainstorming-session-{date}.md`
+- Brainstorming sessions saved to `{output_folder}/brainstorming-session-{date}.md`
 - All ideas preserved (no filtering)
 - Organized by technique structure
 - Next steps and insights included
@@ -345,8 +358,8 @@ Facilitator: "Now let's reverse these into positive requirements:"
 
 ## Output Files
 
-- `.bmad/output/brainstorming-session-{date}.md` - Complete session results
-- `.bmad/sprint-artifacts/bmm-workflow-status.yaml` - Updated with brainstorm-project completion (if tracking)
+- `{output_folder}/brainstorming-session-{date}.md` - Complete session results
+- `{sprint_artifacts}/bmm-workflow-status.yaml` - Updated with brainstorm-project completion (if tracking)
 
 ## Related Workflows
 
