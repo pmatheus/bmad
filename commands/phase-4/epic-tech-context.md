@@ -24,11 +24,11 @@ This workflow generates a **comprehensive technical specification** for a single
 Before running this workflow:
 
 - [ ] BMAD plugin installed in Claude Code
-- [ ] Project initialized (`/bmad/workflow-init`)
-- [ ] PRD created (`/bmad/prd`)
-- [ ] Architecture document created (`/bmad/architecture`)
-- [ ] Epics created (`/bmad/create-epics-and-stories`)
-- [ ] Sprint planning initialized (`/bmad/sprint-planning`)
+- [ ] Project initialized (`/bmad:meta:workflow-init`)
+- [ ] PRD created (`/bmad:phase-2:prd`)
+- [ ] Architecture document created (`/bmad:phase-3:architecture`)
+- [ ] Epics created (`/bmad:phase-2:create-epics-and-stories`)
+- [ ] Sprint planning initialized (`/bmad:phase-4:sprint-planning`)
 
 **Required files:**
 - `.bmad/config.yaml` - Project configuration
@@ -486,8 +486,8 @@ development_status:
 **Note:** This is a JIT (Just-In-Time) workflow - run again for other epics as needed.
 
 **Next Steps:**
-1. Run `/bmad/create-story` to begin implementing stories under this epic
-2. OR run `/bmad/epic-tech-context` again for the next backlog epic
+1. Run `/bmad:phase-4:create-story` to begin implementing stories under this epic
+2. OR run `/bmad:phase-4:epic-tech-context` again for the next backlog epic
 ```
 
 ## Key Principles
@@ -607,7 +607,7 @@ Savings: 570 lines (76% reduction)
    File: .bmad/sprint-artifacts/tech-spec-epic-3.md
    ACs: 12 | Components: 3 | APIs: 8 | Risks: 4
 
-   Next: Run /bmad/create-story for Epic 3
+   Next: Run /bmad:phase-4:create-story for Epic 3
    ```
 
 ### Example 2: Healthcare Patient Portal - HIPAA Compliance Epic
@@ -666,7 +666,7 @@ Savings: 570 lines (76% reduction)
 
    Compliance: HIPAA requirements mapped
 
-   Next: Run /bmad/create-story for Epic 5
+   Next: Run /bmad:phase-4:create-story for Epic 5
    ```
 
 ### Example 3: Mobile Fitness App - Offline-First Data Sync Epic
@@ -726,7 +726,7 @@ Savings: 570 lines (76% reduction)
 
    UX Design: Integrated (sync indicators, conflict UI)
 
-   Next: Run /bmad/create-story for Epic 2
+   Next: Run /bmad:phase-4:create-story for Epic 2
    ```
 
 ## Troubleshooting
@@ -739,7 +739,7 @@ Savings: 570 lines (76% reduction)
 ```
 
 **Solution:**
-Run `/bmad/sprint-planning` to initialize sprint tracking.
+Run `/bmad:phase-4:sprint-planning` to initialize sprint tracking.
 
 ### Epic not in sprint status
 
@@ -751,7 +751,7 @@ Run `/bmad/sprint-planning` to initialize sprint tracking.
 **Cause:** Sprint planning hasn't registered this epic.
 
 **Solution:**
-Run `/bmad/sprint-planning` to scan epics and create status file.
+Run `/bmad:phase-4:sprint-planning` to scan epics and create status file.
 
 ### PRD or Architecture missing
 
@@ -763,8 +763,8 @@ Run `/bmad/sprint-planning` to scan epics and create status file.
 ```
 
 **Solution:**
-1. Run `/bmad/prd` to create PRD
-2. Run `/bmad/architecture` to create architecture
+1. Run `/bmad:phase-2:prd` to create PRD
+2. Run `/bmad:phase-3:architecture` to create architecture
 3. Then re-run this workflow
 
 ### Epic has no acceptance criteria
@@ -789,7 +789,7 @@ Run `/bmad/sprint-planning` to scan epics and create status file.
 **Solution:**
 - Check `.bmad/PRD/index.md` for expected sections
 - Verify all section files exist
-- Re-run `/bmad/prd` if sections are missing
+- Re-run `/bmad:phase-2:prd` if sections are missing
 
 ### Dependency manifest scan finds nothing
 
@@ -810,20 +810,20 @@ Run `/bmad/sprint-planning` to scan epics and create status file.
 ## Related Workflows
 
 **Before this workflow:**
-1. `/bmad/workflow-init` - Initialize project structure
-2. `/bmad/prd` - Create product requirements
-3. `/bmad/architecture` - Define system architecture
-4. `/bmad/create-epics-and-stories` - Break down into epics
-5. `/bmad/sprint-planning` - Initialize sprint tracking
+1. `/bmad:meta:workflow-init` - Initialize project structure
+2. `/bmad:phase-2:prd` - Create product requirements
+3. `/bmad:phase-3:architecture` - Define system architecture
+4. `/bmad:phase-2:create-epics-and-stories` - Break down into epics
+5. `/bmad:phase-4:sprint-planning` - Initialize sprint tracking
 
 **After this workflow:**
-1. `/bmad/create-story` - Create individual story files
-2. `/bmad/story-context` - Assemble story implementation context
-3. `/bmad/dev-story` - Implement stories
+1. `/bmad:phase-4:create-story` - Create individual story files
+2. `/bmad:phase-4:story-context` - Assemble story implementation context
+3. `/bmad:phase-4:dev-story` - Implement stories
 
 **Parallel workflows:**
-- `/bmad/epic-tech-context` - Run for each epic (JIT)
-- `/bmad/workflow-status` - Check current phase
+- `/bmad:phase-4:epic-tech-context` - Run for each epic (JIT)
+- `/bmad:workflow-status` - Check current phase
 
 ## Success Criteria
 

@@ -25,9 +25,9 @@ This workflow generates a **comprehensive story file** that includes:
 Before running this workflow:
 
 - [ ] BMAD plugin installed in Claude Code
-- [ ] Project initialized (`/bmad/workflow-init`)
-- [ ] Epics created (`/bmad/create-epics-and-stories`)
-- [ ] Sprint planning run (`/bmad/sprint-planning`)
+- [ ] Project initialized (`/bmad:meta:workflow-init`)
+- [ ] Epics created (`/bmad:phase-2:create-epics-and-stories`)
+- [ ] Sprint planning run (`/bmad:phase-4:sprint-planning`)
 - [ ] Epic contexted (optional but recommended)
 
 **Required files:**
@@ -55,7 +55,7 @@ Before running this workflow:
 All stories are either drafted or completed.
 
 Options:
-1. Run /bmad/sprint-planning to refresh tracking
+1. Run /bmad:phase-4:sprint-planning to refresh tracking
 2. Add more stories to epic files
 3. Check if sprint is complete
 ```
@@ -204,7 +204,7 @@ development_status:
 📋 No backlog stories found
 
 Options:
-1. Run /bmad/sprint-planning to refresh
+1. Run /bmad:phase-4:sprint-planning to refresh
 2. Add more stories to epic files
 3. Check if sprint complete
 ```
@@ -225,7 +225,7 @@ If not found:
 
 Epic files and sprint-status.yaml are out of sync.
 
-Run /bmad/sprint-planning to resync.
+Run /bmad:phase-4:sprint-planning to resync.
 ```
 → HALT
 
@@ -727,7 +727,7 @@ File: `.bmad/sprint-artifacts/sprint-status.yaml`
 
 Story file created but sprint-status not updated.
 
-Run /bmad/sprint-planning to resync.
+Run /bmad:phase-4:sprint-planning to resync.
 ```
 
 ### Step 14: Report Completion
@@ -751,8 +751,8 @@ Run /bmad/sprint-planning to resync.
 **Next Steps:**
 
 1. Review the drafted story
-2. Run /bmad/story-context to generate context and mark ready-for-dev
-3. OR run /bmad/story-ready to manually mark ready
+2. Run /bmad:phase-4:story-context to generate context and mark ready-for-dev
+3. OR run /bmad:phase-4:story-ready to manually mark ready
 
 **⚠️ Context-intensive workflows ahead - consider restarting agent**
 ```
@@ -868,7 +868,7 @@ Use AuthService.hashPassword() - DO NOT recreate hashing logic
 
    No previous story (first in epic)
 
-   Next: Run /bmad/story-context
+   Next: Run /bmad:phase-4:story-context
    ```
 
 ### Example 2: Healthcare Portal - With Previous Story Learnings
@@ -981,7 +981,7 @@ Use AuthService.hashPassword() - DO NOT recreate hashing logic
    - Following UTC timezone pattern
    - Addressing technical debt from Story 2.2
 
-   Next: Run /bmad/story-context
+   Next: Run /bmad:phase-4:story-context
    ```
 
 ### Example 3: Mobile Fitness - With Pending Review Items
@@ -1097,7 +1097,7 @@ Use AuthService.hashPassword() - DO NOT recreate hashing logic
 
    Review items from Story 3.1 applied proactively!
 
-   Next: Run /bmad/story-context
+   Next: Run /bmad:phase-4:story-context
    ```
 
 ## Troubleshooting
@@ -1112,7 +1112,7 @@ All stories drafted or completed.
 ```
 
 **Solutions:**
-1. Run `/bmad/sprint-planning` to refresh
+1. Run `/bmad:phase-4:sprint-planning` to refresh
 2. Add more stories to epic files
 3. Check if sprint is complete
 
@@ -1126,7 +1126,7 @@ Sprint-status and epic files out of sync.
 ```
 
 **Solution:**
-- Run `/bmad/sprint-planning` to resync
+- Run `/bmad:phase-4:sprint-planning` to resync
 - OR add missing story to epic files
 
 ### Previous story file not found
@@ -1142,7 +1142,7 @@ Continuing without previous story learnings.
 
 **Solution:**
 - Check if previous story file exists
-- If missing, create it with `/bmad/create-story`
+- If missing, create it with `/bmad:phase-4:create-story`
 
 ### No epic tech spec found
 
@@ -1156,7 +1156,7 @@ Using epic file for requirements.
 **Impact:** Less detailed requirements
 
 **Solution:**
-- Run `/bmad/epic-tech-context` to create tech spec
+- Run `/bmad:phase-4:epic-tech-context` to create tech spec
 - OR continue with epic file (acceptable)
 
 ### Story file already exists
@@ -1175,20 +1175,20 @@ Updating existing story.
 ## Related Workflows
 
 **Before this workflow:**
-1. `/bmad/workflow-init` - Initialize project
-2. `/bmad/prd` - Create requirements
-3. `/bmad/create-epics-and-stories` - Create epics
-4. `/bmad/sprint-planning` - Initialize tracking
-5. `/bmad/epic-tech-context` - Context epic (recommended)
+1. `/bmad:meta:workflow-init` - Initialize project
+2. `/bmad:phase-2:prd` - Create requirements
+3. `/bmad:phase-2:create-epics-and-stories` - Create epics
+4. `/bmad:phase-4:sprint-planning` - Initialize tracking
+5. `/bmad:phase-4:epic-tech-context` - Context epic (recommended)
 
 **After this workflow:**
-1. `/bmad/story-context` - Generate context (recommended)
-2. `/bmad/story-ready` - Mark ready manually
-3. `/bmad/dev-story` - Implement story
+1. `/bmad:phase-4:story-context` - Generate context (recommended)
+2. `/bmad:phase-4:story-ready` - Mark ready manually
+3. `/bmad:phase-4:dev-story` - Implement story
 
 **Parallel workflows:**
-- `/bmad/create-story` - Run for each backlog story
-- `/bmad/workflow-status` - Check current phase
+- `/bmad:phase-4:create-story` - Run for each backlog story
+- `/bmad:workflow-status` - Check current phase
 
 ## Success Criteria
 

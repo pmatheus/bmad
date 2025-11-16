@@ -22,8 +22,8 @@ This workflow delegates to the **bmad-pm** (Product Manager) subagent, which spe
 ## Prerequisites
 
 1. BMAD plugin installed and initialized
-2. Run `/bmad/workflow-init` to set up project structure
-3. **PRD.md must exist** in output folder (run `/bmad/prd` first)
+2. Run `/bmad:meta:workflow-init` to set up project structure
+3. **PRD.md must exist** in output folder (run `/bmad:phase-2:prd` first)
 4. (Optional) Product brief and domain brief for additional context
 
 ## How It Works
@@ -77,7 +77,7 @@ status_file: {output_folder}/bmm-workflow-status.yaml
 - Check if PRD.md exists (required)
   - Try whole document: `{output_folder}/*prd*.md`
   - Try sharded version: `{output_folder}/prd/index.md`
-  - If not found → Error: "PRD.md not found. Run /bmad/prd first."
+  - If not found → Error: "PRD.md not found. Run /bmad:phase-2:prd first."
 - Load workflow status if exists
 - Check if epics already completed
   - If yes → Ask user if they want to overwrite
@@ -316,12 +316,55 @@ Summary:
 {epic_summary}
 
 Next Steps:
-1. Run /bmad/architecture to create technical architecture
-2. Run /bmad/epic-tech-context to create technical specs for epics
-3. Run /bmad/workflow-status to see your project status
+1. Run /bmad:phase-3:architecture to create technical architecture
+2. Run /bmad:phase-4:epic-tech-context to create technical specs for epics
+3. Run /bmad:workflow-status to see your project status
 
 Epic 1 establishes the foundation - ready for architecture decisions!
 ```
+
+### Step 5: Auto-Continue to Sprint Planning
+
+**Purpose:** Enable seamless workflow continuation to sprint planning.
+
+**Process:**
+
+1. **Check next workflow:**
+   - Next required workflow: `sprint-planning`
+   - Sprint planning creates tracking file for story implementation
+
+2. **Check prerequisites:**
+   - epics.md exists? ✓ (just created)
+   - User input needed? ✗ (sprint-planning auto-generates tracking from epics.md)
+   - Configuration exists? ✓
+
+3. **Auto-continue decision:**
+
+   **IF** workflow status file exists AND epics.md created successfully:
+
+   ```
+   🚀 Auto-continuing to sprint planning...
+
+   Sprint planning will create tracking file for your {story_count} stories.
+   ```
+
+   **Execute next workflow:**
+   Use SlashCommand tool with command: `/bmad:phase-4:sprint-planning`
+
+   **ELSE:**
+
+   Report completion and suggest next command:
+   ```
+   ✅ Epic Breakdown Complete!
+
+   Next recommended workflow: sprint-planning
+
+   Run: /bmad:phase-4:sprint-planning
+
+   This will create sprint status tracking for your stories.
+   ```
+
+**CRITICAL:** DO NOT ask user permission to continue. Sprint planning requires no user input and should run automatically after epic breakdown completes.
 
 ## Key Principles
 
@@ -573,13 +616,13 @@ Epic 4: Multi-Database Support (2 stories)
 ### Integration with Other Workflows
 
 **Before:**
-- `/bmad/prd` - Must have PRD.md
+- `/bmad:phase-2:prd` - Must have PRD.md
 
 **After:**
-- `/bmad/architecture` - Technical architecture decisions
-- `/bmad/epic-tech-context` - Technical specs per epic
-- `/bmad/create-story` - Individual story implementation plans
-- `/bmad/sprint-planning` - Sprint status tracking
+- `/bmad:phase-3:architecture` - Technical architecture decisions
+- `/bmad:phase-4:epic-tech-context` - Technical specs per epic
+- `/bmad:phase-4:create-story` - Individual story implementation plans
+- `/bmad:phase-4:sprint-planning` - Sprint status tracking
 
 ### Story Sizing Guidelines
 
@@ -610,7 +653,7 @@ For healthcare, finance, aerospace, etc.:
 ## Troubleshooting
 
 **"PRD.md not found"**
-- Run `/bmad/prd` first to create PRD
+- Run `/bmad:phase-2:prd` first to create PRD
 - Check output folder location
 - Ensure PRD workflow completed successfully
 
@@ -636,12 +679,12 @@ For healthcare, finance, aerospace, etc.:
 
 ## Related Workflows
 
-- `/bmad/prd` - Create PRD (run first)
-- `/bmad/architecture` - Technical architecture (run after)
-- `/bmad/epic-tech-context` - Epic technical specs (run after)
-- `/bmad/sprint-planning` - Sprint tracking setup (run after)
-- `/bmad/create-story` - Individual story generation (run during implementation)
-- `/bmad/workflow-status` - Check project status (anytime)
+- `/bmad:phase-2:prd` - Create PRD (run first)
+- `/bmad:phase-3:architecture` - Technical architecture (run after)
+- `/bmad:phase-4:epic-tech-context` - Epic technical specs (run after)
+- `/bmad:phase-4:sprint-planning` - Sprint tracking setup (run after)
+- `/bmad:phase-4:create-story` - Individual story generation (run during implementation)
+- `/bmad:workflow-status` - Check project status (anytime)
 
 ## Success Criteria
 

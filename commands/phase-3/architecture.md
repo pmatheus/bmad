@@ -18,7 +18,7 @@ Creates a decision-focused architecture document by delegating to the **bmad-arc
 
 - **BMAD plugin installed** - The bmad-architect subagent must be available
 - **workflow-init run** - Project configured with `.bmad/config.yaml`
-- **PRD created** - Product Requirements Document must exist (run `/bmad/prd` first)
+- **PRD created** - Product Requirements Document must exist (run `/bmad:phase-2:prd` first)
 - **Epics created** (optional but recommended) - Having epics helps architect understand scope
 
 ---
@@ -55,9 +55,9 @@ cat .bmad/config.yaml
 ls .bmad/PRD.md  # or .bmad/prd/index.md
 ```
 
-**If PRD is missing:** Run `/bmad/prd` first.
+**If PRD is missing:** Run `/bmad:phase-2:prd` first.
 
-**If config is missing:** Run `/bmad/workflow-init` first.
+**If config is missing:** Run `/bmad:meta:workflow-init` first.
 
 ### Step 2: Gather Optional Context
 
@@ -322,7 +322,7 @@ cat .bmad/architecture.md
 
 ### Step 7: Update Workflow Status (if using workflow tracking)
 
-If you ran `/bmad/workflow-init`, update the workflow status:
+If you ran `/bmad:meta:workflow-init`, update the workflow status:
 
 1. Read current status: `cat .bmad/bmm-workflow-status.yaml`
 2. Update `create-architecture` status to `completed`
@@ -735,7 +735,7 @@ ls .bmad/*prd*.md
 ```
 
 **Solutions:**
-1. **PRD doesn't exist:** Run `/bmad/prd` first to create it
+1. **PRD doesn't exist:** Run `/bmad:phase-2:prd` first to create it
 2. **PRD has different name:** Provide the correct path when delegating to architect
 3. **PRD in different location:** Update `.bmad/config.yaml` `output_folder` setting
 
@@ -748,7 +748,7 @@ ls .bmad/*prd*.md
 ls .bmad/config.yaml
 ```
 
-**Solution:** Run `/bmad/workflow-init` to create project structure and configuration
+**Solution:** Run `/bmad:meta:workflow-init` to create project structure and configuration
 
 ### Problem: "Architecture is too generic"
 
@@ -818,26 +818,26 @@ ls .bmad/config.yaml
 
 These should typically be run **before** architecture:
 
-- **`/bmad/workflow-init`** - Initialize project structure and configuration
-- **`/bmad/prd`** - Create Product Requirements Document (REQUIRED)
-- **`/bmad/create-epics-and-stories`** - Break PRD into epics (optional but recommended)
+- **`/bmad:meta:workflow-init`** - Initialize project structure and configuration
+- **`/bmad:phase-2:prd`** - Create Product Requirements Document (REQUIRED)
+- **`/bmad:phase-2:create-epics-and-stories`** - Break PRD into epics (optional but recommended)
 - **`/bmad/create-ux-design`** - Define UX (optional, but helpful for architectural decisions)
 
 ### Follow-Up Workflows
 
 These should typically be run **after** architecture:
 
-- **`/bmad/epic-tech-context`** - Create detailed technical specs for each epic (RECOMMENDED NEXT)
-- **`/bmad/create-story`** - Create individual user story files
-- **`/bmad/sprint-planning`** - Generate sprint status tracking
-- **`/bmad/dev-story`** - Implement individual stories using architecture guidance
+- **`/bmad:phase-4:epic-tech-context`** - Create detailed technical specs for each epic (RECOMMENDED NEXT)
+- **`/bmad:phase-4:create-story`** - Create individual user story files
+- **`/bmad:phase-4:sprint-planning`** - Generate sprint status tracking
+- **`/bmad:phase-4:dev-story`** - Implement individual stories using architecture guidance
 
 ### Parallel/Related Workflows
 
 These can be run alongside architecture workflow:
 
-- **`/bmad/document-project`** - Analyze existing codebase (brownfield projects)
-- **`/bmad/tech-spec`** - Quick tech spec for small changes (Level 0 projects)
+- **`/bmad:phase-1:document-project`** - Analyze existing codebase (brownfield projects)
+- **`/bmad:phase-2:tech-spec`** - Quick tech spec for small changes (Level 0 projects)
 
 ---
 
@@ -969,4 +969,4 @@ The architect adapts communication to your skill level:
 
 **Ready to create your architecture?** Run this workflow when you have a PRD and you're ready to make technical decisions about how to build your system.
 
-**Next step after architecture:** Typically `/bmad/epic-tech-context` to create detailed epic-level technical specifications, or `/bmad/create-story` to start breaking epics into implementable stories.
+**Next step after architecture:** Typically `/bmad:phase-4:epic-tech-context` to create detailed epic-level technical specifications, or `/bmad:phase-4:create-story` to start breaking epics into implementable stories.

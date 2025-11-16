@@ -24,7 +24,7 @@ This workflow provides **comprehensive, systematic code review** with:
 Before running this workflow:
 
 - [ ] BMAD plugin installed in Claude Code
-- [ ] Project initialized (`/bmad/workflow-init`)
+- [ ] Project initialized (`/bmad:meta:workflow-init`)
 - [ ] Story implemented and marked "review" status
 - [ ] Story context file exists
 - [ ] Epic tech spec available (for architecture validation)
@@ -751,7 +751,7 @@ File: `.bmad/sprint-artifacts/sprint-status.yaml` OR `.bmad/sprint-status.yaml`
 ⚠️ Could not update sprint-status: {story_key} not found
 
 Review saved to story file, but sprint-status.yaml may be out of sync.
-Run /bmad/sprint-planning to refresh tracking.
+Run /bmad:phase-4:sprint-planning to refresh tracking.
 ```
 
 ### Step 11: Persist Action Items
@@ -857,9 +857,73 @@ Create or append to section: "Post-Review Follow-ups"
 **Next Steps:**
 1. Review the Senior Developer Review notes appended to story
 2. If APPROVED: ✓ Story is done, continue with next story
-3. If CHANGES REQUESTED: Address {count} action items and re-run /bmad/dev-story
+3. If CHANGES REQUESTED: Address {count} action items and re-run /bmad:phase-4:dev-story
 4. If BLOCKED: Resolve {high_count} HIGH severity blockers before proceeding
 ```
+
+### Step 13: Pause for User Review (NO Auto-Continue)
+
+**Purpose:** Allow user to review findings before proceeding.
+
+**Process:**
+
+1. **Review outcome assessment:**
+   - APPROVED → Story can be marked done
+   - CHANGES REQUESTED → Action items must be addressed
+   - BLOCKED → Critical issues must be resolved
+
+2. **User decision points:**
+
+   **IF outcome = APPROVED:**
+   - User may want to verify the review before marking story done
+   - User may want to see the code themselves
+   - **Pause here** - suggest: `/bmad:phase-4:story-done`
+
+   **IF outcome = CHANGES REQUESTED:**
+   - User should review action items
+   - User may want to address some items manually
+   - User may want to re-run dev agent to address items
+   - **Pause here** - suggest: Review action items, then re-run `/bmad:phase-4:dev-story`
+
+   **IF outcome = BLOCKED:**
+   - User MUST resolve blocking issues
+   - Cannot proceed until blockers addressed
+   - **Pause here** - user must take action
+
+3. **Report and pause:**
+
+   ```
+   ✅ Code Review Complete!
+
+   **Review Outcome:** {outcome}
+
+   **Action Items:** {count} ({high} High, {med} Medium, {low} Low)
+
+   📋 Next Steps (Your Decision):
+
+   {IF APPROVED}
+   1. Review the findings above
+   2. If satisfied, mark story done: /bmad:phase-4:story-done
+   3. Or continue to next story: /bmad:phase-4:create-story
+
+   {IF CHANGES REQUESTED}
+   1. Review the {count} action items
+   2. Address items manually, OR
+   3. Re-run dev agent to address: /bmad:phase-4:dev-story
+
+   {IF BLOCKED}
+   1. Resolve {high_count} HIGH severity blockers
+   2. Re-run dev agent: /bmad:phase-4:dev-story
+   ```
+
+**CRITICAL:**
+- DO NOT auto-continue after code review
+- User should review findings
+- User decides whether to mark done, fix issues, or continue
+- This is a quality gate - user oversight is valuable
+
+**Rationale:**
+Code review provides critical feedback that the user may want to review before proceeding. While the review runs autonomously, the findings should be reviewed by the user who can make informed decisions about next steps. This pause maintains quality control while still providing autonomous review.
 
 ## Key Principles
 
@@ -1154,7 +1218,7 @@ Create or append to section: "Post-Review Follow-ups"
 ```
 
 **Options:**
-1. Run `/bmad/dev-story` to implement a story
+1. Run `/bmad:phase-4:dev-story` to implement a story
 2. Check `sprint-status.yaml` for current states
 3. Use ad-hoc review mode
 
@@ -1167,7 +1231,7 @@ Create or append to section: "Post-Review Follow-ups"
 
 **Solution:**
 - Check file naming in stories directory
-- Run `/bmad/sprint-planning` to resync
+- Run `/bmad:phase-4:sprint-planning` to resync
 - Verify sprint_artifacts path in config
 
 ### No story context file
@@ -1180,7 +1244,7 @@ Create or append to section: "Post-Review Follow-ups"
 **Impact:** Review continues but context limited
 
 **Solution:**
-- Run `/bmad/story-context` to generate context
+- Run `/bmad:phase-4:story-context` to generate context
 - Or continue with limited context validation
 
 ### No epic tech spec
@@ -1193,7 +1257,7 @@ Create or append to section: "Post-Review Follow-ups"
 **Impact:** Cannot validate architecture alignment fully
 
 **Solution:**
-- Run `/bmad/epic-tech-context` to create tech spec
+- Run `/bmad:phase-4:epic-tech-context` to create tech spec
 - Or continue without architecture validation
 
 ### Too many false completions
@@ -1212,7 +1276,7 @@ BLOCKED: 8 tasks marked complete but NOT DONE
 1. Review each false completion
 2. Either implement or uncheck task
 3. Update File List in Dev Agent Record
-4. Re-run `/bmad/dev-story` to complete work
+4. Re-run `/bmad:phase-4:dev-story` to complete work
 
 ### All ACs missing
 
@@ -1229,27 +1293,27 @@ BLOCKED: 0 of 6 ACs implemented
 **Solution:**
 1. Verify implementation exists
 2. Update File List if code exists
-3. Or continue implementation with `/bmad/dev-story`
+3. Or continue implementation with `/bmad:phase-4:dev-story`
 
 ## Related Workflows
 
 **Before this workflow:**
-1. `/bmad/workflow-init` - Initialize project
-2. `/bmad/prd` - Requirements
-3. `/bmad/architecture` - System design
-4. `/bmad/create-epics-and-stories` - Create epics
-5. `/bmad/create-story` - Draft stories
-6. `/bmad/story-context` - Generate context
-7. `/bmad/dev-story` - Implement story (marks "review")
+1. `/bmad:meta:workflow-init` - Initialize project
+2. `/bmad:phase-2:prd` - Requirements
+3. `/bmad:phase-3:architecture` - System design
+4. `/bmad:phase-2:create-epics-and-stories` - Create epics
+5. `/bmad:phase-4:create-story` - Draft stories
+6. `/bmad:phase-4:story-context` - Generate context
+7. `/bmad:phase-4:dev-story` - Implement story (marks "review")
 
 **After this workflow:**
 1. **If APPROVED:** Story done, move to next
-2. **If CHANGES REQUESTED:** `/bmad/dev-story` to fix issues
-3. **If BLOCKED:** Fix blockers, then `/bmad/dev-story`
+2. **If CHANGES REQUESTED:** `/bmad:phase-4:dev-story` to fix issues
+3. **If BLOCKED:** Fix blockers, then `/bmad:phase-4:dev-story`
 
 **Parallel workflows:**
-- `/bmad/code-review` - Run for each story marked "review"
-- `/bmad/workflow-status` - Check current phase
+- `/bmad:phase-4:code-review` - Run for each story marked "review"
+- `/bmad:workflow-status` - Check current phase
 
 ## Success Criteria
 

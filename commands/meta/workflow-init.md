@@ -140,7 +140,7 @@ questions:
 
 Handle **Continue implementation:**
 - Check if `bmm-workflow-status.yaml` exists
-- If yes: Tell user they're already set up, run `/bmad/workflow-status` to see progress. Exit workflow.
+- If yes: Tell user they're already set up, run `/bmad:workflow-status` to see progress. Exit workflow.
 - If no: Set `migrating_legacy_project = true`, store artifacts, jump to Step 7
 
 Handle **Completed/Abandoned:** Offer to archive, then `new_project = true`, continue to Step 5.
@@ -154,7 +154,7 @@ I see you have an existing codebase:
 No BMM artifacts found - this project hasn't used BMAD Method yet.
 
 💡 Note for brownfield projects:
-You'll need to run /bmad/document-project workflow before planning.
+You'll need to run /bmad:phase-1:document-project workflow before planning.
 This analyzes your codebase and creates documentation that AI agents can use.
 ```
 
@@ -577,7 +577,7 @@ prd: docs/PRD.md  # agent: pm
 
 Next Workflow: prd
 Agent: PM (Product Manager)
-Command: /bmad/prd
+Command: /bmad:phase-2:prd
 
 What it does: Create Product Requirements Document for your project
 
@@ -586,7 +586,7 @@ What it does: Create Product Requirements Document for your project
 Happy building with BMAD Method! 🚀
 
 To check your progress anytime:
-  /bmad/workflow-status
+  /bmad:workflow-status
 ```
 
 If no:
@@ -594,7 +594,7 @@ If no:
 No problem! You can run workflow-init again anytime you're ready.
 
 To get started later:
-  /bmad/workflow-init
+  /bmad:meta:workflow-init
 ```
 
 ## Output Files
@@ -607,12 +607,12 @@ To get started later:
 - This is always the first workflow to run for new projects
 - Can be run again to reset/reinitialize workflow tracking
 - Automatically detects and preserves existing work
-- Brownfield projects should run `/bmad/document-project` before planning workflows
+- Brownfield projects should run `/bmad:phase-1:document-project` before planning workflows
 - The workflow status file tracks progress through all subsequent workflows
 
 ## Next Steps
 
 After workflow-init completes:
 1. Run the recommended next workflow (displayed at the end)
-2. Check progress anytime with `/bmad/workflow-status`
+2. Check progress anytime with `/bmad:workflow-status`
 3. Follow the workflow path in sequence for best results

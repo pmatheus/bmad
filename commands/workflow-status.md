@@ -16,7 +16,7 @@ This slash command helps you understand where you are in the BMAD Method workflo
 
 ## Prerequisites
 
-You must have initialized your project first with `/bmad/workflow-init`. If you haven't done this yet, run that command first.
+You must have initialized your project first with `/bmad:meta:workflow-init`. If you haven't done this yet, run that command first.
 
 ## Instructions
 
@@ -32,7 +32,7 @@ Look for `bmm-workflow-status.yaml` in the output folder.
 ```
 No workflow status found. To get started:
 
-Run: /bmad/workflow-init
+Run: /bmad:meta:workflow-init
 
 This will guide you through project setup and create your workflow path.
 ```
@@ -108,7 +108,7 @@ Phase 4 (Implementation):
 
 **Agent:** PM (Product Manager)
 
-**Command:** /bmad/prd
+**Command:** /bmad:phase-2:prd
 
 **What it does:** Create Product Requirements Document (PRD) for your project
 ```
@@ -143,7 +143,7 @@ Based on user choice:
 ```
 Ready to run prd!
 
-Command: /bmad/prd
+Command: /bmad:phase-2:prd
 
 Note: This workflow will create your Product Requirements Document.
 The PRD agent will guide you through the process.

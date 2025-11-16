@@ -24,8 +24,8 @@ This workflow creates a **sprint-status.yaml** file that:
 Before running this workflow:
 
 - [ ] BMAD plugin installed in Claude Code
-- [ ] Project initialized (`/bmad/workflow-init`)
-- [ ] Epics created (`/bmad/create-epics-and-stories`)
+- [ ] Project initialized (`/bmad:meta:workflow-init`)
+- [ ] Epics created (`/bmad:phase-2:create-epics-and-stories`)
 
 **Required files:**
 - `.bmad/config.yaml` - Project configuration
@@ -158,7 +158,7 @@ Priority order:
 
 Cannot generate sprint status without epics.
 
-Run /bmad/create-epics-and-stories to create epics first.
+Run /bmad:phase-2:create-epics-and-stories to create epics first.
 ```
 → HALT
 
@@ -434,10 +434,69 @@ development_status:
 
 **Next Steps:**
 1. Review the generated sprint-status.yaml
-2. Run /bmad/epic-tech-context to context next epic
-3. Run /bmad/create-story to draft next story
-4. Re-run /bmad/sprint-planning to refresh auto-detected statuses
+2. Run /bmad:phase-4:epic-tech-context to context next epic
+3. Run /bmad:phase-4:create-story to draft next story
+4. Re-run /bmad:phase-4:sprint-planning to refresh auto-detected statuses
 ```
+
+### Step 8: Auto-Continue to Epic Tech Context
+
+**Purpose:** Enable seamless workflow continuation to epic contexting.
+
+**Process:**
+
+1. **Check next workflow:**
+   - Next recommended workflow: `epic-tech-context`
+   - Creates technical specifications for first epic
+
+2. **Check prerequisites:**
+   - sprint-status.yaml exists? ✓ (just created)
+   - epics.md exists? ✓
+   - User input needed? ✗ (epic-tech-context runs autonomously with architecture context)
+   - Configuration exists? ✓
+
+3. **Determine if epic-tech-context should run:**
+   - Check if any epics have status "backlog"
+   - Check if architecture.md exists (provides context for epic-tech-context)
+
+4. **Auto-continue decision:**
+
+   **IF** architecture.md exists AND at least one epic in backlog:
+
+   ```
+   🚀 Auto-continuing to epic tech context...
+
+   Creating technical specification for first epic.
+   ```
+
+   **Execute next workflow:**
+   Use SlashCommand tool with command: `/bmad:phase-4:epic-tech-context`
+
+   **ELSE IF** architecture.md does NOT exist:
+
+   ```
+   ✅ Sprint Status Generated!
+
+   📋 Next Step: Architecture Recommended
+
+   Before creating epic tech specs, run architecture workflow:
+   /bmad:phase-3:architecture
+
+   Or skip directly to story creation:
+   /bmad:phase-4:create-story
+   ```
+
+   **ELSE IF** all epics already contexted:
+
+   ```
+   ✅ Sprint Status Generated!
+
+   All epics already contexted. Ready for story implementation.
+
+   Next: /bmad:phase-4:create-story
+   ```
+
+**CRITICAL:** DO NOT ask user permission to continue if architecture exists and epics need contexting. Epic-tech-context runs autonomously.
 
 ## Key Principles
 
@@ -573,7 +632,7 @@ development_status:
 
    Completion: 0 / 15 (0%)
 
-   Next: Run /bmad/epic-tech-context to context Epic 1
+   Next: Run /bmad:phase-4:epic-tech-context to context Epic 1
    ```
 
 ### Example 2: Healthcare Portal - Mid-Project Refresh
@@ -772,7 +831,7 @@ Cannot generate sprint status without epics.
 ```
 
 **Solution:**
-Run `/bmad/create-epics-and-stories` to create epics first.
+Run `/bmad:phase-2:create-epics-and-stories` to create epics first.
 
 ### Invalid YAML syntax
 
@@ -812,7 +871,7 @@ Backing up to sprint-status.yaml.backup and creating fresh file.
 **Cause:** Epic files updated but sprint-planning not re-run.
 
 **Solution:**
-Re-run `/bmad/sprint-planning` to sync.
+Re-run `/bmad:phase-4:sprint-planning` to sync.
 
 ### Statuses downgraded unexpectedly
 
@@ -831,20 +890,20 @@ Re-run `/bmad/sprint-planning` to sync.
 ## Related Workflows
 
 **Before this workflow:**
-1. `/bmad/workflow-init` - Initialize project
-2. `/bmad/prd` - Create requirements
-3. `/bmad/create-epics-and-stories` - Create epics
+1. `/bmad:meta:workflow-init` - Initialize project
+2. `/bmad:phase-2:prd` - Create requirements
+3. `/bmad:phase-2:create-epics-and-stories` - Create epics
 
 **After this workflow:**
-1. `/bmad/epic-tech-context` - Context next backlog epic
-2. `/bmad/create-story` - Draft next story
-3. `/bmad/story-context` - Context next drafted story
-4. `/bmad/dev-story` - Implement next ready story
-5. `/bmad/code-review` - Review next completed story
+1. `/bmad:phase-4:epic-tech-context` - Context next backlog epic
+2. `/bmad:phase-4:create-story` - Draft next story
+3. `/bmad:phase-4:story-context` - Context next drafted story
+4. `/bmad:phase-4:dev-story` - Implement next ready story
+5. `/bmad:phase-4:code-review` - Review next completed story
 
 **Parallel workflows:**
-- `/bmad/sprint-planning` - Re-run anytime to refresh
-- `/bmad/workflow-status` - Check current phase
+- `/bmad:phase-4:sprint-planning` - Re-run anytime to refresh
+- `/bmad:workflow-status` - Check current phase
 
 ## Success Criteria
 

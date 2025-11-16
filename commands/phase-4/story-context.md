@@ -26,8 +26,8 @@ This workflow creates a **Story Context XML file** that serves as the single sou
 Before running this workflow:
 
 - [ ] BMAD plugin installed in Claude Code
-- [ ] Project initialized (`/bmad/workflow-init`)
-- [ ] Stories created and drafted (`/bmad/create-story`)
+- [ ] Project initialized (`/bmad:meta:workflow-init`)
+- [ ] Stories created and drafted (`/bmad:phase-4:create-story`)
 - [ ] Sprint status tracking active
 
 **Required files:**
@@ -195,8 +195,8 @@ development_status:
 All stories are either still in backlog or already marked ready/in-progress/done.
 
 **Next Steps:**
-1. Run /bmad/create-story to draft more stories
-2. Run /bmad/sprint-planning to refresh story tracking
+1. Run /bmad:phase-4:create-story to draft more stories
+2. Run /bmad:phase-4:sprint-planning to refresh story tracking
 ```
 → HALT
 
@@ -640,7 +640,7 @@ File: `.bmad/sprint-artifacts/sprint-status.yaml` OR `.bmad/sprint-status.yaml`
 ```
 ⚠️ Story file updated, but could not update sprint-status: {story_key} not found
 
-You may need to run /bmad/sprint-planning to refresh tracking.
+You may need to run /bmad:phase-4:sprint-planning to refresh tracking.
 ```
 
 ### Step 12: Report Completion
@@ -667,12 +667,51 @@ You may need to run /bmad/sprint-planning to refresh tracking.
 **Next Steps:**
 
 1. Review the context file: {context_file}
-2. Run /bmad/dev-story to implement the story
+2. Run /bmad:phase-4:dev-story to implement the story
 3. Generate context for more drafted stories if needed
 
 **Quality Check:**
 All validation items passed ✓
 ```
+
+### Step 13: Auto-Continue to Story Implementation
+
+**Purpose:** Enable seamless workflow continuation to story implementation.
+
+**Process:**
+
+1. **Check next workflow:**
+   - Next workflow: `dev-story`
+   - Developer agent will implement the story using the context we just created
+
+2. **Check prerequisites:**
+   - Story context file exists? ✓ (just created)
+   - Story marked as ready-for-dev? ✓ (just updated)
+   - User input needed? ✗ (dev agent works autonomously with story context)
+   - Configuration exists? ✓
+
+3. **Auto-continue decision:**
+
+   **ALWAYS auto-continue to dev-story:**
+
+   ```
+   🚀 Auto-continuing to story implementation...
+
+   Developer agent will implement {story_key} using the generated context.
+   This is a continuous autonomous process.
+   ```
+
+   **Execute next workflow:**
+   Use SlashCommand tool with command: `/bmad:phase-4:dev-story`
+
+**CRITICAL:**
+- DO NOT ask user permission to continue
+- Story context + dev-story is designed as a continuous flow
+- The dev agent works autonomously until completion or blocker
+- User can review after implementation completes
+
+**Rationale:**
+Story context generation exists specifically to feed the dev agent. Once context is ready, there's no reason to pause - the implementation should proceed immediately. This reduces friction and maintains workflow momentum.
 
 ## Key Principles
 
@@ -794,7 +833,7 @@ All validation items passed ✓
    Context: 6 docs, 8 code refs, 4 interfaces, 12 test ideas
    Status: ready-for-dev
 
-   Next: Run /bmad/dev-story
+   Next: Run /bmad:phase-4:dev-story
    ```
 
 ### Example 2: Healthcare Portal - HIPAA Audit Logging Story
@@ -861,7 +900,7 @@ All validation items passed ✓
    Compliance: HIPAA requirements mapped
    Status: ready-for-dev
 
-   Next: Run /bmad/dev-story
+   Next: Run /bmad:phase-4:dev-story
    ```
 
 ### Example 3: Mobile Fitness - Offline Workout Sync Story
@@ -927,7 +966,7 @@ All validation items passed ✓
    Mobile: Battery optimization constraints included
    Status: ready-for-dev
 
-   Next: Run /bmad/dev-story
+   Next: Run /bmad:phase-4:dev-story
    ```
 
 ## Troubleshooting
@@ -942,8 +981,8 @@ All validation items passed ✓
 **Cause:** All stories are either backlog, ready-for-dev, in-progress, or done.
 
 **Solution:**
-1. Run `/bmad/create-story` to draft more stories
-2. Run `/bmad/sprint-planning` to refresh tracking
+1. Run `/bmad:phase-4:create-story` to draft more stories
+2. Run `/bmad:phase-4:sprint-planning` to refresh tracking
 
 ### Story file not found
 
@@ -956,7 +995,7 @@ All validation items passed ✓
 
 **Solution:**
 1. Check story file naming
-2. Run `/bmad/sprint-planning` to resync
+2. Run `/bmad:phase-4:sprint-planning` to resync
 3. Verify sprint_artifacts path in config
 
 ### Story status is not "drafted"
@@ -1053,20 +1092,20 @@ Consider if all references are necessary.
 ## Related Workflows
 
 **Before this workflow:**
-1. `/bmad/workflow-init` - Initialize project
-2. `/bmad/prd` OR `/bmad/tech-spec` - Requirements
-3. `/bmad/architecture` - System design
-4. `/bmad/create-epics-and-stories` - Create epics
-5. `/bmad/create-story` - Draft individual stories
-6. `/bmad/sprint-planning` - Initialize tracking
+1. `/bmad:meta:workflow-init` - Initialize project
+2. `/bmad:phase-2:prd` OR `/bmad:phase-2:tech-spec` - Requirements
+3. `/bmad:phase-3:architecture` - System design
+4. `/bmad:phase-2:create-epics-and-stories` - Create epics
+5. `/bmad:phase-4:create-story` - Draft individual stories
+6. `/bmad:phase-4:sprint-planning` - Initialize tracking
 
 **After this workflow:**
-1. `/bmad/dev-story` - Implement the story (uses context)
-2. `/bmad/story-context` - Generate context for next drafted story
+1. `/bmad:phase-4:dev-story` - Implement the story (uses context)
+2. `/bmad:phase-4:story-context` - Generate context for next drafted story
 
 **Parallel workflows:**
-- `/bmad/story-context` - Run for each drafted story (JIT)
-- `/bmad/workflow-status` - Check current phase
+- `/bmad:phase-4:story-context` - Run for each drafted story (JIT)
+- `/bmad:workflow-status` - Check current phase
 
 ## Success Criteria
 

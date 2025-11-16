@@ -18,9 +18,9 @@ Implements a user story by delegating to the **bmad-dev** (Developer) subagent. 
 
 - **BMAD plugin installed** - The bmad-dev subagent must be available
 - **workflow-init run** - Project configured with `.bmad/config.yaml`
-- **Story exists** - At least one story file created (run `/bmad/create-story`)
+- **Story exists** - At least one story file created (run `/bmad:phase-4:create-story`)
 - **Story is ready** - Story status is "ready-for-dev" or "in-progress"
-- **Story Context generated** (strongly recommended) - Run `/bmad/story-context` first for best results
+- **Story Context generated** (strongly recommended) - Run `/bmad:phase-4:story-context` first for best results
 
 ---
 
@@ -60,9 +60,9 @@ ls .bmad/stories/story-*.md
 ```
 
 **If missing:**
-- Config → Run `/bmad/workflow-init`
-- Sprint status → Run `/bmad/sprint-planning`
-- Stories → Run `/bmad/create-story`
+- Config → Run `/bmad:meta:workflow-init`
+- Sprint status → Run `/bmad:phase-4:sprint-planning`
+- Stories → Run `/bmad:phase-4:create-story`
 
 ### Step 2: Check Story Readiness
 
@@ -79,7 +79,7 @@ A story is "ready-for-dev" when:
 - Tasks are outlined
 - (Optionally) Story Context XML has been generated
 
-**If no ready stories:** Run `/bmad/story-ready` to mark drafted stories as ready, or `/bmad/story-context` to generate context and mark ready.
+**If no ready stories:** Run `/bmad:phase-4:story-ready` to mark drafted stories as ready, or `/bmad:phase-4:story-context` to generate context and mark ready.
 
 ### Step 3: (Recommended) Generate Story Context
 
@@ -87,7 +87,7 @@ For best results, generate Story Context XML before implementing:
 
 ```bash
 # Generates context for next ready story
-/bmad/story-context
+/bmad:phase-4:story-context
 ```
 
 Story Context provides:
@@ -254,7 +254,7 @@ You are implementing the next ready user story using AC-driven, context-based de
 
    **Status:** Ready for code review
 
-   **Recommended Next Step:** Run /bmad/code-review to perform senior developer review
+   **Recommended Next Step:** Run /bmad:phase-4:code-review to perform senior developer review
    ```
 
    **If blocked:**
@@ -299,7 +299,7 @@ If Story Context is missing, you can still implement, but:
 - You may rebuild what already exists
 - Patterns may be inconsistent
 
-Recommend user runs /bmad/story-context first if context is missing.
+Recommend user runs /bmad:phase-4:story-context first if context is missing.
 ```
 
 ### Step 6: Developer Works Continuously
@@ -345,21 +345,77 @@ After story implementation:
 
 **Option A: Code Review (Recommended)**
 ```bash
-/bmad/code-review
+/bmad:phase-4:code-review
 ```
 Performs senior developer code review, provides feedback, creates action items.
 
 **Option B: Mark Story Done (if review not needed)**
 ```bash
-/bmad/story-done
+/bmad:phase-4:story-done
 ```
 Marks story as complete in sprint status.
 
 **Option C: Continue Next Story**
 ```bash
-/bmad/dev-story
+/bmad:phase-4:dev-story
 ```
 Automatically finds and implements the next ready story.
+
+### Step 9: Auto-Continue to Code Review
+
+**Purpose:** Enable seamless workflow continuation to code review when story implementation completes.
+
+**Process:**
+
+1. **Check story completion:**
+   - Was story marked as "ready-for-review"? (dev agent sets this when done)
+   - Are all acceptance criteria satisfied?
+   - Are all tests passing?
+
+2. **Check prerequisites for code-review:**
+   - Story file exists with implementation? ✓
+   - Story status is "ready-for-review"? ✓
+   - User input needed? ✗ (code-review runs autonomously)
+
+3. **Auto-continue decision:**
+
+   **IF** story implementation completed successfully (status = "ready-for-review"):
+
+   ```
+   🚀 Auto-continuing to code review...
+
+   Senior developer review will validate implementation and provide feedback.
+   ```
+
+   **Execute next workflow:**
+   Use SlashCommand tool with command: `/bmad:phase-4:code-review`
+
+   **ELSE IF** developer reported a blocker:
+
+   ```
+   ⚠️  Story implementation blocked.
+
+   Blocker: {blocker_description}
+
+   Please resolve the blocker, then re-run /bmad:phase-4:dev-story to resume.
+   ```
+
+   **ELSE IF** story is still in progress:
+
+   ```
+   ⏸️  Story implementation in progress.
+
+   Developer is still working. Check story file for progress updates.
+   ```
+
+**CRITICAL:**
+- DO NOT ask user permission to continue if story is ready for review
+- Code review is the natural next step after implementation
+- Review runs autonomously and provides structured feedback
+- User can address review feedback after review completes
+
+**Rationale:**
+Code review is part of the standard development flow. Once implementation is complete, it should automatically proceed to review without user intervention. This maintains workflow momentum and ensures quality gates are applied consistently.
 
 ---
 
@@ -389,7 +445,7 @@ Story Context XML is the single source of truth for implementation:
 
 **With Story Context:** Developer reuses existing code, follows established patterns, produces consistent implementation.
 
-**Strongly recommended:** Run `/bmad/story-context` before `/bmad/dev-story` for best results.
+**Strongly recommended:** Run `/bmad:phase-4:story-context` before `/bmad:phase-4:dev-story` for best results.
 
 ### 3. Reuse Over Rebuild
 
@@ -457,7 +513,7 @@ As you work, update the story file:
 
 1. **User runs command:**
    ```
-   /bmad/dev-story
+   /bmad:phase-4:dev-story
    ```
 
 2. **Workflow delegates to bmad-dev:**
@@ -554,7 +610,7 @@ As you work, update the story file:
 
    **Status:** Ready for code review
 
-   **Recommended Next Step:** Run /bmad/code-review
+   **Recommended Next Step:** Run /bmad:phase-4:code-review
    ```
 
 6. **User reviews and continues:**
@@ -563,10 +619,10 @@ As you work, update the story file:
    cat .bmad/stories/story-1.1-user-signup-login.md
 
    # Run code review
-   /bmad/code-review
+   /bmad:phase-4:code-review
 
    # Or implement next story
-   /bmad/dev-story
+   /bmad:phase-4:dev-story
    ```
 
 **Key Points:**
@@ -685,7 +741,7 @@ As you work, update the story file:
 
    **Status:** Ready for code review
 
-   **Recommended Next Step:** Run /bmad/code-review
+   **Recommended Next Step:** Run /bmad:phase-4:code-review
    ```
 
 **Key Points:**
@@ -786,7 +842,7 @@ As you work, update the story file:
 
    **Status:** Ready for re-review
 
-   **Recommended Next Step:** Run /bmad/code-review again for re-review
+   **Recommended Next Step:** Run /bmad:phase-4:code-review again for re-review
    ```
 
 **Key Points:**
@@ -811,9 +867,9 @@ cat .bmad/sprint-status.yaml | grep -A 1 development_status
 ```
 
 **Solutions:**
-1. **Stories are "drafted":** Run `/bmad/story-ready` to mark as ready
-2. **No stories exist:** Run `/bmad/create-story` to create stories from epics
-3. **Stories are "done":** All work complete! Run `/bmad/create-story` for next epic
+1. **Stories are "drafted":** Run `/bmad:phase-4:story-ready` to mark as ready
+2. **No stories exist:** Run `/bmad:phase-4:create-story` to create stories from epics
+3. **Stories are "done":** All work complete! Run `/bmad:phase-4:create-story` for next epic
 
 ### Problem: "Story Context missing"
 
@@ -824,7 +880,7 @@ cat .bmad/sprint-status.yaml | grep -A 1 development_status
 **Solution:**
 ```bash
 # Generate Story Context for next ready story
-/bmad/story-context
+/bmad:phase-4:story-context
 ```
 
 **Prevention:** Always run story-context before dev-story for best results
@@ -841,7 +897,7 @@ interface not provided in Story Context.
 
 **Solutions:**
 1. **Provide missing info:** Answer developer's question directly
-2. **Update Story Context:** Re-run `/bmad/story-context` if context is stale
+2. **Update Story Context:** Re-run `/bmad:phase-4:story-context` if context is stale
 3. **Clarify AC:** If requirement is ambiguous, update story file and re-run
 
 ### Problem: "Tests failing"
@@ -855,7 +911,7 @@ interface not provided in Story Context.
 - Test environment issue (user needs to fix)
 - Dependency missing (user needs to install)
 
-**Solution:** Provide necessary environment fixes, then re-run `/bmad/dev-story` to resume
+**Solution:** Provide necessary environment fixes, then re-run `/bmad:phase-4:dev-story` to resume
 
 ### Problem: "Developer rebuilt existing code"
 
@@ -864,7 +920,7 @@ interface not provided in Story Context.
 **Root Cause:** Story Context was missing or didn't include the existing utility
 
 **Prevention:**
-1. Always run `/bmad/story-context` before implementation
+1. Always run `/bmad:phase-4:story-context` before implementation
 2. Ensure story-context workflow finds all relevant existing code
 3. Review Story Context XML before implementation starts
 
@@ -900,25 +956,25 @@ cat .bmad/architecture.md
 
 These should typically run **before** dev-story:
 
-- **`/bmad/workflow-init`** - Initialize project structure
-- **`/bmad/architecture`** - Define architectural patterns
-- **`/bmad/create-epics-and-stories`** - Break PRD into stories
-- **`/bmad/sprint-planning`** - Generate sprint status tracking
-- **`/bmad/story-context`** - Generate Story Context XML (STRONGLY RECOMMENDED)
-- **`/bmad/story-ready`** - Mark drafted story as ready-for-dev
+- **`/bmad:meta:workflow-init`** - Initialize project structure
+- **`/bmad:phase-3:architecture`** - Define architectural patterns
+- **`/bmad:phase-2:create-epics-and-stories`** - Break PRD into stories
+- **`/bmad:phase-4:sprint-planning`** - Generate sprint status tracking
+- **`/bmad:phase-4:story-context`** - Generate Story Context XML (STRONGLY RECOMMENDED)
+- **`/bmad:phase-4:story-ready`** - Mark drafted story as ready-for-dev
 
 ### Follow-Up Workflows
 
 These should typically run **after** dev-story:
 
-- **`/bmad/code-review`** - Perform senior developer code review (RECOMMENDED NEXT)
-- **`/bmad/story-done`** - Mark story as complete after review passes
-- **`/bmad/dev-story`** - Implement next ready story (repeat)
+- **`/bmad:phase-4:code-review`** - Perform senior developer code review (RECOMMENDED NEXT)
+- **`/bmad:phase-4:story-done`** - Mark story as complete after review passes
+- **`/bmad:phase-4:dev-story`** - Implement next ready story (repeat)
 
 ### Related Workflows
 
 - **`/bmad/correct-course`** - Navigate significant changes during sprint
-- **`/bmad/retrospective`** - Review epic completion, extract lessons
+- **`/bmad:phase-4:retrospective`** - Review epic completion, extract lessons
 
 ---
 
@@ -979,7 +1035,7 @@ Your story implementation is successful when:
 - May use inconsistent patterns
 - Lower quality, slower implementation
 
-**Strongly recommend:** Always run `/bmad/story-context` before `/bmad/dev-story`
+**Strongly recommend:** Always run `/bmad:phase-4:story-context` before `/bmad:phase-4:dev-story`
 
 ### Continuous Execution Reduces Friction
 
@@ -1043,7 +1099,7 @@ The bmad-dev agent is trained to:
 After story implementation, the recommended next step is code review:
 
 ```bash
-/bmad/code-review
+/bmad:phase-4:code-review
 ```
 
 Code review:
@@ -1057,13 +1113,13 @@ Code review:
 
 ---
 
-**Ready to implement stories?** Run `/bmad/dev-story` when you have stories marked "ready-for-dev" in your sprint status.
+**Ready to implement stories?** Run `/bmad:phase-4:dev-story` when you have stories marked "ready-for-dev" in your sprint status.
 
 **Best practice flow:**
-1. `/bmad/story-context` - Generate context
-2. `/bmad/dev-story` - Implement story
-3. `/bmad/code-review` - Review implementation
-4. Address review feedback (re-run `/bmad/dev-story` if needed)
-5. `/bmad/story-done` - Mark complete
+1. `/bmad:phase-4:story-context` - Generate context
+2. `/bmad:phase-4:dev-story` - Implement story
+3. `/bmad:phase-4:code-review` - Review implementation
+4. Address review feedback (re-run `/bmad:phase-4:dev-story` if needed)
+5. `/bmad:phase-4:story-done` - Mark complete
 
 **Core Philosophy:** AC-driven development, Story Context is truth, reuse over rebuild, continuous execution, tests are non-negotiable.

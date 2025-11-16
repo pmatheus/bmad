@@ -17,9 +17,9 @@ This workflow delegates to the **bmad-pm** (Product Manager) subagent, which spe
 ## Prerequisites
 
 1. BMAD plugin installed and initialized
-2. Run `/bmad/workflow-init` to set up project structure
-3. (Optional but recommended) Product brief created via `/bmad/product-brief`
-4. (Optional for complex domains) Domain research via `/bmad/domain-research`
+2. Run `/bmad:meta:workflow-init` to set up project structure
+3. (Optional but recommended) Product brief created via `/bmad:phase-1:product-brief`
+4. (Optional for complex domains) Domain research via `/bmad:phase-1:domain-research`
 
 ## How It Works
 
@@ -29,7 +29,7 @@ BMAD supports three project tracks:
 
 - **BMad Method**: Full product development with comprehensive planning (uses this workflow)
 - **Enterprise Method**: Enterprise-scale projects with extended planning (uses this workflow)
-- **Quick Flow**: Single feature/bug fix (uses `/bmad/tech-spec` instead)
+- **Quick Flow**: Single feature/bug fix (uses `/bmad:phase-2:tech-spec` instead)
 
 **This workflow is for BMad Method and Enterprise Method tracks.**
 
@@ -70,10 +70,10 @@ status_file: {output_folder}/bmm-workflow-status.yaml
 
 **Validate:**
 - Check if `project_track` is "BMad Method" or "Enterprise Method"
-  - If "Quick Flow" → Redirect to `/bmad/tech-spec`
+  - If "Quick Flow" → Redirect to `/bmad:phase-2:tech-spec`
 - Check if PRD workflow already completed
   - If completed → Ask user if they want to overwrite
-  - If "no" → Exit and suggest `/bmad/workflow-status`
+  - If "no" → Exit and suggest `/bmad:workflow-status`
 
 **If no status file found:**
 - Set `standalone_mode = true`
@@ -215,10 +215,10 @@ Created:
 
 Next Steps:
 {if_no_epics}
-1. Run /bmad/create-epics-and-stories to break down requirements into implementable stories
+1. Run /bmad:phase-2:create-epics-and-stories to break down requirements into implementable stories
 {endif}
-2. Run /bmad/architecture to create technical architecture
-3. Run /bmad/workflow-status to see your full project status
+2. Run /bmad:phase-3:architecture to create technical architecture
+3. Run /bmad:workflow-status to see your full project status
 ```
 
 ## Key Principles
@@ -371,7 +371,7 @@ If user chooses to continue with epic breakdown:
 
 ### Track Routing
 
-- **Quick Flow projects** should use `/bmad/tech-spec` instead of this workflow
+- **Quick Flow projects** should use `/bmad:phase-2:tech-spec` instead of this workflow
 - Quick Flow is for single features, bug fixes, or small atomic changes
 - This workflow is for comprehensive product development
 
@@ -381,7 +381,7 @@ If user chooses to continue with epic breakdown:
 - Keeps sessions focused and manageable
 - Better context window management
 - Clear separation of planning phases
-- User runs `/bmad/create-epics-and-stories` separately
+- User runs `/bmad:phase-2:create-epics-and-stories` separately
 
 **Option B: Continue Here**
 - Good for simpler projects
@@ -395,7 +395,7 @@ If no workflow status file exists:
 - Workflow runs without status tracking
 - PRD still created successfully
 - User manages next steps manually
-- Consider running `/bmad/workflow-init` for better tracking
+- Consider running `/bmad:meta:workflow-init` for better tracking
 
 ### Session Management
 
@@ -407,18 +407,18 @@ For very complex products:
 
 ## Related Workflows
 
-- `/bmad/workflow-init` - Initialize project structure (run first)
-- `/bmad/product-brief` - Quick product vision doc (optional, before PRD)
-- `/bmad/domain-research` - Research complex domains (optional, before PRD)
-- `/bmad/create-epics-and-stories` - Break PRD into epics (after PRD)
-- `/bmad/architecture` - Technical architecture (after PRD or epics)
-- `/bmad/workflow-status` - Check project status (anytime)
+- `/bmad:meta:workflow-init` - Initialize project structure (run first)
+- `/bmad:phase-1:product-brief` - Quick product vision doc (optional, before PRD)
+- `/bmad:phase-1:domain-research` - Research complex domains (optional, before PRD)
+- `/bmad:phase-2:create-epics-and-stories` - Break PRD into epics (after PRD)
+- `/bmad:phase-3:architecture` - Technical architecture (after PRD or epics)
+- `/bmad:workflow-status` - Check project status (anytime)
 
 ## Troubleshooting
 
 **"Quick Flow Track - Redirecting"**
 - Your project is set to Quick Flow track
-- Use `/bmad/tech-spec` for focused technical specs
+- Use `/bmad:phase-2:tech-spec` for focused technical specs
 - PRD is for comprehensive product development
 
 **"PRD already completed"**
@@ -429,7 +429,7 @@ For very complex products:
 **"No workflow status file"**
 - Running in standalone mode
 - PRD will still be created
-- Run `/bmad/workflow-init` for better project tracking
+- Run `/bmad:meta:workflow-init` for better project tracking
 
 **Context window concerns**
 - For very complex products, consider multiple sessions
@@ -437,7 +437,7 @@ For very complex products:
 - Can do epic breakdown in separate session
 
 **Domain complexity**
-- If healthcare, finance, aerospace, etc., consider `/bmad/domain-research` first
+- If healthcare, finance, aerospace, etc., consider `/bmad:phase-1:domain-research` first
 - PM agent will offer research options if complexity detected
 - Better requirements with domain context loaded
 
