@@ -41,9 +41,15 @@ Each story executes: create → context → dev → review → done.
 See [shared/prerequisites.md#phase-4-bring-to-life](../shared/prerequisites.md)
 
 **Workflow-specific:**
-- [ ] At least one story in backlog status
+- [ ] At least one epic defined in sprint-status.yaml
 - [ ] Sprint artifacts directory exists
-- [ ] Epic files available
+- [ ] Epic files available (epics.md or epic-{N}.md)
+
+**Note on Epic Context:**
+- Epic context (epic-tech-context) is **required** before stories can be created
+- Workflow will **automatically generate** epic context for any epic with status "backlog"
+- You do not need to manually run epic-tech-context before bring-to-life
+- If epic context generation fails, the epic will be marked "blocked" and workflow continues with other epics
 
 ## Instructions
 
@@ -222,7 +228,14 @@ def gather_all_candidates():
         else:
             # PRIORITY 3: Backlog stories (no explicit dependencies)
             if status == "backlog":
-                candidates['priority_3'].append(key)
+                # CRITICAL: Verify epic is contexted before adding story
+                epic_num = extract_epic_number(key)
+                epic_key = f"epic-{epic_num}"
+
+                # Only add story if its epic has been contexted
+                if sprint_status.get(epic_key) == "contexted":
+                    candidates['priority_3'].append(key)
+                # If epic not contexted, skip story (will be available after epic context generated)
 
     return candidates
 ```
@@ -436,6 +449,30 @@ def select_next_cluster():
     return clusters[0], tier
 ```
 
+#### Step 6: Detect Epics Needing Context
+
+```python
+def get_epics_needing_context():
+    """
+    Identify epics that need context generation before their stories can be created.
+    Returns list of epic keys with status "backlog" (not yet contexted).
+    """
+    epics_need_context = []
+
+    for key, status in sprint_status:
+        # Skip non-epic entries
+        if not key.startswith("epic-"):
+            continue
+
+        # Epic with status "backlog" needs context generation
+        if status == "backlog":
+            epics_need_context.append(key)
+
+    return epics_need_context
+```
+
+**Purpose:** This function enables automatic epic context generation when bring-to-life encounters stories that cannot proceed because their parent epic hasn't been contexted.
+
 **OUTCOME:** Returns story cluster + tier information
 - Cluster size 1 → Sequential execution
 - Cluster size 2+ → Parallel execution (verified independent)
@@ -450,7 +487,61 @@ WHILE remaining_context > 20%:
   story_cluster, tier = select_next_cluster()  # From Section 2.5
 
   IF story_cluster is None:
-    BREAK  # All done or all blocked
+    # No candidate stories available - check WHY
+    epics_needing_context = get_epics_needing_context()  # From Section 2.5, Step 6
+
+    IF epics_needing_context:
+      # AUTOMATIC EPIC CONTEXT GENERATION
+      PRINT f"🔧 Generating context for {len(epics_needing_context)} epic(s): {epics_needing_context}"
+
+      # Launch epic-tech-context for each epic
+      # If multiple epics, launch in parallel (single message)
+      epic_workers = []
+
+      FOR epic_key in epics_needing_context:
+        epic_workers.append(
+          Task(
+            subagent_type="bmad:bmad-architect",
+            description=f"Generate epic context for {epic_key}",
+            prompt=f"""
+            Generate technical context for {epic_key} using /bmad:phase-4:epic-tech-context.
+
+            This is required before stories in this epic can be created.
+
+            After context generation:
+            1. Verify epic-tech-spec-{epic_key}.md was created
+            2. Update sprint-status.yaml: {epic_key} → "contexted"
+            3. Report completion status
+
+            Return: {{
+              "epic_key": "{epic_key}",
+              "status": "completed" | "failed",
+              "spec_file": "path/to/epic-tech-spec-{epic_key}.md"
+            }}
+            """
+          )
+        )
+
+      # Wait for all epic context workers to complete
+      epic_results = await_all_workers(epic_workers)
+
+      # Update sprint-status for successfully contexted epics
+      FOR result in epic_results:
+        IF result.status == "completed":
+          update_sprint_status(result.epic_key, "contexted")
+          PRINT f"✅ {result.epic_key} contexted"
+        ELSE:
+          PRINT f"❌ {result.epic_key} failed to context: {result.error}"
+          # Mark epic as blocked so it doesn't retry indefinitely
+          update_sprint_status(result.epic_key, "blocked")
+
+      # Re-run Ultra Think with newly contexted epics
+      # (Stories from contexted epics will now be available)
+      CONTINUE
+
+    ELSE:
+      # Truly all done or all blocked
+      BREAK  # Exit main loop
 
   cluster_size = len(story_cluster)
 
@@ -703,6 +794,8 @@ When context < 20% or critical blocker:
 ## Session Summary
 - Stories Completed: {count}
 - Stories Blocked: {count}
+- Epics Contexted: {count}
+- Epics Blocked: {count}
 - Last Execution Mode: {SEQUENTIAL | PARALLEL}
 - Last Cluster Size: {size}
 - Last Tier: {PRIORITY_1_FIXES | PRIORITY_2_DEPENDENCIES | PRIORITY_3_BACKLOG}
@@ -711,6 +804,19 @@ When context < 20% or critical blocker:
 ## Completed Stories
 - ✅ {story-key} ({tier}, {mode}, worker-{id})
 - ✅ {story-key} ({tier}, {mode}, worker-{id})
+...
+
+## Epic Context Generation
+{if any epics were contexted or blocked}
+
+**Contexted Epics:**
+- ✅ {epic-key}: epic-tech-spec-{epic-key}.md created
+...
+
+**Blocked Epics:**
+{if any}
+- 🚫 {epic-key}: {error-reason}
+  - Affected Stories: {list of stories that cannot proceed}
 ...
 
 ## Blocked Stories
@@ -771,6 +877,11 @@ When context < 20% or critical blocker:
 ## Context Notes
 {Any important observations from this session}
 - {note about patterns, common issues, etc.}
+
+**Epic Context Notes:**
+- Total epics processed: {contexted + blocked}
+- Epic context generation added {estimated tokens} to context usage
+- {any patterns observed in epic context generation}
 ...
 ```
 
