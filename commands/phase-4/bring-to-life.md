@@ -210,9 +210,27 @@ def gather_all_candidates():
 
         # PRIORITY 1: Stories needing fixes (HIGHEST PRIORITY)
         if status in ["review", "in-progress"]:
+            # Check for review issues first
             if has_pending_review_issues(key):
                 candidates['priority_1'].append(key)
                 continue
+
+            # CRITICAL: Detect orphaned "in-progress" stories (worker died/timed out)
+            if status == "in-progress":
+                # Check if story has active worker lock
+                if not has_active_worker_lock(key):  # From Section 2.6
+                    # Worker died/timed out - story is orphaned
+                    PRINT f"🔧 Detected orphaned in-progress story: {key}"
+
+                    # Reset to previous status for retry
+                    previous_status = get_previous_status(key)  # From Section 2.6
+                    update_sprint_status(key, previous_status)
+
+                    PRINT f"   ↩️  Reset to '{previous_status}' for high-priority retry"
+
+                    # Add to priority_1 for immediate retry
+                    candidates['priority_1'].append(key)
+                    continue
 
         # PRIORITY 2: Stories with explicit dependencies
         dependencies = extract_dependencies_from_story(key)
@@ -477,6 +495,115 @@ def get_epics_needing_context():
 - Cluster size 1 → Sequential execution
 - Cluster size 2+ → Parallel execution (verified independent)
 
+---
+
+### 2.6. Retry Tracking Infrastructure
+
+**Purpose:** Track retry attempts for stories and epics to prevent infinite loops while allowing recovery from transient failures (worker timeouts, network issues, etc.).
+
+#### Retry Tracking Data Structure
+
+Store in checkpoint file or separate `{sprint_artifacts}/retry-tracking.yaml`:
+
+```yaml
+retry_counts:
+  story-3-2: 1          # First retry
+  epic-4: 2             # Second retry (max reached)
+
+max_retries:
+  stories: 2            # Max 2 retries per story
+  epics: 2              # Max 2 retries per epic
+```
+
+#### Retry Tracking Functions
+
+```python
+def get_retry_count(key):
+    """
+    Get current retry count for a story or epic.
+    Returns 0 if never retried.
+    """
+    if key not in retry_tracking['retry_counts']:
+        return 0
+    return retry_tracking['retry_counts'][key]
+
+def increment_retry_count(key):
+    """
+    Increment retry count for a story or epic.
+    Used after timeout/failure to track retry attempts.
+    """
+    current = get_retry_count(key)
+    retry_tracking['retry_counts'][key] = current + 1
+    save_retry_tracking()
+
+def clear_retry_count(key):
+    """
+    Clear retry count for a story or epic after success.
+    Allows future retries if story/epic is worked on again.
+    """
+    if key in retry_tracking['retry_counts']:
+        del retry_tracking['retry_counts'][key]
+        save_retry_tracking()
+
+def has_active_worker_lock(story_key):
+    """
+    Check if story has an active worker lock.
+    Worker locks are created when worker claims story (status → "in-progress").
+    Lock should include timestamp and worker ID.
+
+    Returns True if:
+    - Story status is "in-progress" AND
+    - Worker lock file exists AND
+    - Lock timestamp < 2 hours old
+
+    Returns False if:
+    - No lock file (orphaned)
+    - Lock timestamp > 2 hours (worker died/timed out)
+    """
+    lock_file = f"{sprint_artifacts}/.locks/{story_key}.lock"
+
+    if not file_exists(lock_file):
+        return False
+
+    lock_data = read_yaml(lock_file)
+    lock_timestamp = lock_data.get('timestamp')
+    worker_id = lock_data.get('worker_id')
+
+    # Check if lock is stale (> 2 hours old)
+    if time_since(lock_timestamp) > 7200:  # 2 hours in seconds
+        return False
+
+    return True
+
+def get_previous_status(story_key):
+    """
+    Get previous status for a story before it was marked "in-progress".
+    Used when resetting after timeout/failure.
+
+    Check in order:
+    1. Checkpoint file (has previous status)
+    2. Story file dependencies (if has deps → "backlog")
+    3. Default to "backlog"
+    """
+    # Try checkpoint first
+    if checkpoint_exists():
+        checkpoint = load_checkpoint()
+        if story_key in checkpoint.get('story_statuses', {}):
+            return checkpoint['story_statuses'][story_key]
+
+    # Check if story has dependencies
+    story_file = f"{stories_dir}/{story_key}.md"
+    if file_exists(story_file):
+        story_content = read_file(story_file)
+        if "depends_on:" in story_content:
+            return "backlog"  # Has dependencies
+
+    # Default
+    return "backlog"
+```
+
+**OUTCOME:** Retry tracking infrastructure ready for use in worker handling and epic context generation.
+
 ### 3. Main Loop: Intelligent Story Development
 
 **CRITICAL:** Uses Ultra Think (Section 2.5) to determine execution strategy dynamically.
@@ -523,17 +650,52 @@ WHILE remaining_context > 20%:
         )
 
       # Wait for all epic context workers to complete
-      epic_results = await_all_workers(epic_workers)
+      epic_results = await_all_workers(epic_workers, timeout=7200)  # 2 hour timeout
 
-      # Update sprint-status for successfully contexted epics
+      # Update sprint-status for successfully contexted epics with retry tracking
       FOR result in epic_results:
+        epic_key = result.epic_key
+
         IF result.status == "completed":
-          update_sprint_status(result.epic_key, "contexted")
-          PRINT f"✅ {result.epic_key} contexted"
+          # Epic context generated successfully
+          update_sprint_status(epic_key, "contexted")
+          clear_retry_count(epic_key)  # From Section 2.6
+          PRINT f"✅ {epic_key} contexted"
+
+        ELIF result.status == "timeout":
+          # Epic context generation timed out
+          PRINT f"⏱️  Epic context timeout: {epic_key}"
+
+          # Track retry attempt
+          retry_count = get_retry_count(epic_key)  # From Section 2.6
+
+          IF retry_count < 2:
+            # Allow retry
+            update_sprint_status(epic_key, "backlog")  # Will retry next iteration
+            increment_retry_count(epic_key)  # From Section 2.6
+            PRINT f"   ↩️  Will retry (attempt {retry_count + 1}/2)"
+          ELSE:
+            # Max retries exceeded
+            update_sprint_status(epic_key, "blocked")
+            PRINT f"   🚫 Max retries exceeded - marking blocked"
+
         ELSE:
-          PRINT f"❌ {result.epic_key} failed to context: {result.error}"
-          # Mark epic as blocked so it doesn't retry indefinitely
-          update_sprint_status(result.epic_key, "blocked")
+          # Epic context generation failed (error)
+          error_msg = result.error
+          PRINT f"❌ {epic_key} failed to context: {error_msg}"
+
+          # Track retry attempt
+          retry_count = get_retry_count(epic_key)
+
+          IF retry_count < 2:
+            # Allow retry
+            update_sprint_status(epic_key, "backlog")  # Will retry next iteration
+            increment_retry_count(epic_key)
+            PRINT f"   ↩️  Will retry (attempt {retry_count + 1}/2)"
+          ELSE:
+            # Max retries exceeded
+            update_sprint_status(epic_key, "blocked")
+            PRINT f"   🚫 Max retries exceeded after 3 attempts - marking blocked"
 
       # Re-run Ultra Think with newly contexted epics
       # (Stories from contexted epics will now be available)
@@ -577,10 +739,82 @@ WHILE remaining_context > 20%:
         workers.append(launch_worker(story, f"worker-par-{i+1}"))
 
     # Wait for ALL workers to complete
-    results = await_all_workers(workers)
+    results = await_all_workers(workers, timeout=7200)  # 2 hour timeout per worker
 
-  # 3C: Aggregate Results
-  stories_completed += count_successes(results)
+  # 3C: Handle Worker Timeouts/Failures and Aggregate Results
+
+  # Process worker results with timeout/failure recovery
+  FOR worker_result in results:
+    story_key = worker_result.story_key
+    worker_id = worker_result.worker_id
+
+    IF worker_result.status == "timeout":
+      # Worker exceeded 2 hour timeout
+      PRINT f"⏱️  Worker timeout on {story_key} ({worker_id})"
+
+      # Reset story status to enable retry
+      previous_status = get_previous_status(story_key)  # From Section 2.6
+      update_sprint_status(story_key, previous_status)
+
+      # Track retry attempt
+      retry_count = get_retry_count(story_key)  # From Section 2.6
+      IF retry_count < 2:
+        increment_retry_count(story_key)  # From Section 2.6
+        PRINT f"   ↩️  Reset to '{previous_status}' - will retry (attempt {retry_count + 1}/2)"
+      ELSE:
+        # Max retries exceeded
+        update_sprint_status(story_key, "blocked")
+        PRINT f"   🚫 Max retries exceeded - marking blocked"
+        blockers.append({
+          'story_key': story_key,
+          'reason': f"Worker timeout after {retry_count + 1} attempts",
+          'critical': False
+        })
+
+      # Remove worker lock
+      remove_worker_lock(story_key)
+
+    ELIF worker_result.status == "failed":
+      # Worker encountered error
+      error_msg = worker_result.error
+      PRINT f"❌ Worker failed on {story_key}: {error_msg}"
+
+      # Reset story status to enable retry
+      previous_status = get_previous_status(story_key)
+      update_sprint_status(story_key, previous_status)
+
+      # Track retry attempt
+      retry_count = get_retry_count(story_key)
+      IF retry_count < 2:
+        increment_retry_count(story_key)
+        PRINT f"   ↩️  Reset to '{previous_status}' - will retry (attempt {retry_count + 1}/2)"
+      ELSE:
+        # Max retries exceeded
+        update_sprint_status(story_key, "blocked")
+        PRINT f"   🚫 Max retries exceeded - marking blocked"
+        blockers.append({
+          'story_key': story_key,
+          'reason': f"Worker failed after {retry_count + 1} attempts: {error_msg}",
+          'critical': True  # Worker failures are more concerning than timeouts
+        })
+
+      # Remove worker lock
+      remove_worker_lock(story_key)
+
+    ELIF worker_result.status == "success":
+      # Worker completed successfully
+      PRINT f"✅ {story_key} completed by {worker_id}"
+
+      # Clear retry count on success
+      clear_retry_count(story_key)  # From Section 2.6
+
+      # Remove worker lock
+      remove_worker_lock(story_key)
+
+      stories_completed += 1
+
+  # Count actual successes after timeout/failure handling
+  # (already counted in loop above)
 
   # Handle blockers
   blockers = extract_blockers(results)
@@ -600,6 +834,10 @@ WHILE remaining_context > 20%:
   IF remaining_context < 20%:
     save_checkpoint(reason="CONTEXT_DEPLETED")
     BREAK
+
+  # 3E: Sprint Status Validation & Sync
+  # Run validation before next iteration to detect and fix status desync issues
+  validate_sprint_status()  # From Section 3E below
 
   # Loop continues - Ultra Think will re-analyze available stories
   # (Dependencies may have resolved, new stories may be available)
@@ -638,6 +876,85 @@ depends_on: ["2-2", "2-3"]  # Explicit dependencies (or [] for none)
 **Independence criteria:**
 - ✅ **Independent:** No shared files, different modules, no dependencies
 - ❌ **Conflicting:** Shared files, same API endpoints, dependency chain, same epic (unless clearly separate)
+
+---
+
+### 3E: Sprint Status Validation
+
+**Purpose:** Detect and fix sprint status desync issues that can cause premature workflow stops. Runs after each main loop iteration.
+
+```python
+def validate_sprint_status():
+    """
+    Validate sprint status consistency and detect issues:
+    1. Stories marked 'done' but missing completion markers
+    2. Orphaned 'in-progress' stories (no active worker)
+    3. Stories with invalid status values
+
+    This prevents:
+    - Status desync blocking progress
+    - Orphaned stories preventing new work
+    - Invalid states causing workflow errors
+    """
+    issues_detected = False
+
+    for story_key, status in sprint_status:
+        # Skip non-story entries
+        if is_epic_or_retro(story_key):
+            continue
+
+        # VALIDATION 1: Stories marked 'done' should have completion markers
+        if status == "done":
+            story_file = f"{stories_dir}/{story_key}.md"
+
+            if not file_exists(story_file):
+                WARN f"⚠️  Status desync: {story_key} marked 'done' but no story file exists"
+                issues_detected = True
+                continue
+
+            story_content = read_file(story_file)
+
+            # Check for completion marker (added by story-done workflow)
+            if "## Story Completion" not in story_content:
+                WARN f"⚠️  Status desync: {story_key} marked 'done' but missing completion section"
+                WARN f"   This may indicate story-done workflow didn't complete properly"
+                issues_detected = True
+                # Don't auto-fix - might be mid-workflow or user intentional
+
+        # VALIDATION 2: In-progress stories should have active worker locks
+        elif status == "in-progress":
+            # Check if worker is still active (has lock)
+            if not has_active_worker_lock(story_key):  # From Section 2.6
+                WARN f"⚠️  Orphaned in-progress: {story_key} - no active worker lock"
+                WARN f"   Resetting to backlog for retry"
+
+                # Reset to backlog (will be retried in next iteration)
+                previous_status = get_previous_status(story_key)  # From Section 2.6
+                update_sprint_status(story_key, previous_status)
+
+                PRINT f"   ✅ Reset {story_key} to '{previous_status}'"
+                issues_detected = True
+
+        # VALIDATION 3: Check for invalid status values
+        valid_statuses = ["backlog", "in-progress", "review", "done", "blocked", "contexted"]
+        if status not in valid_statuses:
+            WARN f"⚠️  Invalid status: {story_key} has status '{status}'"
+            WARN f"   Valid statuses: {valid_statuses}"
+            issues_detected = True
+
+    if issues_detected:
+        PRINT "🔍 Sprint status validation found issues (see warnings above)"
+        PRINT "   Issues have been auto-fixed where safe"
+    else:
+        # Silent success - no need to log on every iteration
+        pass
+
+    return issues_detected
+```
+
+**OUTCOME:** Sprint status is validated and corrected before next iteration, preventing premature workflow stops.
+
+---
 
 ### 3B: Worker Launch (Conditional: Sequential vs Parallel)
 
@@ -824,9 +1141,24 @@ When context < 20% or critical blocker:
 - 🚫 {story-key}: {blocker-reason}
   - Critical: {yes/no}
   - Worker: {worker-id}
-  - Retry Count: {count}
-  - Review Outcome: {BLOCKED | CHANGES_REQUESTED | max_retries}
+  - Retry Count: {count}  # From retry tracking (Section 2.6)
+  - Review Outcome: {BLOCKED | CHANGES_REQUESTED | worker_timeout | worker_failed | max_retries}
   - Action Items: {extracted from review if available}
+...
+
+## Retry Tracking State
+{Snapshot of current retry counts - helps prevent re-attempts of permanently blocked items}
+
+**Active Retries:**
+{if any stories/epics have retry_count > 0 but < 2}
+- {story-key}: {retry_count}/2 attempts
+- {epic-key}: {retry_count}/2 attempts
+...
+
+**Max Retries Reached:**
+{if any stories/epics have retry_count >= 2}
+- {story-key}: Failed after 3 attempts (status: blocked)
+- {epic-key}: Failed after 3 attempts (status: blocked)
 ...
 
 ## Dependency Graph State
@@ -891,10 +1223,19 @@ Save to: `{sprint_artifacts}/bring-to-life-checkpoint.md`
 
 When resuming from checkpoint:
 1. Extract `stories_completed` count
-2. Read `Dependency Graph State` to understand pending work
-3. Read `Blocked Stories` to prioritize fixes
-4. Use `Next Run Strategy` to inform Ultra Think analysis
-5. Continue from where previous session stopped
+2. Load `Retry Tracking State` to restore retry counts (prevents re-attempting failed items)
+3. Read `Dependency Graph State` to understand pending work
+4. Read `Blocked Stories` to prioritize fixes
+5. Use `Next Run Strategy` to inform Ultra Think analysis
+6. Continue from where previous session stopped
+
+**Retry Tracking Persistence:**
+
+The checkpoint file now includes retry counts, which should be:
+1. **Loaded on resume:** Restore retry counts from `Retry Tracking State` section
+2. **Updated during session:** Increment/clear as workers timeout/fail/succeed
+3. **Saved on checkpoint:** Include current retry counts in checkpoint
+4. **Used for decisions:** Check retry counts before attempting work on stories/epics
 
 ### Final Report
 
