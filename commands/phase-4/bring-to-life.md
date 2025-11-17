@@ -97,6 +97,85 @@ See [shared/common-operations.md#load-configuration](../shared/common-operations
 
 Verify: sprint-status.yaml, epics.md or epic-{N}.md files exist.
 
+### 1.5 CLAUDE.md Validation
+
+**Purpose:** Ensure agents can navigate project during multi-story development
+
+**Check for CLAUDE.md:**
+```bash
+if [ ! -f "{output_folder}/CLAUDE.md" ]; then
+  warn "No CLAUDE.md found - agents may struggle with navigation"
+fi
+```
+
+**Why CLAUDE.md is critical for bring-to-life:**
+- Multiple stories will reference existing code
+- Agents need to locate files quickly across codebase
+- File map prevents redundant Grep/Glob searches
+- Coding standards ensure consistency across all stories
+- Common tasks provide operational guidance
+
+**If CLAUDE.md missing:**
+
+Display warning:
+```
+⚠️ CLAUDE.md Not Found
+
+bring-to-life will create multiple stories across many files.
+Without CLAUDE.md, agents will have difficulty:
+- Locating existing files and components
+- Understanding project structure
+- Following coding standards consistently
+- Navigating the codebase efficiently
+
+This may lead to:
+- Slower story development
+- Duplicate code creation
+- Inconsistent patterns
+- Difficulty finding related modules
+```
+
+**Ask user via AskUserQuestion:**
+```
+Question: "Generate CLAUDE.md now? (Recommended for multi-story development)"
+Options:
+- Yes, generate now (strongly recommended)
+- No, continue without it (may impact efficiency)
+```
+
+**If user chooses Yes:**
+```python
+# Call generate-claude-md workflow
+Task(
+    subagent_type="general-purpose",
+    description="Generate CLAUDE.md for navigation",
+    prompt="""
+    Generate CLAUDE.md file for project navigation and coding standards.
+
+    Use /bmad:meta:generate-claude-md workflow.
+
+    This is critical for bring-to-life workflow because:
+    - Multiple workers need to navigate codebase
+    - File map enables quick file discovery
+    - Standards ensure consistency across stories
+
+    Wait for completion before continuing with bring-to-life.
+    """
+)
+```
+
+**If user chooses No:**
+- Log: "⚠️ Proceeding without CLAUDE.md - agents will use Grep/Glob for navigation (slower)"
+- Continue to Step 2
+- Note: CLAUDE.md can be generated later, but efficiency will be impacted
+
+**If CLAUDE.md exists:**
+- Verify it's current (check last updated timestamp)
+- If outdated (> 30 days old), suggest regeneration
+- Continue to Step 2
+
+**Timing:** After Step 1 (config loaded), before Step 2 (initialize tracking)
+
 ### 2. Initialize Progress Tracking
 
 Check for `{sprint_artifacts}/bring-to-life-checkpoint.md`:

@@ -164,3 +164,67 @@ const projectRelative = absolutePath.replace(projectRoot, '').replace(/^\//, '')
 - `{sprint_artifacts}` - Usually `.bmad/sprint-artifacts`
 - `{story_path}` - `{sprint_artifacts}/stories`
 - `{bmad_folder}` - `.bmad`
+
+## CLAUDE.md Operations
+
+### Update File Map
+**Purpose:** Keep CLAUDE.md navigation index current when files are created
+
+**When to call:**
+- After creating ANY project file (source, config, doc, story, etc.)
+- At end of dev-story (source files created)
+- At end of create-story (story files created)
+- At end of prd/tech-spec/architecture (documentation files created)
+
+**Pattern:**
+```python
+def update_claude_md_file_map(files: list[str]):
+    """
+    Update CLAUDE.md file maps for newly created files.
+
+    Steps:
+    1. Generate descriptions for each file
+    2. Determine target CLAUDE.md files (root/subfolder)
+    3. Insert entries alphabetically
+    4. Enforce size limits (420 root, 200 subfolder)
+    5. Create subfolder CLAUDE.md if needed
+    """
+    for file_path in files:
+        description = extract_file_description(file_path)
+        target_claude = determine_target_claude_md(file_path)
+        update_file_map_section(target_claude, file_path, description)
+
+    enforce_size_limits()
+```
+
+**Example usage:**
+```python
+# At end of workflow that created files
+files_created = [
+    "src/components/Button.tsx",
+    "src/lib/utils.ts",
+    "src/app/page.tsx"
+]
+
+Task(
+    subagent_type="general-purpose",
+    description="Update CLAUDE.md file map",
+    prompt=f"""
+    Update CLAUDE.md file maps for newly created files.
+
+    Files: {files_created}
+
+    Use /bmad:meta:update-claude-md workflow.
+    """
+)
+```
+
+**Size enforcement:**
+- Root > 420 lines → Create subfolder CLAUDE.md
+- Subfolder > 200 lines → Compress descriptions or split
+
+**Key points:**
+- Atomic read-modify-write prevents corruption
+- Alphabetical order maintained automatically
+- File descriptions extracted from comments or inferred
+- Subfolder CLAUDE.md auto-created when directory > 30 files

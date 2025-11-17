@@ -58,6 +58,25 @@
 **For Retrospective:**
 - [ ] Epic completed (all stories done)
 
+### Meta Workflows
+
+**For Workflow Init:**
+- [ ] BMAD plugin installed
+- [ ] Project directory accessible
+
+**For Generate CLAUDE.md:**
+- [ ] .bmad/config.yaml exists (output_folder configured)
+- [ ] ~/agent-os/profiles/ directory accessible
+- [ ] ~/agent-os/profiles/default/ exists (REQUIRED - base for all profiles)
+- [ ] Specific profile exists OR use default as fallback (optional)
+- [ ] PRD.md for tech stack extraction (optional)
+- [ ] Project files for file map generation (optional)
+
+**For Update CLAUDE.md:**
+- [ ] Root CLAUDE.md exists (run generate-claude-md first)
+- [ ] Files to add are readable
+- [ ] File paths are valid
+
 ## Required File Structure
 
 ### Minimal Setup

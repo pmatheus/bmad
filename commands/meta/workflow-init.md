@@ -122,6 +122,83 @@ Ask: "What are you doing with this codebase?"
 **If STATE 5 (Partial/unclear):**
 Display all found artifacts, ask user to explain situation, guide to appropriate path.
 
+### 3.5 CLAUDE.md Check and Generation
+
+**Purpose:** Ensure project has navigation and coding standards in place
+
+**Check for CLAUDE.md:**
+```bash
+if [ ! -f "{output_folder}/CLAUDE.md" ]; then
+  # CLAUDE.md missing
+fi
+```
+
+**Decision logic based on project state:**
+
+**For STATE 1 (New Project):**
+- Recommend generation
+- Explain benefits: "CLAUDE.md provides AI agents with project navigation, coding standards, and operational context"
+
+**For STATE 2 (Planning in progress):**
+- Optional (can wait until implementation)
+- Note: "Can generate now or wait until code exists"
+
+**For STATE 3 (Implementation in progress):**
+- Strongly recommend
+- Explain: "Agents will have difficulty navigating without file map"
+
+**For STATE 4 (Legacy Codebase):**
+- Strongly recommend
+- Explain: "CLAUDE.md helps agents understand existing structure and standards"
+
+**For STATE 5 (Unclear):**
+- Ask user preference
+
+**Ask user via AskUserQuestion:**
+```
+Question: "Generate CLAUDE.md for project navigation and coding standards?"
+Options:
+- Yes, generate now (recommended)
+- No, skip for now
+```
+
+**If user chooses Yes:**
+```python
+# Call generate-claude-md workflow
+Task(
+    subagent_type="general-purpose",
+    description="Generate CLAUDE.md",
+    prompt="""
+    Generate CLAUDE.md file for project navigation and coding standards.
+
+    Use /bmad:meta:generate-claude-md workflow.
+
+    This will:
+    1. Detect project framework (Next.js, Python, Rust, etc.)
+    2. Copy default + specific profile standards to .bmad/standards/
+    3. Extract top 10-15 critical coding rules
+    4. Generate file map for navigation
+    5. Create root CLAUDE.md (≤420 lines)
+    6. Create subfolder CLAUDE.md for large directories
+
+    Wait for completion before proceeding.
+    """
+)
+```
+
+**What gets generated:**
+- Root CLAUDE.md (≤420 lines): Core context, guidelines, file map, troubleshooting
+- .bmad/standards/: Full coding standards from profiles (default + specific)
+- Subfolder CLAUDE.md: For directories with > 30 files (≤200 lines each)
+
+**If user chooses No:**
+- Log warning: "Agents may have difficulty navigating project without CLAUDE.md"
+- Continue to next step
+
+**Timing:** After Step 3 (project state validated), before Step 4 (get project details)
+
+**Note:** CLAUDE.md can be generated later via `/bmad:meta:generate-claude-md` if skipped now
+
 ### 4. Get Project Details (New Projects Only)
 
 **Get project name:**
