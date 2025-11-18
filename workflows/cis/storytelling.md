@@ -4,17 +4,11 @@ description: Craft compelling narratives using proven story frameworks for marke
 
 # Storytelling
 
-## What This Does
+## Purpose
 
 Guides you through structured narrative development using proven story frameworks to create emotionally resonant and engaging stories. This workflow helps craft stories for marketing, pitches, brand narratives, case studies, and any context where compelling storytelling matters.
 
-## Prerequisites
-
-- BMAD plugin installed
-- `/workflow-init` run (creates `.bmad/config.yaml`)
-
-## When to Use
-
+**When to Use:**
 - Creating marketing or brand narratives
 - Developing pitch decks or investor presentations
 - Writing case studies or customer success stories
@@ -23,16 +17,34 @@ Guides you through structured narrative development using proven story framework
 - Transforming data or insights into compelling narratives
 - Developing content marketing or thought leadership pieces
 
+**Prerequisites:**
+- BMAD plugin installed
+- `/workflow-init` run (creates `.bmad/config.yaml`)
+
+## Variables
+
+The following variables are used throughout this workflow:
+
+- `{documentation_dir}` - Directory where story documents are saved (from `.bmad/config.yaml`)
+- `{user_name}` - User's name for personalization (from `.bmad/config.yaml`)
+- `{communication_language}` - Preferred language for communication (from `.bmad/config.yaml`)
+- `{date}` - Current date in YYYY-MM-DD format for file naming
+- `{story_purpose}` - The intended use of the story (marketing, pitch, brand narrative, case study)
+- `{target_audience}` - The intended audience for the story
+- `{key_messages}` - Core takeaways the audience should have
+- `{constraints}` - Any limitations (length, tone, medium, brand guidelines)
+- `{selected_framework}` - The story framework chosen from the 10 available options
+
 ## Instructions
 
-### Step 1: Load Configuration
+### 1. Load Configuration
 
-Read configuration from `.bmad/config.yaml`:
+Read configuration from `.bmad/config.yaml` to retrieve:
 - `documentation_dir` - Where to save the story document
 - `user_name` - Your name for personalization
 - `communication_language` - Preferred language
 
-### Step 2: Gather Story Context
+### 2. Gather Story Context
 
 Ask the user about their storytelling needs:
 - What's the purpose of this story? (marketing, pitch, brand narrative, case study)
@@ -40,69 +52,69 @@ Ask the user about their storytelling needs:
 - What key messages or takeaways do you want the audience to have?
 - Any constraints? (length, tone, medium, brand guidelines)
 
-If context data is provided (e.g., brand info, product details), load and incorporate it.
+If context data is provided (e.g., brand info, product details), load and incorporate it into `{story_purpose}`, `{target_audience}`, `{key_messages}`, and `{constraints}` variables.
 
-### Step 3: Delegate to Storyteller Agent
+### 3. Delegate to Storyteller Agent
 
-Use the Task tool to invoke the `bmad-storyteller` subagent with the story context gathered.
+Use the Task tool to invoke the `bmad-storyteller` subagent with the story context gathered in Step 2.
 
-The agent will guide through narrative development:
+The agent will guide through the following narrative development process:
 
-1. **Select Story Framework** - Choose from 10 proven frameworks:
+**a) Select Story Framework** - Choose from 10 proven frameworks:
 
-   **Transformation Narratives:**
-   - Hero's Journey - Classic transformation arc
-   - Pixar Story Spine - Emotional tension to resolution
-   - Customer Journey Story - Before/after transformation
-   - Challenge-Overcome Arc - Dramatic obstacle to victory
+*Transformation Narratives:*
+- Hero's Journey - Classic transformation arc
+- Pixar Story Spine - Emotional tension to resolution
+- Customer Journey Story - Before/after transformation
+- Challenge-Overcome Arc - Dramatic obstacle to victory
 
-   **Strategic Narratives:**
-   - Brand Story - Values, mission, positioning
-   - Pitch Narrative - Problem to solution structure
-   - Vision Narrative - Future-focused aspiration
-   - Origin Story - Foundational "how it began" narrative
+*Strategic Narratives:*
+- Brand Story - Values, mission, positioning
+- Pitch Narrative - Problem to solution structure
+- Vision Narrative - Future-focused aspiration
+- Origin Story - Foundational "how it began" narrative
 
-   **Specialized Narratives:**
-   - Data Storytelling - Transform insights into narrative
-   - Emotional Hooks - Craft powerful openings
+*Specialized Narratives:*
+- Data Storytelling - Transform insights into narrative
+- Emotional Hooks - Craft powerful openings
 
-2. **Gather Story Elements** - Framework-specific questions to draw out:
-   - Characters and their journeys
-   - Conflict and tension
-   - Transformation and change
-   - Core truth and authenticity
+**b) Gather Story Elements** - Framework-specific questions to draw out:
+- Characters and their journeys
+- Conflict and tension
+- Transformation and change
+- Core truth and authenticity
 
-3. **Craft Emotional Arc** - Develop emotional journey:
-   - Beginning emotion
-   - Turning point shift
-   - Ending emotion
-   - Peaks and valleys
+**c) Craft Emotional Arc** - Develop emotional journey:
+- Beginning emotion
+- Turning point shift
+- Ending emotion
+- Peaks and valleys
 
-4. **Develop Opening Hook** - Create attention-grabbing opening:
-   - Surprising facts or questions
-   - Intriguing statements
-   - Relatable moments
-   - Concrete vivid details
+**d) Develop Opening Hook** - Create attention-grabbing opening:
+- Surprising facts or questions
+- Intriguing statements
+- Relatable moments
+- Concrete vivid details
 
-5. **Write Core Narrative** - Three modes:
-   - User drafts with AI guidance
-   - AI writes first draft for user refinement
-   - Collaborative co-creation
+**e) Write Core Narrative** - Three modes:
+- User drafts with AI guidance
+- AI writes first draft for user refinement
+- Collaborative co-creation
 
-6. **Create Story Variations** - Adapt for different contexts:
-   - Short version (1-3 sentences) - social media, emails
-   - Medium version (1-2 paragraphs) - blog intros, summaries
-   - Extended version - full narrative for articles, presentations
+**f) Create Story Variations** - Adapt for different contexts:
+- Short version (1-3 sentences) - social media, emails
+- Medium version (1-2 paragraphs) - blog intros, summaries
+- Extended version - full narrative for articles, presentations
 
-7. **Usage Guidelines** - Strategic deployment guidance:
-   - Best channels for this story
-   - Audience-specific adaptations
-   - Tone and voice consistency
-   - Visual or multimedia enhancements
+**g) Usage Guidelines** - Strategic deployment guidance:
+- Best channels for this story
+- Audience-specific adaptations
+- Tone and voice consistency
+- Visual or multimedia enhancements
 
-### Step 4: Generate Output Document
+### 4. Generate Output Document
 
-Create storytelling output in `{documentation_dir}/story-[date].md` with:
+Create storytelling output in `{documentation_dir}/story-{date}.md` with:
 - Story purpose and target audience
 - Selected framework and rationale
 - Complete core narrative
@@ -112,14 +124,133 @@ Create storytelling output in `{documentation_dir}/story-[date].md` with:
 - Usage guidelines and deployment strategy
 - Refinement notes
 
-### Step 5: Confirm Completion
+### 5. Confirm Completion
 
 Inform the user:
-"Story complete! Your narrative has been saved to `{documentation_dir}/story-[date].md`"
+"Story complete! Your narrative has been saved to `{documentation_dir}/story-{date}.md`"
 
-## Output Files
+## Workflow
 
-- `{documentation_dir}/story-[date].md` - Complete story with all variations and usage guidelines
+```
+┌─────────────────────────────────────┐
+│ 1. Load Configuration               │
+│    - Read .bmad/config.yaml         │
+│    - Extract directory paths        │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│ 2. Gather Story Context             │
+│    - Story purpose                  │
+│    - Target audience                │
+│    - Key messages                   │
+│    - Constraints                    │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│ 3. Delegate to Storyteller Agent    │
+│    ┌───────────────────────────┐   │
+│    │ a) Select Framework       │   │
+│    └───────────┬───────────────┘   │
+│                ▼                    │
+│    ┌───────────────────────────┐   │
+│    │ b) Gather Story Elements  │   │
+│    └───────────┬───────────────┘   │
+│                ▼                    │
+│    ┌───────────────────────────┐   │
+│    │ c) Craft Emotional Arc    │   │
+│    └───────────┬───────────────┘   │
+│                ▼                    │
+│    ┌───────────────────────────┐   │
+│    │ d) Develop Opening Hook   │   │
+│    └───────────┬───────────────┘   │
+│                ▼                    │
+│    ┌───────────────────────────┐   │
+│    │ e) Write Core Narrative   │   │
+│    └───────────┬───────────────┘   │
+│                ▼                    │
+│    ┌───────────────────────────┐   │
+│    │ f) Create Story Variations│   │
+│    └───────────┬───────────────┘   │
+│                ▼                    │
+│    ┌───────────────────────────┐   │
+│    │ g) Usage Guidelines       │   │
+│    └───────────────────────────┘   │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│ 4. Generate Output Document         │
+│    - Save to story-{date}.md        │
+│    - Include all story components   │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│ 5. Confirm Completion               │
+│    - Notify user of saved file      │
+└─────────────────────────────────────┘
+```
+
+## Report
+
+After completing the storytelling workflow, provide the user with:
+
+### Completion Summary
+
+- **Story File Location**: Full path to the generated story document
+- **Framework Used**: Which framework was selected and why it was appropriate
+- **Story Variations**: Confirm all three versions (short, medium, extended) were created
+- **Key Story Elements**: Briefly summarize the core narrative and emotional arc
+
+### Story Quality Indicators
+
+- **Authenticity Check**: Confirm the story is drawn from real experiences and truths
+- **Conflict Presence**: Verify the story includes tension and struggle
+- **Transformation Arc**: Confirm clear before/after or change journey
+- **Emotional Touchpoints**: List key emotional moments identified
+
+### Deployment Guidance
+
+- **Primary Use Case**: The main context where this story should be used
+- **Recommended Channels**: Top 2-3 channels for story deployment
+- **Next Steps**: Suggested actions (e.g., test with audience, create visuals, adapt for additional formats)
+
+### Output Files
+
+- `{documentation_dir}/story-{date}.md` - Complete story with all variations and usage guidelines
+
+### Example Report
+
+```
+Story Development Complete!
+
+Your narrative has been saved to: /project/docs/story-2025-01-15.md
+
+Framework Selected: Customer Journey Story (Before/After transformation)
+Rationale: Best suited for demonstrating concrete ROI and transformation for VP-level decision makers
+
+Story Variations Created:
+✓ Short (2 sentences) - For social proof and sales snippets
+✓ Medium (2 paragraphs) - For website case study summary
+✓ Extended (500 words) - For full case study and sales enablement
+
+Key Story Elements:
+- Opening Hook: "Marketing team was spending 40 hours/week on reporting. Now it takes 4."
+- Emotional Arc: Overwhelm → Hope → Confidence → Success
+- Core Transformation: Manual processes to automated efficiency with 10x ROI
+- Authenticity: Real customer data with specific metrics and quotes
+
+Deployment Recommendations:
+1. Lead with this case study in sales conversations with similar companies
+2. Feature on website homepage as social proof
+3. Create short version for LinkedIn company posts
+4. Consider video testimonial to complement written narrative
+
+Estimated time investment: 90 minutes
+Story effectiveness rating: High (concrete metrics, relatable problem, clear transformation)
+```
 
 ## Examples
 

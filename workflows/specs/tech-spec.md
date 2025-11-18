@@ -4,30 +4,11 @@ description: Create context-rich technical specification for Level 0-1 projects 
 
 # Tech-Spec Workflow
 
-## What This Does
+## Purpose
 
-Creates a comprehensive technical specification for **Quick Flow (Level 0-1)** projects by:
-1. Gathering all available context (docs, codebase, stack)
-2. Analyzing brownfield codebases (patterns, conventions, existing modules)
-3. Detecting project stack with exact versions
-4. Creating focused technical specification
-5. Generating epic + stories (1 story for simple changes, 2-5 stories for features)
-6. Providing context-rich documentation (often eliminates need for story-context)
+Creates a comprehensive technical specification for **Quick Flow (Level 0-1)** projects by gathering all available context, analyzing brownfield codebases, detecting project stacks, creating focused technical specifications, and generating epic + stories (1-5 stories) with context-rich documentation that often eliminates the need for story-context.
 
 **Quick Flow = Tech-spec only, no PRD needed**
-
----
-
-## Prerequisites
-
-- BMAD plugin installed (`/bmad:bmm:workflows:workflow-init` run) OR standalone mode
-- Configuration file at `.bmad/config.yaml`
-- For brownfield: existing codebase to analyze
-- For greenfield: project idea and stack preference
-
----
-
-## Level 0-1 Projects (Quick Flow)
 
 **When to use tech-spec:**
 - **Level 0:** Single atomic change (bug fix, add one field, single file)
@@ -39,32 +20,67 @@ Creates a comprehensive technical specification for **Quick Flow (Level 0-1)** p
 
 **If > 5 stories:** Use full BMad Method instead (PRD → Architecture → Epics)
 
----
+## Variables
 
-## How It Works
+All variables are read from `.bmad/config.yaml`:
 
-```
-1. Validate workflow readiness → Check status file or run standalone
-2. Comprehensive context discovery:
-   - Load existing docs (product brief, research)
-   - Detect project stack (exact versions)
-   - Analyze brownfield codebase (patterns, conventions)
-3. Define technical requirements → Create living tech-spec
-4. Validate specification → Check completeness and clarity
-5. Generate epic + stories → 1-5 stories with full context
-6. Finalize and guide → Next steps for direct development
-```
+- `project_name` - Name of the project
+- `documentation_dir` - Directory where all documentation is stored (default: `docs/bmad`)
+- `sprint_artifacts` - Directory where story files are stored (default: `docs/bmad/sprint_artifacts`)
+- `user_name` - Name of the user/developer
+- `communication_language` - Language for agent communication (default: `English`)
+- `document_output_language` - Language for generated documents (default: `English`)
+- `user_skill_level` - User's technical skill level: `expert`, `intermediate`, or `beginner`
 
-**Key behavior:**
-- **Living document:** Writes to tech-spec.md continuously (not at end)
-- **Context is king:** Gathers ALL available context before spec
-- **Brownfield intelligence:** Detects and conforms to existing patterns
-- **Stack awareness:** Exact framework versions, dependencies
-- **Context-rich stories:** Often eliminates need for story-context workflow
+**Runtime variables** (determined during execution):
 
----
+- `standalone_mode` - Boolean indicating if running without workflow status file
+- `story_count` - Number of stories to generate (1-5)
+- `field_type` - Project type: `greenfield` (new) or `brownfield` (existing)
+- `selected_track` - Workflow track from status file (e.g., `quick-flow-greenfield`)
+- `project_stack_summary` - Comprehensive analysis of project's technology stack
+- `existing_structure_summary` - Analysis of brownfield codebase structure (brownfield only)
+- `existing_conventions` - Detected code style and conventions (brownfield only)
 
 ## Instructions
+
+### Prerequisites
+
+Before running this workflow:
+- BMAD plugin installed (`/bmad:bmm:workflows:workflow-init` run) OR standalone mode
+- Configuration file at `.bmad/config.yaml`
+- For brownfield: existing codebase to analyze
+- For greenfield: project idea and stack preference
+
+### Key Principles
+
+Follow these principles throughout execution:
+
+**1. Context is King**
+- Gather ALL available context before generating spec (docs, stack, brownfield analysis, dependencies)
+- Context-rich specs enable direct development without additional context assembly
+
+**2. Living Document Approach**
+- Write to tech-spec.md continuously as requirements emerge (don't wait until end)
+- Capture decisions in real-time and build incrementally
+
+**3. Brownfield Intelligence**
+- Detect and conform to existing patterns (code style, test patterns, file organization, naming conventions)
+- New code integrates seamlessly with existing codebase
+
+**4. Definitiveness Over Ambiguity**
+- Always use specific, definitive language
+- ✅ Use: "React 18.2.0", "src/components/UserProfile.tsx", "Uses Jest with coverage threshold of 80%"
+- ❌ Never use: "latest", "recent", "current", "maybe", "could", "probably", "should work", "might need"
+
+**5. Stack Awareness**
+- Use project's actual dependencies (exact framework versions, available testing frameworks, existing build/test scripts, installed libraries)
+- Ensures spec is implementable with project's actual stack
+
+**6. Context-Rich Stories**
+- Stories reference tech-spec as primary context
+- Comprehensive enough to skip story-context workflow
+- Include brownfield analysis, exact versions, patterns, and specific file paths
 
 ### Step 1: Validate Workflow Readiness
 
@@ -596,413 +612,67 @@ Since the tech-spec is CONTEXT-RICH, you can often skip story-context generation
 The tech-spec is your single source of truth! 🚀
 ```
 
----
+### Troubleshooting
 
-## Key Principles
+**Issue: No stack detected (empty project)**
 
-### 1. Context is King
-
-**Gather ALL available context before generating spec:**
-- Existing documentation (briefs, research)
-- Project stack (exact versions)
-- Brownfield analysis (patterns, conventions)
-- Dependencies and frameworks
-
-**Why:** Context-rich specs enable direct development without additional context assembly.
-
-### 2. Living Document Approach
-
-**Write to tech-spec.md continuously** as requirements emerge:
-- Don't wait until end
-- Capture decisions in real-time
-- Build incrementally
-
-**Why:** Prevents forgetting details, ensures completeness.
-
-### 3. Brownfield Intelligence
-
-**Detect and conform to existing patterns:**
-- Code style (semicolons, quotes, indentation)
-- Test patterns (naming, organization, frameworks)
-- File organization (feature-based, layer-based)
-- Naming conventions
-
-**Why:** New code integrates seamlessly with existing codebase.
-
-### 4. Definitiveness Over Ambiguity
-
-**Always use specific, definitive language:**
-- ✅ "React 18.2.0" (not "latest React")
-- ✅ "src/components/UserProfile.tsx" (not "a user profile component")
-- ✅ "Uses Jest with coverage threshold of 80%" (not "good test coverage")
-
-**Never use:**
-- ❌ "latest", "recent", "current"
-- ❌ "maybe", "could", "probably"
-- ❌ "should work", "might need"
-
-**Why:** Developers need exact instructions, not approximations.
-
-### 5. Stack Awareness
-
-**Use project's actual dependencies:**
-- Exact framework versions from package files
-- Available testing frameworks
-- Existing build/test scripts
-- Installed libraries
-
-**Why:** Ensures spec is implementable with project's actual stack.
-
-### 6. Context-Rich Stories
-
-**Stories reference tech-spec as primary context:**
-- Comprehensive enough to skip story-context workflow
-- Include brownfield analysis
-- Include exact versions and patterns
-- Include specific file paths
-
-**Why:** Faster development, less context assembly overhead.
-
----
-
-## Examples
-
-### Example 1: Greenfield Single Story (Bug Fix)
-
-**Context:**
-- New React project
-- 1 story needed (bug fix)
-- Greenfield (no existing code)
-
-**Execution:**
-
-1. **Validate readiness:**
-   - No status file → standalone mode
-   - User selects: 1 story, greenfield
-
-2. **Context discovery:**
-   - No existing docs
-   - Detect stack: package.json shows React 18.2.0, Jest 29.5.0
-   - No brownfield analysis needed
-
-3. **Stack analysis:**
-   ```
-   **Detected Stack:**
-   - Framework: React 18.2.0
-   - Testing: Jest 29.5.0, React Testing Library 14.0.0
-   - Build: Vite 4.3.9
-   - Project type: Web app
-   ```
-
-4. **Define requirements:**
-   - User describes bug: "Email validation allows invalid emails"
-   - Technical approach: Update validateEmail() function
-   - Testing: Add test cases for edge cases
-
-5. **Validate spec:**
-   ```
-   ✅ Validation Passed!
-   - Context Gathering: Comprehensive
-   - Definitiveness: All definitive
-   - Brownfield Integration: N/A (greenfield)
-   - Stack Alignment: Perfect
-   - Implementation Readiness: ✅ Ready
-   ```
-
-6. **Generate stories:**
-   - Epic: "Email Validation Fix"
-   - Story 1: "Fix email validation to reject invalid formats"
-
-7. **Result:**
-   ```
-   ✅ Tech-Spec Complete!
-
-   Deliverables:
-   - tech-spec.md (email validation fix spec)
-   - epics.md (minimal epic)
-   - story-email-validation-fix-1.md
-
-   Next: Run dev-story to implement!
-   ```
-
-**Files created:**
-- `tech-spec.md` (validation fix spec with React/Jest context)
-- `epics.md` (minimal epic structure)
-- `sprint_artifacts/story-email-validation-fix-1.md`
-
----
-
-### Example 2: Brownfield Multiple Stories (OAuth Integration)
-
-**Context:**
-- Existing Express.js API
-- 3 stories needed (OAuth integration)
-- Brownfield (existing auth system)
-
-**Execution:**
-
-1. **Validate readiness:**
-   - Status file found → workflow mode
-   - Level: Quick Flow (Level 1)
-   - Field type: brownfield
-
-2. **Context discovery:**
-
-   **Loaded documents:**
-   - Product brief: "Add Google OAuth login"
-   - Document-project: Brownfield codebase map
-
-   **Stack detected:**
-   ```
-   Framework: Express 4.18.2
-   Auth: Passport.js 0.6.0 (already installed!)
-   Testing: Jest 29.5.0, Supertest 6.3.3
-   Database: PostgreSQL with Sequelize ORM
-   ```
-
-   **Brownfield analysis:**
-   ```
-   Existing Auth System:
-   - File: src/auth/LocalStrategy.js (email/password)
-   - User model: src/models/User.js
-   - Auth routes: src/routes/auth.js
-
-   Code Style:
-   - Semicolons: yes
-   - Quotes: single
-   - Indentation: 2 spaces
-   - Test files: *.test.js in __tests__/
-
-   Conventions:
-   - Async/await (not callbacks)
-   - Error handling: try/catch with next(error)
-   - Logging: Winston logger
-   ```
-
-3. **Confirm conventions:**
-   ```
-   Detected conventions:
-   - Code style: Semicolons, single quotes, 2 spaces
-   - Test pattern: *.test.js in __tests__/
-   - Auth pattern: Passport strategies
-
-   Follow existing? Yes
-   ```
-
-4. **Define requirements:**
-   - Add Google OAuth strategy
-   - Integrate with existing User model
-   - Add OAuth routes alongside existing auth routes
-   - Maintain existing error handling patterns
-
-5. **Validate spec:**
-   ```
-   ✅ Validation Passed!
-   - Context Gathering: Comprehensive
-   - Definitiveness: All definitive
-   - Brownfield Integration: Excellent
-   - Stack Alignment: Perfect
-   - Implementation Readiness: ✅ Ready
-   ```
-
-6. **Generate stories:**
-   - Epic: "Google OAuth Integration"
-   - Story 1: "Add Google OAuth Strategy with Passport.js"
-   - Story 2: "Integrate OAuth with User Model"
-   - Story 3: "Add OAuth Routes and Error Handling"
-
-7. **Result:**
-   ```
-   ✅ Tech-Spec Complete!
-
-   Deliverables:
-   - tech-spec.md (OAuth integration with brownfield context)
-   - epics.md (detailed epic with 3 stories)
-   - story-oauth-integration-1.md (Strategy)
-   - story-oauth-integration-2.md (User Model)
-   - story-oauth-integration-3.md (Routes)
-
-   Tech-spec includes:
-   - Existing auth system analysis
-   - Passport.js 0.6.0 integration approach
-   - User model extension points
-   - Exact file paths and conventions
-
-   Next: Run dev-story to implement Story 1!
-   ```
-
-**Files created:**
-- `tech-spec.md` (comprehensive OAuth spec with brownfield analysis)
-- `epics.md` (detailed epic)
-- `sprint_artifacts/story-oauth-integration-1.md`
-- `sprint_artifacts/story-oauth-integration-2.md`
-- `sprint_artifacts/story-oauth-integration-3.md`
-
----
-
-### Example 3: Greenfield Feature with Starter Template
-
-**Context:**
-- New Django project
-- 4 stories needed (User profile feature)
-- Greenfield (no code yet)
-
-**Execution:**
-
-1. **Validate readiness:**
-   - No status file → standalone mode
-   - User selects: 4 stories, greenfield
-
-2. **Context discovery:**
-   - No existing docs
-   - No stack detected (empty project)
-
-3. **Stack recommendation:**
-   ```
-   No existing stack detected. Let me recommend current best practices...
-
-   **Recommended Stack:**
-   - Framework: Django 5.0 (latest stable)
-   - Database: PostgreSQL 16
-   - Testing: pytest-django 4.7.0
-   - API: Django REST Framework 3.14.0
-
-   **Starter Template Available:**
-   - cookiecutter-django
-   - Includes: User auth, PostgreSQL setup, pytest, DRF, Docker
-   - Setup time: ~5 minutes vs 2+ hours manual
-
-   Would you like to use this starter?
-   ```
-
-4. **User accepts starter:**
-   ```
-   ✅ Using cookiecutter-django starter template
-
-   Stack will include:
-   - Django 5.0
-   - PostgreSQL 16 with psycopg3
-   - pytest-django for testing
-   - DRF for API
-   - Pre-configured Docker setup
-   ```
-
-5. **Define requirements:**
-   - User profile page with avatar upload
-   - Profile edit functionality
-   - Public/private profile toggle
-   - Profile API endpoints
-
-6. **Validate spec:**
-   ```
-   ✅ Validation Passed!
-   - Context Gathering: Comprehensive
-   - Definitiveness: All definitive
-   - Brownfield Integration: N/A (greenfield with starter)
-   - Stack Alignment: Perfect
-   - Implementation Readiness: ✅ Ready
-   ```
-
-7. **Generate stories:**
-   - Epic: "User Profile Feature"
-   - Story 1: "Create Profile Model and Database Schema"
-   - Story 2: "Build Profile View and Edit Pages"
-   - Story 3: "Implement Avatar Upload with Storage"
-   - Story 4: "Create Profile API Endpoints"
-
-8. **Result:**
-   ```
-   ✅ Tech-Spec Complete!
-
-   Deliverables:
-   - tech-spec.md (profile feature with Django 5.0/DRF context)
-   - epics.md (detailed epic with 4 stories)
-   - story-user-profile-1.md (Model)
-   - story-user-profile-2.md (Views)
-   - story-user-profile-3.md (Upload)
-   - story-user-profile-4.md (API)
-
-   Tech-spec includes:
-   - cookiecutter-django starter instructions
-   - Django 5.0 and DRF 3.14.0 patterns
-   - PostgreSQL schema design
-   - pytest-django testing approach
-   - Docker setup considerations
-
-   Next: Run sprint-planning to organize all 4 stories!
-   ```
-
-**Files created:**
-- `tech-spec.md` (comprehensive profile feature spec with starter template)
-- `epics.md` (detailed epic with 4 stories)
-- `sprint_artifacts/story-user-profile-1.md`
-- `sprint_artifacts/story-user-profile-2.md`
-- `sprint_artifacts/story-user-profile-3.md`
-- `sprint_artifacts/story-user-profile-4.md`
-
----
-
-## Troubleshooting
-
-### Issue: No stack detected (empty project)
-
-**Symptoms:**
+Symptoms:
 ```
 No dependency manifest found in project root
 ```
 
-**Cause:** Greenfield project with no package files yet
+Cause: Greenfield project with no package files yet
 
-**Solution:**
+Solution:
 - Workflow will ask user for intended stack
 - Or recommend starter template with modern stack
 - Or suggest creating package.json/requirements.txt first
 
 ---
 
-### Issue: Brownfield conventions unclear
+**Issue: Brownfield conventions unclear**
 
-**Symptoms:**
+Symptoms:
 ```
 Multiple conflicting patterns detected in codebase
 ```
 
-**Cause:** Inconsistent codebase or mixed conventions
+Cause: Inconsistent codebase or mixed conventions
 
-**Solution:**
+Solution:
 - Workflow will show detected conflicts
 - Ask user which pattern to follow
 - Or suggest establishing new consistent standards
 
 ---
 
-### Issue: Stack too outdated
+**Issue: Stack too outdated**
 
-**Symptoms:**
+Symptoms:
 ```
 Warning: Major dependencies >2 years old
 - React 16.8.0 (released 2019, current: 18.2.0)
 ```
 
-**Cause:** Brownfield project with old dependencies
+Cause: Brownfield project with old dependencies
 
-**Solution:**
+Solution:
 - Workflow will note migration complexity
 - Recommend upgrade path if reasonable
 - Or work with existing versions if upgrade too risky
 
 ---
 
-### Issue: > 5 stories estimated
+**Issue: > 5 stories estimated**
 
-**Symptoms:**
+Symptoms:
 ```
 You estimated 7 stories - too many for Quick Flow
 ```
 
-**Cause:** Project complexity exceeds Level 1
+Cause: Project complexity exceeds Level 1
 
-**Solution:**
+Solution:
 ```
 For projects requiring >5 stories, use full BMad Method:
 1. Run workflow-init with Level 2+ track
@@ -1013,26 +683,247 @@ For projects requiring >5 stories, use full BMad Method:
 Quick Flow (tech-spec) is for 1-5 story projects only.
 ```
 
----
+## Workflow
 
-## Related Workflows
+The tech-spec workflow follows this execution sequence:
+
+```
+1. Validate workflow readiness
+   ├─ Check for status file (.bmad/bmm-workflow-status.yaml)
+   ├─ If NOT found: Enter standalone mode
+   │  ├─ Display standalone mode message
+   │  ├─ Ask: Continue standalone or exit?
+   │  └─ If continue: Ask story count (1-5) and field type (greenfield/brownfield)
+   └─ If found: Enter workflow mode
+      ├─ Load and parse status file
+      ├─ Validate selected_track is quick-flow
+      ├─ Check if tech-spec already completed
+      └─ Verify workflow sequence
+
+2. Comprehensive context discovery
+   ├─ PHASE 1: Load existing documents
+   │  ├─ Search for product brief
+   │  ├─ Search for research documents
+   │  ├─ Load document-project output (brownfield map)
+   │  └─ Ask user about additional documents
+   ├─ PHASE 2: Intelligently detect project stack
+   │  ├─ Discover dependency manifests in project root
+   │  ├─ Extract framework versions and dependencies
+   │  ├─ Assess currency (identify outdated dependencies)
+   │  └─ For greenfield: Recommend starter templates
+   └─ PHASE 3: Brownfield codebase reconnaissance (if brownfield)
+      ├─ Analyze directory structure
+      ├─ Identify code patterns
+      ├─ Document key modules/services
+      ├─ Detect testing patterns and standards
+      ├─ Identify code style and conventions
+      └─ Confirm conventions with user
+
+3. Define technical requirements
+   ├─ Start interactive discovery conversation
+   ├─ Explore core technical areas:
+   │  ├─ Change description
+   │  ├─ Technical approach
+   │  ├─ Data & state
+   │  ├─ APIs & interfaces
+   │  ├─ Testing strategy
+   │  └─ Non-functional requirements
+   └─ Write to tech-spec.md continuously (living document)
+
+4. Validate specification
+   ├─ Check context gathering (comprehensive/partial/insufficient)
+   ├─ Check definitiveness (all definitive/some ambiguity/major issues)
+   ├─ Check brownfield integration (excellent/partial/missing/N/A)
+   ├─ Check stack alignment (perfect/good/partial/none)
+   ├─ Check implementation readiness (yes/no)
+   ├─ Generate validation report
+   └─ If issues found: Ask to fix or proceed with warnings
+
+5. Generate epic and context-rich stories
+   ├─ Delegate to bmad-pm subagent
+   ├─ Generate epics.md (minimal if 1 story, detailed if multiple)
+   ├─ Generate story files: story-{epic-slug}-N.md (N = 1 to story_count)
+   └─ Stories reference tech-spec.md as primary context
+
+6. Finalize and guide next steps
+   ├─ If not standalone: Update workflow status file
+   ├─ Display completion message with deliverables
+   ├─ Explain what makes this tech-spec special
+   └─ Provide clear next steps (direct to dev-story)
+```
+
+**Key workflow behaviors:**
+
+- **Living document:** Writes to tech-spec.md continuously (not at end)
+- **Context first:** Gathers ALL available context before spec generation
+- **Brownfield intelligence:** Detects and conforms to existing patterns
+- **Stack awareness:** Uses exact framework versions and dependencies
+- **Context-rich stories:** Often eliminates need for story-context workflow
+- **Validation built-in:** Self-checks before story generation
+
+**Decision points:**
+
+1. **Standalone vs workflow mode:** Determined by presence of status file
+2. **Story count:** User selects 1-5 stories (>5 requires full BMad Method)
+3. **Field type:** User selects greenfield or brownfield
+4. **Starter template:** For greenfield, user decides if using starter
+5. **Conventions:** For brownfield, user confirms following existing or new standards
+6. **Validation issues:** User decides to fix or proceed with warnings
+
+## Report
+
+At the conclusion of the tech-spec workflow, report to the user using this structure:
+
+### Success Report
+
+Display completion message:
+
+```
+**✅ Tech-Spec Complete, {user_name}!**
+
+**Deliverables Created:**
+
+- ✅ **tech-spec.md** - Context-rich technical specification
+  - Location: `{documentation_dir}/tech-spec.md`
+  - Includes: brownfield analysis, framework details, existing patterns
+
+- ✅ **epics.md** - Epic structure {story_count == 1 ? "(minimal for single story)" : `with ${story_count} stories`}
+  - Location: `{documentation_dir}/epics.md`
+
+- ✅ **Story Files** - {story_count} user {story_count == 1 ? "story" : "stories"}
+  - Location: `{sprint_artifacts}/story-{epic-slug}-N.md` (N = 1 to {story_count})
+  - Primary context reference: tech-spec.md
+```
+
+### Quality Summary
+
+Highlight what makes this tech-spec special:
+
+```
+**What Makes This Tech-Spec Special:**
+
+The tech-spec is comprehensive enough to serve as the primary context document:
+- ✨ {brownfield ? "Brownfield codebase analysis with existing patterns" : "Greenfield starter template recommendations"}
+- ✨ Exact framework and library versions from your project
+- ✨ {brownfield ? "Existing code references and integration points" : "Modern best practices and setup guidance"}
+- ✨ Specific file paths and implementation details
+- ✨ Complete developer resources and testing strategy
+```
+
+### Validation Scores
+
+Report the validation results:
+
+```
+**Validation Scores:**
+- Context Gathering: {score}
+- Definitiveness: {score}
+- Brownfield Integration: {score}
+- Stack Alignment: {score}
+- Implementation Readiness: ✅ Ready
+```
+
+### Next Steps Guidance
+
+Provide clear next steps based on story count:
+
+**For single story (story_count == 1):**
+```
+**Next Steps:**
+
+**🎯 Recommended Path - Direct to Development:**
+
+Since the tech-spec is CONTEXT-RICH, you can skip story-context generation!
+
+**For Your Single Story:**
+
+1. Run `dev-story` workflow
+   - Select story-{epic-slug}-1.md
+   - Tech-spec provides all the context needed!
+
+💡 **Optional:** Only run `story-context` if this is unusually complex
+```
+
+**For multiple stories (story_count > 1):**
+```
+**Next Steps:**
+
+**🎯 Recommended Path - Direct to Development:**
+
+Since the tech-spec is CONTEXT-RICH, you can skip story-context generation!
+
+**For Your {story_count} Stories - Iterative Approach:**
+
+1. **Start with Story 1:**
+   - Run `dev-story` workflow
+   - Select story-{epic-slug}-1.md
+   - Tech-spec provides context
+
+2. **After Story 1 Complete:**
+   - Repeat for story-{epic-slug}-2.md
+   - Continue through story {story_count}
+
+💡 **Alternative:** Use `sprint-planning` to organize all stories as a coordinated sprint
+
+💡 **Optional:** Run `story-context` for complex stories needing additional context
+```
+
+### File Locations
+
+Summarize where all artifacts were saved:
+
+```
+**Your Tech-Spec Files:**
+
+- 📄 Tech-Spec: `{documentation_dir}/tech-spec.md`
+- 📄 Epic: `{documentation_dir}/epics.md`
+- 📄 Stories: `{sprint_artifacts}/story-{epic-slug}-N.md` (N = 1 to {story_count})
+
+**Contains:**
+- All context, decisions, patterns, and implementation guidance
+- Ready for direct development!
+
+The tech-spec is your single source of truth! 🚀
+```
+
+### Success Criteria Checklist
+
+At the end of the report, confirm all success criteria were met:
+
+```
+**Success Criteria:**
+
+✅ Context gathered comprehensively (docs, stack, brownfield)
+✅ Tech-spec created with definitive language (no ambiguity)
+✅ Stack alignment (exact versions, existing dependencies)
+✅ {brownfield ? "Brownfield integration (patterns detected, conventions confirmed)" : "Greenfield setup (starter templates recommended)"}
+✅ Epic + stories generated ({story_count} {story_count == 1 ? "story" : "stories"} with full context)
+✅ Validation passed (implementation-ready)
+✅ Clear next steps (direct to dev-story)
+```
+
+### Related Workflows Reference
+
+Provide navigation guidance for related workflows:
+
+```
+**Related Workflows:**
 
 **Before tech-spec:**
-- `/bmad:bmm:workflows:workflow-init` - Initialize project (RECOMMENDED)
-- `/bmad:bmm:workflows:product-brief` - Product vision (optional, for context)
-- `/bmad:bmm:workflows:document-project` - Brownfield analysis (optional, tech-spec does this)
+- `workflow-init` - Initialize project (recommended)
+- `product-brief` - Product vision (optional, for context)
+- `document-project` - Brownfield analysis (optional, tech-spec does this)
 
 **After tech-spec:**
-- `/bmad:bmm:workflows:dev-story` - Implement stories (RECOMMENDED next step)
-- `/bmad:bmm:workflows:sprint-planning` - Organize stories (optional, for multiple stories)
-- `/bmad:bmm:workflows:story-context` - Additional context (optional, usually not needed)
+- `dev-story` - Implement stories (recommended next step)
+- `sprint-planning` - Organize stories (optional, for multiple stories)
+- `story-context` - Additional context (optional, usually not needed)
 
 **Alternatives:**
-- `/bmad:bmm:workflows:prd` - For Level 2+ projects (>5 stories)
-- `/bmad:bmm:workflows:architecture` - For complex technical design
+- `prd` - For Level 2+ projects (>5 stories)
+- `architecture` - For complex technical design
 
 **Navigation:**
-```
 Quick Flow (Level 0-1):
   workflow-init (Level 0-1 track)
     ↓
@@ -1048,47 +939,11 @@ Full BMad Method (Level 2+):
   dev-story
 ```
 
----
+### Output File Structure
 
-## Success Criteria
+Document the structure of generated files:
 
-✅ **Context gathered comprehensively** (docs, stack, brownfield)
-
-✅ **Tech-spec created** with definitive language (no ambiguity)
-
-✅ **Stack alignment** (exact versions, existing dependencies)
-
-✅ **Brownfield integration** (patterns detected, conventions confirmed)
-
-✅ **Epic + stories generated** (1-5 stories with full context)
-
-✅ **Validation passed** (implementation-ready)
-
-✅ **Clear next steps** (direct to dev-story)
-
----
-
-## Configuration
-
-Reads from `.bmad/config.yaml`:
-
-```yaml
-project_name: "project-name"
-documentation_dir: "docs/bmad"
-sprint_artifacts: "docs/bmad/sprint_artifacts"
-user_name: "Developer"
-communication_language: "English"
-document_output_language: "English"
-user_skill_level: "intermediate"  # expert/intermediate/beginner
-```
-
----
-
-## Output Files
-
-### Created Files
-
-**1. Tech-Spec** (`{documentation_dir}/tech-spec.md`)
+**Tech-Spec** (`{documentation_dir}/tech-spec.md`):
 ```markdown
 # Technical Specification: {Change Title}
 
@@ -1108,7 +963,7 @@ user_skill_level: "intermediate"  # expert/intermediate/beginner
 {Definitive success criteria}
 ```
 
-**2. Epic** (`{documentation_dir}/epics.md`)
+**Epic** (`{documentation_dir}/epics.md`):
 ```markdown
 # Epic: {Epic Title}
 
@@ -1117,7 +972,7 @@ user_skill_level: "intermediate"  # expert/intermediate/beginner
 {Minimal structure if 1 story, detailed if multiple}
 ```
 
-**3. Stories** (`{sprint_artifacts}/story-{epic-slug}-N.md`)
+**Stories** (`{sprint_artifacts}/story-{epic-slug}-N.md`):
 ```markdown
 # Story {N}: {Story Title}
 
@@ -1134,36 +989,46 @@ Primary: tech-spec.md (comprehensive context)
 {Specific, testable criteria}
 ```
 
-**Modified Files (if workflow mode):**
-
-**4. Workflow Status** (`.bmad/bmm-workflow-status.yaml`)
+**Workflow Status** (`.bmad/bmm-workflow-status.yaml`) - if workflow mode:
 ```yaml
 workflow_status:
   tech-spec: "{documentation_dir}/tech-spec.md"  # ← Updated
 ```
 
----
+### Execution Summary
 
-## Notes
+Provide a summary of what was accomplished:
+
+```
+**Execution Summary:**
+
+- **Mode:** {standalone_mode ? "Standalone" : "Workflow"}
+- **Story Count:** {story_count}
+- **Field Type:** {field_type}
+- **Starter Template:** {starter_template_used ? "Yes - " + template_name : "No"}
+- **Documents Loaded:** {count} documents
+- **Stack Detected:** {framework_name} {framework_version}
+- **Brownfield Analysis:** {brownfield ? "Complete" : "N/A"}
+- **Validation:** ✅ Passed
+- **Time:** Approximately {estimated_time} minutes
+
+**Typical usage time:** 30-60 minutes (depending on complexity)
+```
+
+### Notes for User
+
+Include important notes about the tech-spec:
+
+```
+**Important Notes:**
 
 - **Quick Flow only:** For Level 0-1 projects (1-5 stories max)
-- **Context-rich:** Gathers ALL available context before spec
-- **Living document:** Writes continuously (not at end)
-- **Brownfield intelligence:** Detects and conforms to existing patterns
-- **Stack awareness:** Uses exact versions from project
-- **Definitive language:** No ambiguity ("React 18.2.0" not "latest React")
-- **Context-rich stories:** Often eliminates need for story-context workflow
-- **Starter template support:** Recommends modern starters for greenfield
-- **Validation built-in:** Self-checks before story generation
-
-**Typical usage:**
-1. Developer has Level 0-1 project (1-5 stories)
-2. Runs tech-spec workflow
-3. Workflow gathers context (docs, stack, brownfield)
-4. Interactive conversation defines requirements
-5. Tech-spec validated and stories generated
-6. Proceeds directly to dev-story (no story-context needed)
-
-**Time:** 30-60 minutes (depending on complexity)
+- **Context-rich:** Tech-spec serves as primary context document
+- **Living document:** Built continuously during discovery
+- **Brownfield intelligence:** Conforms to existing patterns
+- **Stack awareness:** Uses exact versions from your project
+- **Definitive language:** No ambiguity (e.g., "React 18.2.0" not "latest React")
+- **Direct to development:** Often eliminates need for story-context workflow
 
 **For > 5 stories:** Use full BMad Method (prd → architecture → epics)
+```

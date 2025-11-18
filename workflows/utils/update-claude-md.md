@@ -4,11 +4,9 @@ description: Update CLAUDE.md file maps when files are created to maintain navig
 
 # Update CLAUDE.md - File Map Maintenance
 
-Updates CLAUDE.md file maps when new files are created, maintaining the living documentation that enables AI agents to navigate the project efficiently.
-
 ## Purpose
 
-Keeps CLAUDE.md file maps current by automatically adding newly created files. Called by ALL workflows that create files (dev-story, create-story, prd, tech-spec, etc.).
+Updates CLAUDE.md file maps when new files are created, maintaining the living documentation that enables AI agents to navigate the project efficiently. This workflow is called by ALL workflows that create files (dev-story, create-story, prd, tech-spec, etc.) to automatically keep the file maps current.
 
 **Key Principles:**
 1. **Automatic updates**: Workflows call this, not users
@@ -16,506 +14,142 @@ Keeps CLAUDE.md file maps current by automatically adding newly created files. C
 3. **Size enforcement**: Auto-creates subfolder CLAUDE.md when limits exceeded
 4. **Alphabetical order**: Maintains sorted file listings
 
-## Quick Start
+## Variables
 
-```bash
-# Typically called by other workflows, not directly
-/bmad:meta:update-claude-md
-
-# Workflow will:
-# 1. Receive list of files created
-# 2. Generate descriptions for each file
-# 3. Determine target CLAUDE.md (root vs subfolder)
-# 4. Update file map sections alphabetically
-# 5. Enforce size limits (420 root, 200 subfolder)
-# 6. Create subfolder CLAUDE.md if needed
-```
-
-## Prerequisites
-
-See [shared/prerequisites.md#meta-update-claude-md](../shared/prerequisites.md)
-
-**Workflow-specific:**
-- [ ] Root CLAUDE.md exists (run generate-claude-md first)
-- [ ] Files to add are readable
-- [ ] File paths are valid (relative to project root or documentation_dir)
+- **file_paths**: Array of file paths created/modified that need to be added to CLAUDE.md
+  - Format: `["src/components/UserProfile.tsx", "src/lib/user-utils.ts", "output/stories/3-2.md"]`
+  - Can be passed as JSON array or newline-separated list
+- **update_type**: Type of update operation (default: "add")
+  - Values: "add", "rename", "delete", "batch"
+- **old_path**: Previous file path (only for rename operations)
+- **new_path**: New file path (only for rename operations)
+- **documentation_dir**: Project documentation root directory (default: project root)
+- **max_root_lines**: Maximum lines for root CLAUDE.md (default: 420)
+- **max_subfolder_lines**: Maximum lines for subfolder CLAUDE.md (default: 200)
+- **directory_split_threshold**: File count to trigger subfolder CLAUDE.md creation (default: 30)
 
 ## Instructions
 
-### 1. Receive File List
+### 1. Receive and Validate File List
 
 **Input**: Array of file paths created/modified
 
-**Expected format:**
-```json
-[
-  "src/components/UserProfile.tsx",
-  "src/lib/user-utils.ts",
-  "src/app/dashboard/page.tsx",
-  "output/stories/3-2.md"
-]
-```
-
-**Validation:**
-- Verify each file path exists
-- Verify each file is readable
-- Filter out files that shouldn't be in CLAUDE.md:
-  - .git/, node_modules/, .next/, __pycache__/
-  - .env, .env.local, secrets files
-  - Build artifacts
+**Validation steps:**
+1. Verify each file path exists and is readable
+2. Filter out files that shouldn't be in CLAUDE.md:
+   - .git/, node_modules/, .next/, __pycache__/
+   - .env, .env.local, secrets files
+   - Build artifacts
+3. Convert relative paths to absolute paths if needed
+4. Deduplicate file list
 
 ### 2. Generate File Descriptions
 
-**For each file, extract description** (priority order):
+**For each file, extract description using priority order:**
 
 **2.1 Try first comment/docstring:**
-
-**JavaScript/TypeScript:**
-```javascript
-/**
- * User profile card component with avatar and bio
- */
-// OR
-// User profile card component with avatar and bio
-```
-
-**Python:**
-```python
-"""User profile card component with avatar and bio"""
-# OR
-# User profile card component with avatar and bio
-```
-
-**Rust:**
-```rust
-/// User profile card component with avatar and bio
-// OR
-//! User profile card component with avatar and bio
-```
+- **JavaScript/TypeScript**: `/** ... */` or `// ...` at top of file
+- **Python**: `"""..."""` or `# ...` at top of file
+- **Rust**: `/// ...` or `//! ...` at top of file
+- **Markdown**: Frontmatter description or first heading
 
 **2.2 Try export statement (if no comment):**
-
-**JavaScript/TypeScript:**
-```javascript
-export function UserProfile() { ... }
-// → "UserProfile function"
-
-export class UserService { ... }
-// → "UserService class"
-
-export const API_CONFIG = { ... }
-// → "API_CONFIG constant"
-```
-
-**Python:**
-```python
-def user_profile(): ...
-// → "user_profile function"
-
-class UserService: ...
-// → "UserService class"
-```
-
-**Rust:**
-```rust
-pub fn user_profile() { ... }
-// → "user_profile function"
-
-pub struct UserService { ... }
-// → "UserService struct"
-```
+- Extract main function, class, or constant name
+- Generate description: "{name} {type}" (e.g., "UserProfile function")
 
 **2.3 Infer from filename (fallback):**
+- Use common patterns (config, utils, helpers, types, etc.)
+- Default: capitalize and humanize filename
 
-```python
-def infer_from_filename(filename: str) -> str:
-    """Generate description from filename patterns."""
-
-    # Remove extension
-    name = filename.rsplit('.', 1)[0]
-
-    # Common patterns
-    patterns = {
-        'config': 'Configuration settings',
-        'utils': 'Utility functions',
-        'helpers': 'Helper functions',
-        'constants': 'Constant definitions',
-        'types': 'Type definitions',
-        'index': 'Module entry point',
-        'test': 'Test suite',
-        'spec': 'Test specifications',
-        'page': 'Page component',
-        'layout': 'Layout component',
-        'route': 'API route handler',
-        'model': 'Data model',
-        'schema': 'Database schema',
-        'migration': 'Database migration'
-    }
-
-    # Check for pattern matches
-    for pattern, description in patterns.items():
-        if pattern in name.lower():
-            return description
-
-    # Default: capitalize and humanize filename
-    return name.replace('-', ' ').replace('_', ' ').title()
-```
-
-**Format description** (5-10 words):
-- Keep concise
+**Format requirements:**
+- 5-10 words maximum
 - Remove articles (a, an, the) if needed for space
 - Use present tense
 - Be specific enough to distinguish from similar files
 
 ### 3. Determine Target CLAUDE.md Files
 
-**For each file, determine which CLAUDE.md to update:**
+**For each file:**
 
-**3.1 Extract directory:**
-```python
-directory = os.path.dirname(file_path)
-```
-
-**3.2 Check if subfolder CLAUDE.md exists:**
-```python
-subfolder_claude = os.path.join(directory, "CLAUDE.md")
-if os.path.exists(subfolder_claude):
-    target = subfolder_claude
-else:
-    target = "CLAUDE.md"  # Root
-```
-
-**3.3 Check if should create subfolder CLAUDE.md:**
-
-**Conditions for creating subfolder CLAUDE.md:**
-- Directory now has > 30 files
-- Root CLAUDE.md would exceed 420 lines after update
-
-**If conditions met:**
-```python
-if count_files_in_directory(directory) > 30:
-    create_subfolder_claude_md(directory)
-    move_directory_files_from_root_to_subfolder(directory)
-    update_root_with_directory_summary(directory)
-    target = subfolder_claude
-```
-
-**3.4 Always update root directory summary:**
-- Even if file added to subfolder CLAUDE.md
-- Update root's directory file count
-- Ensure root has link to subfolder CLAUDE.md
+1. **Extract directory**: Get parent directory of file
+2. **Check if subfolder CLAUDE.md exists**: If yes, use subfolder; if no, use root
+3. **Check if should create subfolder CLAUDE.md**:
+   - Directory now has > 30 files (directory_split_threshold)
+   - Root CLAUDE.md would exceed 420 lines after update
+4. **If conditions met**: Create subfolder CLAUDE.md and migrate directory files from root
 
 ### 4. Update File Map Section
 
 **4.1 For Root CLAUDE.md:**
-
-**Locate "## File Map" section:**
-```python
-content = read_file("CLAUDE.md")
-sections = parse_markdown_sections(content)
-file_map_section = sections["File Map"]
-```
-
-**Find appropriate directory subsection:**
-```markdown
-## File Map
-
-### Source Code
-- **src/app/** (24 files) - Next.js app router pages
-  - See src/app/CLAUDE.md for detailed listing
-- **src/components/** (15 files) - React components
-  - Button.tsx - Primary button with variants
-  - Input.tsx - Form input with validation
-  ... ← Insert new file here
-```
-
-**If file is first in directory:**
-```python
-if directory not in file_map_section:
-    # Create new directory subsection
-    file_map_section += f"\n- **{directory}/** (1 file) - {directory_description}\n"
-```
-
-**Insert file entry alphabetically:**
-```python
-# Find insertion point (alphabetical order)
-lines = file_map_section.split('\n')
-directory_lines = [l for l in lines if l.startswith(f'  - {directory}/')]
-
-# Insert new file in sorted position
-new_entry = f"  - {filename} - {description}"
-directory_lines_sorted = sorted(directory_lines + [new_entry])
-
-# Replace old lines with sorted lines
-file_map_section = '\n'.join(lines_with_new_sorted_entries)
-```
-
-**Update directory file count:**
-```python
-# Find directory header line
-# e.g., "- **src/components/** (15 files) - React components"
-# Increment count: (15 files) → (16 files)
-directory_header = re.sub(
-    r'\((\d+) files?\)',
-    lambda m: f'({int(m.group(1)) + 1} files)',
-    directory_header
-)
-```
+- Locate "## File Map" section
+- Find appropriate directory subsection
+- Insert file entry alphabetically within directory group
+- Update directory file count: `(15 files)` → `(16 files)`
+- Add directory summary if first file in new directory
 
 **4.2 For Subfolder CLAUDE.md:**
+- Locate "## File Map" section
+- Insert file entry alphabetically (flat list, no grouping)
+- Simpler structure than root
 
-**Locate "## File Map" section:**
-```python
-content = read_file(f"{directory}/CLAUDE.md")
-sections = parse_markdown_sections(content)
-file_map_section = sections["File Map"]
-```
-
-**Insert file entry alphabetically:**
-```markdown
-## File Map
-
-- **ComponentA.tsx** - Primary component for feature X
-- **ComponentB.tsx** - Secondary component for feature Y
-- **NewFile.tsx** - {description}  ← Insert here (alphabetically)
-- **helpers.ts** - Utility functions
-```
-
-**Simpler than root** (no directory grouping, just flat list):
-```python
-lines = file_map_section.split('\n')
-new_entry = f"- **{filename}** - {description}"
-sorted_lines = sorted(lines + [new_entry])
-file_map_section = '\n'.join(sorted_lines)
-```
+**Alphabetical sorting:**
+- Files must be sorted alphabetically within their sections
+- Case-insensitive sorting
+- Maintain consistent indentation
 
 ### 5. Enforce Size Limits
 
 **After updates, check line counts:**
 
 **5.1 If Root CLAUDE.md > 420 lines:**
-
-**Step 1: Identify largest directory section** (most files):
-```python
-def find_largest_directory_section(file_map):
-    """Find directory with most files in root file map."""
-    directories = {}
-
-    for line in file_map.split('\n'):
-        # Match: "- **src/components/** (15 files) - ..."
-        match = re.search(r'\*\*(.+?)/\*\* \((\d+) files?\)', line)
-        if match:
-            dir_path, file_count = match.groups()
-            directories[dir_path] = int(file_count)
-
-    # Return directory with most files
-    return max(directories.items(), key=lambda x: x[1])[0]
-```
-
-**Step 2: Create subfolder CLAUDE.md for that directory:**
-```python
-largest_dir = find_largest_directory_section(file_map)
-create_subfolder_claude_md(largest_dir)
-```
-
-**Step 3: Move all file entries from root to subfolder:**
-```python
-# Extract all file entries for this directory from root
-directory_files = extract_directory_files_from_root(largest_dir)
-
-# Create subfolder CLAUDE.md with these files
-create_subfolder_claude_with_files(largest_dir, directory_files)
-
-# Remove individual file entries from root
-remove_directory_files_from_root(largest_dir)
-
-# Replace with directory summary in root
-replace_with_directory_summary(largest_dir)
-```
-
-**Step 4: Verify root now ≤ 420 lines:**
-```python
-root_lines = count_lines("CLAUDE.md")
-assert root_lines <= 420, f"Still exceeds 420 lines ({root_lines})"
-```
+1. Identify largest directory section (most files)
+2. Create subfolder CLAUDE.md for that directory
+3. Move all file entries from root to subfolder
+4. Replace with directory summary in root
+5. Verify root now ≤ 420 lines
 
 **5.2 If Subfolder CLAUDE.md > 200 lines:**
-
-**Step 1: Compress descriptions:**
-```python
-def compress_description(description: str) -> str:
-    """Reduce description to 3-5 words."""
-
-    # Remove articles
-    description = re.sub(r'\b(a|an|the)\b\s*', '', description, flags=re.IGNORECASE)
-
-    # Common abbreviations
-    abbreviations = {
-        'component': 'comp',
-        'function': 'fn',
-        'utility': 'util',
-        'configuration': 'config',
-        'definition': 'def',
-        'management': 'mgmt',
-        'authentication': 'auth',
-        'authorization': 'authz'
-    }
-
-    for full, abbrev in abbreviations.items():
-        description = description.replace(full, abbrev)
-
-    # Limit to first 5 words
-    words = description.split()[:5]
-    return ' '.join(words)
-```
-
-**Step 2: If still > 200 lines, split directory:**
-```python
-# Split into logical sub-directories
-# e.g., src/components/ → src/components/ui/, src/components/forms/
-
-# Create sub-directory CLAUDE.md files
-for sub_dir in sub_directories:
-    create_subfolder_claude_md(sub_dir)
-
-# Update parent with sub-directory summaries
-update_parent_with_subdirectory_summaries()
-```
+1. Compress descriptions (remove articles, use abbreviations)
+2. If still > 200 lines, split directory into sub-directories
+3. Create sub-directory CLAUDE.md files
+4. Update parent with sub-directory summaries
 
 ### 6. Atomic Update Pattern
 
-**Use read-modify-write pattern** to prevent corruption:
-
-```python
-def update_claude_md_atomic(file_path: str, updates: list[dict]):
-    """
-    Atomically update CLAUDE.md file map.
-
-    Args:
-        file_path: Path to CLAUDE.md
-        updates: List of {file_path, description} dicts
-    """
-    # 1. Read current content
-    with open(file_path, 'r') as f:
-        content = f.read()
-
-    # 2. Parse sections
-    sections = parse_markdown_sections(content)
-
-    # 3. Update file map section
-    file_map = sections.get("File Map", "")
-
-    for update in updates:
-        file_path = update['file_path']
-        description = update['description']
-
-        # Insert alphabetically
-        file_map = insert_file_entry_alphabetically(
-            file_map,
-            file_path,
-            description
-        )
-
-    sections["File Map"] = file_map
-
-    # 4. Reassemble content
-    updated_content = reassemble_sections(sections)
-
-    # 5. Check size
-    line_count = len(updated_content.split('\n'))
-    max_lines = 420 if file_path.endswith("CLAUDE.md") else 200
-
-    if line_count > max_lines:
-        updated_content = enforce_size_limit(updated_content, max_lines)
-
-    # 6. Write atomically (write to temp, then move)
-    temp_file = file_path + ".tmp"
-    with open(temp_file, 'w') as f:
-        f.write(updated_content)
-
-    os.replace(temp_file, file_path)  # Atomic on Unix
-
-    # 7. Verify
-    verify_line_count(file_path, max_lines)
-```
+**Use read-modify-write pattern to prevent corruption:**
+1. Read current CLAUDE.md content
+2. Parse markdown sections
+3. Update file map section with new entries
+4. Reassemble content
+5. Check size limits
+6. Write to temp file
+7. Atomically replace original (os.replace)
+8. Verify line count and alphabetical order
 
 ### 7. Handle Edge Cases
 
 **7.1 New Directory Created:**
-
-**If entire directory created with multiple files:**
-```python
-new_directory = detect_new_directory(file_paths)
-if new_directory:
-    # Add directory summary to root
-    add_directory_summary_to_root(new_directory)
-
-    # If created with > 30 files, create subfolder CLAUDE.md immediately
-    if count_files_in_directory(new_directory) > 30:
-        create_subfolder_claude_md(new_directory)
-```
+- Add directory summary to root
+- If created with > 30 files, create subfolder CLAUDE.md immediately
 
 **7.2 File Moved/Renamed:**
-
-**Input includes old_path and new_path:**
-```python
-if update_type == "rename":
-    # Remove old entry from file map
-    remove_file_entry(old_path)
-
-    # Add new entry in correct location
-    add_file_entry(new_path, description)
-```
+- Remove old entry from file map
+- Add new entry in correct location
 
 **7.3 File Deleted:**
-
-**Input includes deleted file paths:**
-```python
-if update_type == "delete":
-    # Remove entry from file map
-    remove_file_entry(file_path)
-
-    # Update directory file count
-    decrement_directory_file_count(directory)
-
-    # If directory now empty, remove directory section
-    if count_files_in_directory(directory) == 0:
-        remove_directory_section(directory)
-```
+- Remove entry from file map
+- Update/decrement directory file count
+- Remove directory section if directory now empty
 
 **7.4 Batch Updates:**
-
-**Multiple files created at once** (e.g., dev-story creates 8 files):
-
-```python
-def update_claude_md_batch(file_updates: list[dict]):
-    """
-    Update CLAUDE.md for multiple files at once.
-
-    Args:
-        file_updates: List of {file_path, description} dicts
-    """
-    # Group updates by target CLAUDE.md
-    updates_by_target = {}
-    for update in file_updates:
-        target = determine_target_claude_md(update['file_path'])
-        if target not in updates_by_target:
-            updates_by_target[target] = []
-        updates_by_target[target].append(update)
-
-    # Process all files before writing
-    # Single atomic update per CLAUDE.md file
-    for target, updates in updates_by_target.items():
-        update_claude_md_atomic(target, updates)
-
-    # Maintain alphabetical order throughout
-    verify_alphabetical_order(target)
-```
+- Group updates by target CLAUDE.md
+- Process all files before writing
+- Single atomic update per CLAUDE.md file
+- Maintain alphabetical order throughout
 
 ### 8. Update Metadata
 
-**Update last updated timestamp** (in subfolder CLAUDE.md):
-
+**For subfolder CLAUDE.md files, update footer:**
 ```markdown
 ---
 
@@ -523,62 +157,92 @@ def update_claude_md_batch(file_updates: list[dict]):
 **Files**: {updated file count}
 ```
 
-**Example:**
-```markdown
----
-
-**Last Updated**: 2025-01-17T10:30:00Z
-**Files**: 47
-```
-
 ### 9. Verification
 
 **After all updates complete:**
+1. **Verify line counts**: Root ≤ 420, subfolders ≤ 200
+2. **Verify alphabetical order**: File entries are sorted
+3. **Verify no duplicates**: No duplicate file entries exist
+4. **Verify all files added**: Cross-check input list with updates
 
-**9.1 Verify line counts:**
-```python
-root_lines = count_lines("CLAUDE.md")
-assert root_lines <= 420, f"Root exceeds 420 lines ({root_lines})"
+## Workflow
 
-for subfolder_claude in find_all_subfolder_claudes():
-    lines = count_lines(subfolder_claude)
-    assert lines <= 200, f"{subfolder_claude} exceeds 200 lines ({lines})"
+```
+START
+  │
+  ├─→ [1] Receive file list
+  │     │
+  │     ├─→ Validate file paths exist
+  │     ├─→ Filter excluded patterns
+  │     └─→ Deduplicate list
+  │
+  ├─→ [2] Generate descriptions for each file
+  │     │
+  │     ├─→ Try first comment/docstring
+  │     ├─→ Try export statement
+  │     └─→ Infer from filename (fallback)
+  │
+  ├─→ [3] Determine target CLAUDE.md for each file
+  │     │
+  │     ├─→ Check if subfolder CLAUDE.md exists
+  │     ├─→ Check if should create subfolder CLAUDE.md
+  │     └─→ Group files by target CLAUDE.md
+  │
+  ├─→ [4] For each target CLAUDE.md:
+  │     │
+  │     ├─→ Read current content (atomic)
+  │     ├─→ Parse "## File Map" section
+  │     ├─→ Insert new entries alphabetically
+  │     ├─→ Update directory file counts
+  │     └─→ Reassemble content
+  │
+  ├─→ [5] Enforce size limits
+  │     │
+  │     ├─→ Check root ≤ 420 lines
+  │     │     └─→ If exceeded: create subfolder CLAUDE.md for largest directory
+  │     │
+  │     └─→ Check subfolders ≤ 200 lines
+  │           └─→ If exceeded: compress descriptions or split directory
+  │
+  ├─→ [6] Atomic write for each CLAUDE.md
+  │     │
+  │     ├─→ Write to temporary file
+  │     ├─→ Atomically replace original
+  │     └─→ Verify file written
+  │
+  ├─→ [7] Update metadata
+  │     │
+  │     └─→ Update timestamp and file count in subfolder CLAUDE.md
+  │
+  ├─→ [8] Verification
+  │     │
+  │     ├─→ Verify line counts within limits
+  │     ├─→ Verify alphabetical order
+  │     ├─→ Verify no duplicates
+  │     └─→ Verify all files added
+  │
+  └─→ [9] Report results
+        │
+        └─→ END
 ```
 
-**9.2 Verify alphabetical order:**
-```python
-def verify_alphabetical_order(claude_md_path: str):
-    """Verify file entries are alphabetically sorted."""
-    content = read_file(claude_md_path)
-    file_map = extract_file_map_section(content)
+**Edge Case Handling:**
+- **New directory**: Add directory summary, check if needs subfolder CLAUDE.md
+- **Rename**: Remove old entry, add new entry
+- **Delete**: Remove entry, update counts, cleanup empty sections
+- **Batch**: Group by target, single atomic update per file
 
-    # Extract file entries
-    file_entries = [line for line in file_map.split('\n') if line.startswith('- **')]
+**Key Constraints:**
+- **Atomic updates**: Read-modify-write prevents corruption
+- **Size enforcement**: 420 root, 200 subfolder (strict)
+- **Alphabetical order**: Always maintain sorted listings
+- **No duplicates**: Prevent duplicate entries
+- **Automatic subfolder creation**: When directory > 30 files or root > 420 lines
+- **Batch efficiency**: Process multiple files in single update
 
-    # Verify sorted
-    sorted_entries = sorted(file_entries)
-    assert file_entries == sorted_entries, "File map not alphabetically sorted"
-```
+## Report
 
-**9.3 Verify no duplicates:**
-```python
-def verify_no_duplicates(claude_md_path: str):
-    """Verify no duplicate file entries."""
-    content = read_file(claude_md_path)
-    file_map = extract_file_map_section(content)
-
-    # Extract file names
-    file_names = [
-        re.search(r'\*\*(.+?)\*\*', line).group(1)
-        for line in file_map.split('\n')
-        if line.startswith('- **')
-    ]
-
-    # Verify unique
-    assert len(file_names) == len(set(file_names)), "Duplicate file entries found"
-```
-
-### 10. Report Results
+**Success Report Format:**
 
 ```
 ✅ CLAUDE.md Updated
@@ -594,30 +258,52 @@ CLAUDE.md files updated:
   - src/app/CLAUDE.md ({line_count} lines) - Within limit ✓
 
 Actions taken:
-  - {action description if any, e.g., "Created src/lib/CLAUDE.md (directory exceeded 30 files)"}
-  - {action description if any, e.g., "Compressed descriptions in src/components/CLAUDE.md (approaching 200 line limit)"}
+  - {action description if any}
+  - {action description if any}
 
 Status: All file maps current and within size limits
 ```
 
-## Key Constraints
+**Actions to report:**
+- Created subfolder CLAUDE.md (specify directory and reason)
+- Compressed descriptions (specify which CLAUDE.md and why)
+- Split directory into sub-directories (specify which)
+- Migrated entries from root to subfolder (specify which)
 
-- **Atomic updates**: Read-modify-write pattern prevents corruption
-- **Size enforcement**: Strict limits (420 root, 200 subfolder) automatically enforced
-- **Alphabetical order**: Always maintain sorted file listings
-- **No duplicates**: Prevent duplicate file entries
-- **Automatic subfolder creation**: Create subfolder CLAUDE.md when directory > 30 files or root > 420 lines
-- **Batch efficiency**: Process multiple files in single update per CLAUDE.md
-- **Metadata currency**: Update timestamps and file counts
+**Error Report Format:**
 
-## Auto-Continue
+```
+❌ CLAUDE.md Update Failed
 
-**NO auto-continue** - This workflow completes independently.
+Error: {error message}
 
-Called by other workflows as final step after file creation.
+Failed files:
+  - {file_path}: {specific error}
+  - {file_path}: {specific error}
 
-## Notes
+Successfully added:
+  - {file_path} → {target_claude_md}
 
+Recommendations:
+  - {suggested action}
+  - {suggested action}
+```
+
+**Verification Summary:**
+- Line counts for all CLAUDE.md files
+- Alphabetical order status
+- Duplicate check status
+- Files processed vs. files added
+
+**Prerequisites:**
+- Root CLAUDE.md exists (run generate-claude-md first if missing)
+- Files to add are readable
+- File paths are valid (relative to project root or documentation_dir)
+- No concurrent updates to CLAUDE.md files
+
+---
+
+**Notes:**
 - **Called by workflows, not users**: This is an internal workflow
 - **File description quality**: Meaningful descriptions critical for navigation
 - **Size discipline**: Strict enforcement prevents bloat
@@ -628,8 +314,6 @@ Called by other workflows as final step after file creation.
 - **Metadata maintenance**: Timestamps track freshness
 
 **Philosophy**: CLAUDE.md file map is navigation index, not documentation. Keep entries concise, sorted, and current. Auto-create subfolders to scale to any project size while maintaining strict size limits.
-
----
 
 **References:**
 - Examples: [examples/update-claude-md-examples.md](../examples/update-claude-md-examples.md)

@@ -4,7 +4,7 @@ description: Create system architecture through collaborative decision-making, d
 
 # Create Architecture
 
-## What This Does
+## Purpose
 
 Creates a decision-focused architecture document by delegating to the **bmad-architect** subagent. The architect facilitates collaborative technical decision-making, selecting technology stacks, defining patterns, and creating clear architectural guidance that prevents AI-agent implementation conflicts.
 
@@ -12,10 +12,7 @@ Creates a decision-focused architecture document by delegating to the **bmad-arc
 
 **Output:** `architecture.md` in your project's `.bmad` folder
 
----
-
-## Prerequisites
-
+**Prerequisites:**
 - **BMAD plugin installed** - The bmad-architect subagent must be available
 - **workflow-init run** - Project configured with `.bmad/config.yaml`
 - **PRD created** - Product Requirements Document must exist (run `/bmad:phase-2:prd` first)
@@ -23,21 +20,23 @@ Creates a decision-focused architecture document by delegating to the **bmad-arc
 
 ---
 
-## How It Works
+## Variables
 
-This workflow delegates the architecture creation to the **bmad-architect** subagent, who:
-
-1. **Loads project context** - Reads PRD, epics, UX design (if available), configuration
-2. **Discovers starter templates** - Finds modern CLI starters that make good default decisions
-3. **Identifies required decisions** - Analyzes requirements to determine what needs to be decided
-4. **Facilitates collaborative decision-making** - Works with you to make technology and pattern choices
-5. **Addresses cross-cutting concerns** - Error handling, logging, authentication, testing strategy
-6. **Defines project structure** - Source tree, epic mapping, integration points
-7. **Designs novel patterns** (if needed) - Creates custom architectural patterns for unique requirements
-8. **Documents implementation patterns** - Clear guidance for dev agents to follow
-9. **Creates architecture.md** - Comprehensive but decision-focused architecture document
-
-**Key Principle:** The architect adapts communication style based on your skill level (beginner, intermediate, expert) for optimal collaboration.
+| Variable | Description | Source | Example |
+|----------|-------------|--------|---------|
+| `project_name` | Name of the project | `.bmad/config.yaml` | "TurboMetrics" |
+| `documentation_dir` | Where files are saved | `.bmad/config.yaml` | ".bmad" |
+| `user_name` | Your name for personalization | `.bmad/config.yaml` | "Alex" |
+| `level` | Project level (0=Quick, 1=BMad, 2=Enterprise) | `.bmad/config.yaml` | "1" |
+| `phase` | Current workflow phase | `.bmad/config.yaml` | "planning" or "solutioning" |
+| `user_skill_level` | User's technical skill level | `.bmad/config.yaml` or ask user | "beginner", "intermediate", "expert" |
+| `communication_language` | Language for interaction | `.bmad/config.yaml` | "English" |
+| `document_output_language` | Language for documentation | `.bmad/config.yaml` | "English" |
+| `prd_path` | Path to Product Requirements Document | File system | ".bmad/PRD.md" or ".bmad/prd/index.md" |
+| `epics_path` | Path to epics file(s) (optional) | File system | ".bmad/epics*.md" |
+| `ux_design_path` | Path to UX design (optional) | File system | ".bmad/*ux*.md" |
+| `brownfield_analysis_path` | Path to brownfield project analysis (optional) | File system | ".bmad/index.md" |
+| `current_date` | Today's date | System | "2025-11-18" |
 
 ---
 
@@ -99,7 +98,7 @@ Use the **Task tool** to delegate architecture creation to the bmad-architect su
 **Task Configuration:**
 - **subagent_type:** `"bmad-architect"`
 - **description:** `"Create system architecture from PRD"`
-- **prompt:** Detailed instructions (see below)
+- **prompt:** Detailed instructions (see delegation prompt template below)
 
 **Delegation Prompt Template:**
 
@@ -330,6 +329,232 @@ If you ran `/bmad:meta:workflow-init`, update the workflow status:
 4. Save the file
 
 **Next recommended workflow:** Either `epic-tech-context` (create detailed epic tech specs) or `create-story` (start creating implementation stories)
+
+---
+
+## Workflow
+
+The architect follows this systematic workflow when creating architecture:
+
+### Phase 1: Context Loading & Understanding
+1. Load and parse PRD, epics, UX design, brownfield analysis (if available)
+2. Extract functional requirements, non-functional requirements, technical constraints
+3. Assess project scale by counting epics and stories
+4. Identify complexity indicators (real-time features, multi-tenancy, compliance needs, integrations)
+5. Reflect understanding back to user for validation
+
+### Phase 2: Starter Template Discovery
+1. Identify primary technology domain from PRD (web, mobile, API, CLI, desktop, etc.)
+2. Use WebSearch to find modern, popular starter templates for that domain
+3. Investigate what each starter provides by default (framework, auth, database, styling, etc.)
+4. Present 2-3 best options to user adapted to their skill level
+5. If starter accepted, document initialization command
+6. Mark all starter-provided decisions as "PROVIDED BY STARTER" to avoid re-deciding
+
+### Phase 3: Facilitation Style Adaptation
+1. Read `user_skill_level` from config
+2. Adjust communication style:
+   - **Beginner:** Use analogies, explain concepts simply, avoid jargon, provide context
+   - **Intermediate:** Balance technical accuracy with clarity, brief explanations
+   - **Expert:** Use technical terminology, move quickly, focus on edge cases and trade-offs
+
+### Phase 4: Decision Identification & Prioritization
+1. Analyze PRD requirements against common architectural patterns
+2. Identify all required decisions (database, hosting, auth, state management, etc.)
+3. Exclude decisions already made by starter template
+4. Categorize by priority:
+   - **CRITICAL:** Blocks all development (language, framework, database)
+   - **IMPORTANT:** Shapes architecture significantly (auth, state, API design)
+   - **NICE-TO-HAVE:** Can be deferred or decided during implementation
+5. Present decision roadmap to user
+
+### Phase 5: Collaborative Decision-Making
+For each decision in priority order:
+1. Present the decision context adapted to user's skill level
+2. If technology-specific, use WebSearch to verify current stable version
+3. Present 2-3 viable options with trade-offs
+4. Ask user for preference or constraints
+5. Provide deeper explanation if requested
+6. Record decision in tracking table: category, choice, version, affected epics, rationale
+7. Check for cascading implications (e.g., choosing PostgreSQL → need migration tool)
+
+### Phase 6: Cross-Cutting Concerns
+Address system-wide patterns that all AI agents must follow consistently:
+1. **Error Handling:** Strategy, patterns, user-facing vs internal errors
+2. **Logging:** Format (structured/unstructured), levels, what to log, where logs go
+3. **Date/Time:** Timezone handling, storage format (UTC), display format, library choice
+4. **Authentication:** Where implemented, how tokens work, session management, refresh strategy
+5. **API Design:** Response format, status codes, error format, versioning
+6. **Testing:** Unit test strategy, integration test approach, E2E testing tools
+7. For beginners: explain WHY each matters and consequences of inconsistency
+
+### Phase 7: Project Structure Definition
+1. Create comprehensive source tree showing:
+   - Root configuration files
+   - Source code organization (by feature, by layer, hybrid)
+   - Test directories
+   - Build/deployment artifacts
+   - Documentation location
+2. Map each epic to architectural boundaries (which epics go where)
+3. Define integration points:
+   - How components communicate
+   - API boundaries
+   - Service interactions
+   - Data flow
+
+### Phase 8: Novel Pattern Design (if needed)
+1. Scan PRD for unique requirements without standard solutions
+2. For each novel pattern needed:
+   - Name the pattern clearly
+   - Explain the problem it solves
+   - Design the solution approach
+   - Show implementation sketch (pseudocode or example)
+   - Map to affected epics
+3. Use collaborative brainstorming for complex patterns
+4. Validate pattern solves the requirement
+
+### Phase 9: Implementation Pattern Documentation
+Document clear patterns for AI-agent consistency:
+1. **Code Organization:** File structure, module boundaries, naming conventions
+2. **Naming Conventions:** Variables, functions, classes, files, directories
+3. **Error Handling:** How to catch, transform, log, report errors
+4. **Logging:** What to log, log levels, structured data, sensitive data handling
+5. **Testing:** Test file naming, test structure, mock patterns, assertion style
+6. **Security:** Input validation, authentication checks, authorization patterns
+7. **Performance:** Caching strategies, query optimization, lazy loading
+
+### Phase 10: Architecture Document Creation
+1. Write to `{documentation_dir}/architecture.md`
+2. Follow standard structure (see Architecture Document Structure above)
+3. Include:
+   - Executive summary (2-3 paragraphs)
+   - Project initialization command or setup steps
+   - Decision summary table (all decisions with rationale)
+   - Complete project structure tree
+   - Epic-to-architecture mapping
+   - Technology stack details with versions
+   - Novel pattern designs (if any)
+   - Implementation patterns for consistency
+   - Consistency rules (must-follow patterns)
+   - Data architecture (models, relationships)
+   - API contracts (if applicable)
+   - Security architecture
+   - Performance considerations
+   - Deployment architecture
+   - Development environment setup
+   - Architecture Decision Records (ADRs) with detailed rationale
+4. Optimize for AI-agent consumption (clear, explicit, unambiguous)
+5. Run validation checklist (see Step 4 above)
+
+### Phase 11: Completion & Reporting
+1. Save architecture.md file
+2. Report back to delegating agent with:
+   - Summary of architectural approach
+   - Key technology decisions made
+   - Number of epics mapped
+   - Novel patterns designed (if any)
+   - Path to architecture.md
+   - Recommended next steps
+
+---
+
+## Report
+
+Upon completion of the architecture workflow, the bmad-architect subagent will report back with the following information:
+
+### Completion Summary
+
+**Architecture Approach:**
+- Brief description of the overall architectural approach chosen (e.g., "Modern full-stack web application with Next.js App Router and PostgreSQL")
+- Primary architectural pattern (monolith, modular monolith, microservices, etc.)
+- Starter template used (if applicable) with initialization command
+
+**Key Technology Decisions:**
+Present a summary table of critical decisions:
+
+| Category | Decision | Version | Rationale |
+|----------|----------|---------|-----------|
+| Framework | Next.js | 14.x | Industry standard, excellent DX, Vercel deployment |
+| Database | PostgreSQL | 16 | Proven reliability, JSONB support, strong ecosystem |
+| Auth | NextAuth.js | 5.x | Seamless Next.js integration, multiple providers |
+| ... | ... | ... | ... |
+
+**Epic Mapping:**
+- Number of epics mapped to architecture: {count}
+- Brief overview of how epics map to architectural boundaries
+- Example: "Epic 1 (User Management) → /app/users/, Epic 2 (Dashboard) → /app/dashboard/"
+
+**Novel Patterns Designed:**
+If custom patterns were needed for unique requirements:
+- Pattern name and problem it solves
+- Brief description of solution approach
+- Which epics are affected
+
+**Deliverable:**
+- Path to architecture document: `{documentation_dir}/architecture.md`
+- Confirmation that validation checklist passed
+
+**Recommended Next Steps:**
+Based on project complexity and state:
+1. **For projects with complex epics:** Run `/bmad:phase-4:epic-tech-context` to create detailed technical specifications for each epic
+2. **For simpler projects:** Run `/bmad:phase-4:create-story` to start creating individual user stories
+3. **If using workflow tracking:** Update `.bmad/bmm-workflow-status.yaml` to mark `create-architecture` as completed
+
+**Considerations & Notes:**
+- Any trade-offs made during decision-making
+- Areas that may need revisiting as implementation progresses
+- Specific concerns or risks identified during architecture design
+- Suggestions for team discussion or validation
+
+### Example Report
+
+```
+Architecture creation completed successfully!
+
+**Architectural Approach:**
+Modern full-stack SaaS application using the T3 stack (Next.js + TypeScript + tRPC + Prisma + NextAuth). Monolithic architecture with clear feature boundaries, optimized for rapid development and Vercel deployment.
+
+**Key Technology Decisions:**
+
+| Category | Decision | Version | Rationale |
+|----------|----------|---------|-----------|
+| Framework | Next.js | 14.2 | App Router for modern React, excellent SEO, Vercel optimization |
+| Language | TypeScript | 5.3 | Type safety prevents runtime errors, better DX |
+| Database | PostgreSQL | 16 | Mature, reliable, excellent JSON support for flexible schemas |
+| ORM | Prisma | 5.8 | Type-safe database access, excellent DX, migrations |
+| Auth | NextAuth.js | 5.0-beta | Seamless Next.js integration, social providers |
+| API | tRPC | 10.45 | End-to-end type safety, no API contract drift |
+| Styling | Tailwind CSS | 3.4 | Provided by T3 starter, component-first |
+| Real-time | Pusher | Latest | Managed WebSocket service, simpler than self-hosted |
+| Testing | Vitest + Playwright | Latest | Fast unit tests, reliable E2E |
+| Deployment | Vercel | - | Zero-config Next.js deployment, global CDN |
+
+**Epic Mapping (5 epics):**
+- Epic 1 (User Management): /app/dashboard/users/ + /server/api/routers/user.ts
+- Epic 2 (Dashboard Builder): /app/dashboard/builder/ + /components/builder/
+- Epic 3 (Data Integration): /server/api/routers/integrations.ts
+- Epic 4 (Reporting): /app/dashboard/reports/ + /lib/reporting/
+- Epic 5 (Billing): /server/api/routers/billing.ts + Stripe integration
+
+**Novel Patterns Designed:**
+1. **Row-Level Security Multi-Tenancy**
+   - Problem: Multiple customers sharing database need guaranteed data isolation
+   - Solution: PostgreSQL RLS policies + Prisma middleware tenant_id injection
+   - Affects: All epics (security cross-cutting concern)
+
+**Deliverable:**
+Architecture document created at `.bmad/architecture.md` (152 lines)
+
+**Recommended Next Steps:**
+1. Run `/bmad:phase-4:epic-tech-context` to create detailed technical specifications for each epic
+2. Or run `/bmad:phase-4:create-story` to begin creating implementation stories
+3. Update workflow status: mark `create-architecture` as completed
+
+**Notes:**
+- Chose managed Pusher over self-hosted WebSocket to reduce operational complexity
+- Multi-tenant RLS pattern is critical - all dev agents MUST follow tenant_id patterns
+- First story should be "Initialize T3 app" using: `pnpm create t3-app@latest`
+```
 
 ---
 

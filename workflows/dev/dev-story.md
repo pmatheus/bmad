@@ -12,8 +12,7 @@ Provides AC-driven development (every change maps to acceptance criteria), conte
 
 **Key Principle:** Continuous execution without pausing. Work until ALL ACs satisfied, ALL tasks complete, ALL tests passing - or until blocked.
 
-## Quick Start
-
+**Quick Start:**
 ```bash
 # Prerequisites: story marked "ready-for-dev", context generated
 /bmad:phase-4:dev-story
@@ -29,7 +28,7 @@ Provides AC-driven development (every change maps to acceptance criteria), conte
 # 8. Auto-continue to code-review
 ```
 
-## Prerequisites
+**Prerequisites:**
 
 See [shared/prerequisites.md#phase-4-dev-story](../shared/prerequisites.md)
 
@@ -38,19 +37,20 @@ See [shared/prerequisites.md#phase-4-dev-story](../shared/prerequisites.md)
 - [ ] Story Context generated (STRONGLY RECOMMENDED - run story-context first)
 - [ ] Epic tech spec available (optional but recommended)
 
+## Variables
+
+- `{project_name}` - Name of the project being developed
+- `{documentation_dir}` - Main output folder for project documentation (.bmad/)
+- `{sprint_artifacts}` - Directory containing sprint artifacts (.bmad/sprints/current/)
+- `{user_name}` - Name of the user running the workflow
+- `{user_skill_level}` - Technical skill level of the user (novice/intermediate/expert)
+- `{current_date}` - Today's date for timestamping changes
+- `{story_key}` - Story identifier in format: `{epic}-{story}-{name}`
+- `{epic}` - Epic identifier from story key
+- `{story}` - Story number from story key
+- `{name}` - Story name/slug from story key
+
 ## Instructions
-
-### Story Implementation Flow
-
-**Overview:**
-1. Find Next Ready Story → First "ready-for-dev" or "in-progress"
-2. Load Story and Context → Read story file and .context.xml
-3. Check for Code Review Continuation → Resume after review if needed
-4. Mark In-Progress → Update sprint status
-5. Implement Continuously → Work through ALL tasks without pausing
-6. Validate Completion → Verify all ACs, all tasks, all tests passing
-7. Update Files → Story file, sprint status
-8. Report and Auto-Continue → Report completion, proceed to code-review
 
 ### 1. Load Configuration and Find Story
 
@@ -311,7 +311,21 @@ Please resolve the blocker, then re-run /bmad:phase-4:dev-story to resume.
 
 **Rationale:** Code review is part of the standard development flow. Once implementation is complete, it should automatically proceed to review without user intervention. This maintains workflow momentum and ensures quality gates are applied consistently.
 
-## Key Constraints
+## Workflow
+
+### Story Implementation Flow
+
+**Overview:**
+1. Find Next Ready Story → First "ready-for-dev" or "in-progress"
+2. Load Story and Context → Read story file and .context.xml
+3. Check for Code Review Continuation → Resume after review if needed
+4. Mark In-Progress → Update sprint status
+5. Implement Continuously → Work through ALL tasks without pausing
+6. Validate Completion → Verify all ACs, all tasks, all tests passing
+7. Update Files → Story file, sprint status
+8. Report and Auto-Continue → Report completion, proceed to code-review
+
+### Key Constraints
 
 - **AC-driven development:** Every line of code maps to specific acceptance criterion
 - **Story Context is truth:** If context exists, it's the single source of truth - reuse existing code
@@ -321,13 +335,88 @@ Please resolve the blocker, then re-run /bmad:phase-4:dev-story to resume.
 - **No scope creep:** Only implement what's in acceptance criteria
 - **Update story file continuously:** Check tasks, update File List, add Change Log entries
 
-## Auto-Continue
+### Auto-Continue Behavior
 
 **ALWAYS auto-continue** to code-review after story implementation completes.
 
 Dev-story + code-review is a continuous flow. Once implementation is complete, proceed immediately to review without user intervention. This maintains workflow momentum and ensures quality gates are applied consistently.
 
-## Notes
+## Report
+
+### Successful Implementation
+
+When the bmad-dev subagent completes story implementation successfully, report:
+
+```
+✅ Story {story_key} implementation complete
+
+**Summary:**
+- Story: {story_title}
+- Acceptance Criteria: {X}/{X} satisfied
+- Tasks: {X}/{X} completed
+- Tests: {X} written, {X}/{X} passing (100%)
+- Files Changed: {X} files modified
+
+**Implementation Highlights:**
+{brief summary of approach, key decisions made, patterns followed}
+
+**Files Modified:**
+- {file_path_1} - {description}
+- {file_path_2} - {description}
+...
+
+**Status:** Ready for code review
+
+**Next Step:** Auto-continuing to code review...
+```
+
+Then automatically proceed to code review using `/bmad:phase-4:code-review`.
+
+### Blocked Implementation
+
+When the bmad-dev subagent encounters a blocker, report:
+
+```
+⚠️ Story {story_key} implementation blocked
+
+**Blocker:** {detailed description of what's blocking progress}
+
+**What's Needed:** {specific information, clarification, or resource required to unblock}
+
+**Progress So Far:**
+- Acceptance Criteria: {X}/{Y} satisfied
+- Tasks: {X}/{Y} completed
+- Tests: {X} written, {X}/{Y} passing
+- Files Changed: {list of files}
+
+**Work Completed:**
+{summary of what was successfully implemented}
+
+**Recommended Action:** {how user can resolve the blocker}
+
+**To Resume:** Run /bmad:phase-4:dev-story after resolving the blocker
+```
+
+### Resume After Code Review
+
+When resuming implementation after code review, report:
+
+```
+🔄 Resuming story {story_key} after code review
+
+**Review Action Items:** {X} items to address
+
+**Action Items:**
+- [ ] {action_item_1}
+- [ ] {action_item_2}
+...
+
+**Approach:** Addressing review feedback before continuing with remaining tasks
+```
+
+After addressing all review items, follow standard completion reporting.
+
+### Notes
 
 - **Story Context critical:** STRONGLY recommend running story-context before dev-story
 - **Without context:** Risk of hallucinations, rebuilding existing code, inconsistent patterns

@@ -4,80 +4,186 @@ description: Identify disruption opportunities and architect business model inno
 
 # Innovation Strategy
 
-## What This Does
+## Purpose
 
-Guides you through a comprehensive strategic analysis process to identify breakthrough opportunities and architect sustainable business model innovation. This workflow applies proven innovation frameworks to analyze markets, competitive dynamics, and business model innovation pathways.
+This workflow guides you through a comprehensive strategic analysis process to identify breakthrough opportunities and architect sustainable business model innovation. It applies proven innovation frameworks to analyze markets, competitive dynamics, and business model innovation pathways.
 
-## Prerequisites
-
-- BMAD plugin installed
-- `/workflow-init` run (creates `.bmad/config.yaml`)
-
-## When to Use
-
+**Use this when:**
 - Exploring new market opportunities or strategic pivots
 - Facing market pressure or competitive threats
 - Analyzing business model innovation opportunities
 - Planning strategic transformation or disruption plays
 - Conducting strategic planning or innovation workshops
 
+**Prerequisites:**
+- BMAD plugin installed
+- `/workflow-init` run (creates `.bmad/config.yaml`)
+
+## Variables
+
+The following variables are loaded from `.bmad/config.yaml`:
+
+- `{documentation_dir}` - Directory where the innovation strategy document will be saved
+- `{user_name}` - User's name for personalization throughout the process
+- `{communication_language}` - Preferred language for communication
+- `{date}` - Current date used in output filename (format: YYYY-MM-DD)
+
+**Strategic Context Variables** (gathered from user):
+- `{company_name}` - Company or business being analyzed
+- `{strategic_driver}` - What's driving this strategic exploration
+- `{current_business_model}` - Brief description of current business model
+- `{constraints}` - Any constraints or boundaries that exist
+- `{success_vision}` - What breakthrough success would look like
+
 ## Instructions
 
-### Step 1: Load Configuration
+Follow these steps to complete the innovation strategy analysis:
 
-Read configuration from `.bmad/config.yaml`:
-- `documentation_dir` - Where to save the innovation strategy document
-- `user_name` - Your name for personalization
-- `communication_language` - Preferred language
+1. **Load Configuration**
+   - Read configuration from `.bmad/config.yaml`
+   - Extract `documentation_dir`, `user_name`, and `communication_language`
+   - Verify prerequisites are met
 
-### Step 2: Gather Strategic Context
+2. **Gather Strategic Context**
+   - Ask the user about their strategic situation:
+     - What company or business are we analyzing?
+     - What's driving this strategic exploration?
+     - What's your current business model in brief?
+     - What constraints or boundaries exist?
+     - What would breakthrough success look like?
+   - If context data is provided (e.g., industry analysis, market research), load and incorporate it
 
-Ask the user about their strategic situation:
-- What company or business are we analyzing?
-- What's driving this strategic exploration?
-- What's your current business model in brief?
-- What constraints or boundaries exist?
-- What would breakthrough success look like?
+3. **Delegate to Innovation Strategist Agent**
+   - Use the Task tool to invoke the `bmad-innovation-strategist` subagent
+   - Provide all gathered strategic context to the agent
+   - The agent will conduct the full strategic analysis using proven frameworks
 
-If context data is provided (e.g., industry analysis, market research), load and incorporate it.
+4. **Generate Output Document**
+   - Create comprehensive innovation strategy document
+   - Save to `{documentation_dir}/innovation-strategy-{date}.md`
+   - Include all analysis sections and recommendations
 
-### Step 3: Delegate to Innovation Strategist Agent
+5. **Confirm Completion**
+   - Inform the user of completion
+   - Provide the path to the saved document
+   - Offer to clarify any aspects of the strategy
 
-Use the Task tool to invoke the `bmad-innovation-strategist` subagent with the strategic context gathered.
+## Workflow
 
-The agent will guide through:
+The Innovation Strategist agent guides through the following 8-phase analysis:
 
-1. **Market Landscape Analysis** - Using frameworks like TAM/SAM/SOM, Five Forces, Competitive Positioning
-2. **Business Model Deconstruction** - Using Business Model Canvas, Value Proposition Canvas
-3. **Disruption Opportunity Identification** - Using Disruptive Innovation Theory, Jobs to be Done, Blue Ocean
-4. **Innovation Generation** - Using Three Horizons, Value Chain Analysis, Partnership Strategy
-5. **Strategic Options Development** - Synthesize 3 distinct strategic directions
-6. **Recommendation** - Bold strategic recommendation with clear rationale
-7. **Execution Roadmap** - Phased implementation plan (0-3, 3-9, 9-18 months)
-8. **Metrics & Risk Mitigation** - Success metrics and risk management
+### Phase 1: Market Landscape Analysis
+Using frameworks: TAM/SAM/SOM, Five Forces, Competitive Positioning
+- Analyze total addressable market and segments
+- Map competitive landscape and industry dynamics
+- Identify market trends and forces
 
-### Step 4: Generate Output Document
+### Phase 2: Business Model Deconstruction
+Using frameworks: Business Model Canvas, Value Proposition Canvas
+- Map current business model components
+- Analyze value creation and capture mechanisms
+- Identify strengths and vulnerabilities
 
-Create innovation strategy document in `{documentation_dir}/innovation-strategy-[date].md` with:
-- Strategic context and challenge
-- Market analysis and competitive insights
-- Current business model assessment
-- Disruption opportunities identified
-- Innovation initiatives and options
-- Recommended strategy with rationale
-- Execution roadmap by phase
-- Success metrics and risk mitigation
+### Phase 3: Disruption Opportunity Identification
+Using frameworks: Disruptive Innovation Theory, Jobs to be Done, Blue Ocean Strategy
+- Identify overserved and underserved market segments
+- Uncover jobs customers are trying to accomplish
+- Find uncontested market spaces
 
-### Step 5: Confirm Completion
+### Phase 4: Innovation Generation
+Using frameworks: Three Horizons, Value Chain Analysis, Partnership Strategy
+- Generate horizon 1, 2, and 3 innovation opportunities
+- Analyze value chain innovation possibilities
+- Explore partnership and ecosystem opportunities
+
+### Phase 5: Strategic Options Development
+- Synthesize analysis into 3 distinct strategic directions
+- Evaluate each option against success criteria
+- Compare risk/reward profiles
+
+### Phase 6: Recommendation
+- Provide bold strategic recommendation with clear rationale
+- Explain why this direction over alternatives
+- Address anticipated objections
+
+### Phase 7: Execution Roadmap
+Phased implementation plan:
+- **Phase 1 (0-3 months):** Foundation and validation activities
+- **Phase 2 (3-9 months):** Core capability building and early wins
+- **Phase 3 (9-18 months):** Scaling and optimization
+
+### Phase 8: Metrics & Risk Mitigation
+- Define success metrics for each phase
+- Identify critical risks and mitigation strategies
+- Establish decision gates and pivoting criteria
+
+**Process Notes:**
+- Innovation strategy requires 2-4 hours for thorough analysis
+- User should have basic market knowledge or research prepared
+- Best conducted with stakeholder alignment on strategic priorities
+- May uncover uncomfortable truths about current business model
+- Framework selection adapts based on business context and maturity
+- Energy checkpoints throughout help manage cognitive load
+
+## Report
+
+### Output Document Structure
+
+The final innovation strategy document (`{documentation_dir}/innovation-strategy-{date}.md`) includes:
+
+1. **Executive Summary**
+   - Strategic challenge and context
+   - Key recommendation
+   - Expected outcomes
+
+2. **Strategic Context**
+   - Company/business overview
+   - Strategic drivers and constraints
+   - Success vision
+
+3. **Market Analysis & Competitive Insights**
+   - Market landscape findings
+   - Competitive dynamics
+   - Industry forces and trends
+
+4. **Current Business Model Assessment**
+   - Business model canvas analysis
+   - Strengths and vulnerabilities
+   - Value proposition evaluation
+
+5. **Disruption Opportunities Identified**
+   - Underserved market segments
+   - Jobs to be Done insights
+   - Blue Ocean opportunities
+
+6. **Innovation Initiatives & Strategic Options**
+   - Three strategic direction options
+   - Evaluation against success criteria
+   - Risk/reward analysis
+
+7. **Recommended Strategy**
+   - Bold recommendation with clear rationale
+   - Why this over alternatives
+   - Response to anticipated objections
+
+8. **Execution Roadmap**
+   - 0-3 month foundation phase
+   - 3-9 month building phase
+   - 9-18 month scaling phase
+   - Key milestones and deliverables
+
+9. **Success Metrics & Risk Mitigation**
+   - KPIs for each phase
+   - Critical risks identified
+   - Mitigation strategies
+   - Decision gates and pivot criteria
+
+### Completion Confirmation
 
 Inform the user:
-"Innovation strategy complete! Your strategic analysis has been saved to `{documentation_dir}/innovation-strategy-[date].md`"
+"Innovation strategy complete! Your strategic analysis has been saved to `{documentation_dir}/innovation-strategy-{date}.md`"
 
-## Output Files
-
-- `{documentation_dir}/innovation-strategy-[date].md` - Comprehensive innovation strategy document
-
-## Examples
+### Examples of Completed Analyses
 
 **Example 1: SaaS Platform Facing Market Pressure**
 
@@ -120,12 +226,3 @@ Process:
 3. Innovation opportunity: Community-driven chronic disease management platform
 4. Recommended strategy: Pivot from general telehealth to condition-specific communities
 5. Capital-efficient roadmap focusing on one condition initially
-
-## Notes
-
-- Innovation strategy requires 2-4 hours for thorough analysis
-- User should have basic market knowledge or research prepared
-- Best conducted with stakeholder alignment on strategic priorities
-- May uncover uncomfortable truths about current business model
-- Framework selection adapts based on business context and maturity
-- Energy checkpoints throughout help manage cognitive load

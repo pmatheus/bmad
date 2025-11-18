@@ -4,55 +4,52 @@ description: Senior Developer systematic code review with AC validation, task ve
 
 # Code Review
 
-Performs a systematic Senior Developer review on completed stories, validating every acceptance criterion, verifying every completed task, and generating structured review notes with evidence-based findings.
-
 ## Purpose
 
-Provides comprehensive, systematic code review with zero-tolerance validation - every AC checked, every task verified, all findings evidence-based. Tasks marked complete but not actually done = HIGH SEVERITY finding. This is an uncompromising gatekeeper.
+Provides comprehensive, systematic code review with zero-tolerance validation - every AC checked, every task verified, all findings evidence-based. This agent performs a Senior Developer review on completed stories, validating every acceptance criterion, verifying every completed task, and generating structured review notes with evidence-based findings.
 
 **Key Principle:** SYSTEMATIC VALIDATION - No shortcuts. No assumptions. Every claim is verified with evidence.
 
-## Quick Start
+**Review Modes:**
+- **Story Review Mode** (Default): Finds first story with status "review", performs systematic validation against ACs and tasks, appends review to story file, and updates sprint status based on outcome
+- **Ad-Hoc Review Mode** (Fallback): Reviews any specified files with user-defined focus, generates standalone report, no sprint status updates
 
-```bash
-# Prerequisites: story implemented and marked "review" status
-/bmad:phase-4:code-review
+**Philosophy:** Uncompromising gatekeeper that ensures quality through systematic validation, evidence-based findings, and clear outcome determination. Tasks marked complete but not actually done = HIGH SEVERITY finding.
 
-# Workflow will:
-# 1. Find first story with status "review"
-# 2. Validate ALL ACs with evidence
-# 3. Verify ALL completed tasks
-# 4. Perform quality/security review
-# 5. Determine outcome (APPROVE/CHANGES/BLOCKED)
-# 6. Update sprint status accordingly
-```
+## Variables
 
-## Prerequisites
+| Variable | Description | Source |
+|----------|-------------|--------|
+| `{sprint_artifacts}` | Path to sprint artifacts directory | Configuration file `.bmad/config.yaml` |
+| `{epic}` | Epic number (e.g., E1) | Sprint status YAML or story file |
+| `{story}` | Story number (e.g., S1) | Sprint status YAML or story file |
+| `{story_key}` | Full story key: `{epic}-{story}-{name}` | Sprint status YAML |
+| `{name}` | Story short name | Sprint status YAML or story file |
+| `{title}` | Story full title | Story file metadata |
+| `{status}` | Current story status | Sprint status YAML or story file |
+| `{epic_num}` | Numeric epic identifier | Extracted from epic key |
+| `{user_name}` | Developer/reviewer name | System or configuration |
+| `{date}` | Current date (YYYY-MM-DD) | System date command |
+| `{outcome}` | Review outcome: APPROVE/CHANGES/BLOCKED | Determined by validation results |
+| `ad_hoc_review_mode` | Boolean flag for ad-hoc review mode | Set when no stories with status "review" |
+| `review_files` | List of files to review (ad-hoc mode) | User input via AskUserQuestion |
+| `review_focus` | Focus areas for review (ad-hoc mode) | User input via AskUserQuestion |
+| `review_context` | Additional context (ad-hoc mode) | User input via AskUserQuestion |
 
-See [shared/prerequisites.md#phase-4-code-review](../shared/prerequisites.md)
+## Instructions
 
-**Workflow-specific:**
+### Prerequisites
+
+**See:** [shared/prerequisites.md#phase-4-code-review](../shared/prerequisites.md)
+
+**Workflow-specific requirements:**
 - [ ] Story implemented and marked "review" status
 - [ ] Story context file exists (warning if missing)
 - [ ] Epic tech spec available (warning if missing)
 
-## Instructions
-
-### Two Review Modes
-
-**Story Review Mode** (Default):
-- Finds first story with status "review" in sprint-status
-- Performs systematic validation against ACs and tasks
-- Appends review to story file
-- Updates sprint status based on outcome
-
-**Ad-Hoc Review Mode** (Fallback):
-- Reviews any specified files
-- Focus on user-specified criteria
-- Generates standalone report
-- No sprint status updates
-
 ### 1. Load Configuration and Find Story
+
+**Load configuration:**
 
 See [shared/common-operations.md#load-configuration](../shared/common-operations.md)
 
@@ -335,9 +332,114 @@ Target status based on outcome:
 - CHANGES REQUESTED → `in-progress`
 - BLOCKED → `review` (stays)
 
-### 9. Report Completion - NO Auto-Continue
+## Workflow
 
-**Story review mode:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 1. Load Configuration and Find Story                        │
+│    - Load config from .bmad/config.yaml                     │
+│    - Find first story with status "review" in sprint-status │
+│    - If none found: AskUserQuestion (dev-story/status/      │
+│      ad-hoc)                                                │
+│    - If ad-hoc: Set flag, gather files/focus, skip story    │
+│      parsing                                                │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│ 2. Parse Story and Load Context                             │
+│    - Extract metadata and sections from story file          │
+│    - Locate: story context, epic tech spec, architecture    │
+│    - Record warnings if files missing                       │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│ 3. Detect Tech Stack and Best Practices                     │
+│    - Scan dependency manifests (package.json, pyproject.toml│
+│      go.mod, Cargo.toml, pom.xml)                           │
+│    - Synthesize best-practices note                         │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│ 4. Systematic Validation                                     │
+│    ┌────────────────────────────────────────────────────┐  │
+│    │ 4A. AC Validation (Story Mode)                     │  │
+│    │     - For each AC: find evidence, determine status │  │
+│    │     - Generate AC validation table                 │  │
+│    │     - Generate AC Coverage Summary                 │  │
+│    └────────────────────────────────────────────────────┘  │
+│    ┌────────────────────────────────────────────────────┐  │
+│    │ 4B. Task Verification (Story Mode)                 │  │
+│    │     - For each completed task: verify with evidence│  │
+│    │     - Flag false completions as HIGH SEVERITY      │  │
+│    │     - Generate Task Completion Summary             │  │
+│    └────────────────────────────────────────────────────┘  │
+│    ┌────────────────────────────────────────────────────┐  │
+│    │ 4C. Cross-Check Epic Tech-Spec                     │  │
+│    │     - Extract specs: services, APIs, NFRs          │  │
+│    │     - Check implementation against specs           │  │
+│    │     - Flag architecture violations as HIGH         │  │
+│    └────────────────────────────────────────────────────┘  │
+│    ┌────────────────────────────────────────────────────┐  │
+│    │ 4D. Compile Validation Findings                    │  │
+│    │     - Organize findings by severity (HIGH/MED/LOW) │  │
+│    └────────────────────────────────────────────────────┘  │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│ 5. Code Quality and Risk Review                             │
+│    - Error handling review                                  │
+│    - Input validation review                                │
+│    - Security review (OWASP Top 10)                         │
+│    - Performance review                                     │
+│    - Test quality review                                    │
+│    - Capture findings with file:line references            │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│ 6. Decide Review Outcome                                    │
+│    - BLOCKED: Any HIGH severity finding                     │
+│    - CHANGES REQUESTED: Any MEDIUM findings or >5 LOW       │
+│    - APPROVE: All ACs implemented, tasks verified, no HIGH/ │
+│      MEDIUM                                                 │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│ 7. Prepare Comprehensive Review Report                      │
+│    - Summary and outcome justification                      │
+│    - Key findings by severity                               │
+│    - AC coverage with validation table                      │
+│    - Task completion validation                             │
+│    - Test coverage and gaps                                 │
+│    - Architectural alignment                                │
+│    - Security notes                                         │
+│    - Best practices and references                          │
+│    - Action items (required + advisory)                     │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│ 8. Append Review and Update Status                          │
+│    If ad-hoc: Create standalone report .bmad/code-review-   │
+│    {date}.md                                                │
+│    If story: Append review to story file, add changelog     │
+│    entry                                                    │
+│    Update sprint-status.yaml based on outcome              │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│ 9. Report Completion (NO Auto-Continue)                     │
+│    Story mode: Show story details, outcome, AC/task summary,│
+│    next steps                                               │
+│    Ad-hoc mode: Show files reviewed, focus, outcome,        │
+│    report path                                              │
+│    DO NOT auto-continue - user should review findings       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Report
+
+### For Story Review Mode
+
+Report completion to the user with this format:
 
 ```
 ✅ Story Review Complete!
@@ -359,7 +461,9 @@ Target status based on outcome:
 4. If BLOCKED: Resolve {high_count} HIGH severity blockers before proceeding
 ```
 
-**Ad-hoc review mode:**
+### For Ad-Hoc Review Mode
+
+Report completion to the user with this format:
 
 ```
 ✅ Ad-Hoc Code Review Complete!
@@ -377,10 +481,16 @@ Target status based on outcome:
 3. Re-run review on updated code if needed
 ```
 
-**CRITICAL:**
-- DO NOT auto-continue after code review
-- User should review findings
+### Key Reporting Constraints
+
+- **DO NOT auto-continue** after code review
+- User should review findings before proceeding
 - This is a quality gate - user oversight is valuable
+- All findings must reference specific file:line locations
+- Severity levels determine outcome and next steps
+- Provide clear, actionable next steps based on outcome
+
+---
 
 ## Key Constraints
 
@@ -400,8 +510,6 @@ Target status based on outcome:
 - **Action items tracked:** Can be added to backlog, story tasks, epic follow-ups
 - **Security focus:** OWASP Top 10 compliance checked
 - **Test coverage:** Verified for all ACs
-
-**Philosophy:** Uncompromising gatekeeper that ensures quality through systematic validation, evidence-based findings, and clear outcome determination.
 
 ---
 

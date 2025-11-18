@@ -4,25 +4,11 @@ description: Run after epic completion to review success, extract lessons learne
 
 # Retrospective - Epic Completion Review
 
-## What This Does
+## Purpose
 
-Facilitates a team retrospective after epic completion to:
-- Review epic execution (successes, challenges, insights)
-- Extract lessons learned from story records
-- Check follow-through on previous retrospective commitments
-- Identify significant discoveries that may affect next epic
-- Create actionable improvements for future work
-- Prepare team for next epic with clear dependencies and prerequisites
+Facilitates a team retrospective after epic completion to review execution, extract lessons learned, check follow-through on previous commitments, identify discoveries that may affect the next epic, and prepare the team for future work.
 
-This workflow uses **Party Mode** - natural multi-agent conversation with the user actively participating.
-
-## Prerequisites
-
-- BMAD plugin installed in Claude Code
-- Epic marked complete in sprint-status.yaml (or near completion)
-- Story files exist in sprint artifacts folder
-
-## When to Use This
+This workflow uses **Party Mode** - natural multi-agent conversation with the user actively participating as Project Lead. All agent dialogue uses the format: `Name (Role): dialogue` to create authentic team dynamics.
 
 **Use retrospective after:**
 - Epic is fully or mostly complete (all stories done)
@@ -30,38 +16,74 @@ This workflow uses **Party Mode** - natural multi-agent conversation with the us
 - Planning to start next epic and want to prepare properly
 - Team wants to reflect on what went well and what didn't
 
-**Party Mode Protocol:**
-- All agent dialogue uses format: `Name (Role): dialogue`
-- Example: `Bob (Scrum Master): "Let's begin..."`
-- Example: `{user_name} (Project Lead): [responds]`
-- Natural back-and-forth with user actively participating
-- Disagreements, diverse perspectives, authentic team dynamics
+**Prerequisites:**
+- BMAD plugin installed in Claude Code
+- Epic marked complete in sprint-status.yaml (or near completion)
+- Story files exist in sprint artifacts folder
+
+## Variables
+
+The following variables are used throughout this workflow:
+
+**Configuration Variables:**
+- `{bmad_folder}` - BMAD plugin installation directory (from .bmad/config.yaml)
+- `{documentation_dir}` - Directory containing epics, PRD, architecture (from .bmad/config.yaml)
+- `{sprint_artifacts}` - Directory containing stories and sprint-status.yaml (from .bmad/config.yaml)
+- `{user_name}` - User's name for Party Mode dialogue (from .bmad/config.yaml)
+
+**Epic Variables:**
+- `{epic_number}` - Current epic number being reviewed
+- `{prev_epic_num}` - Previous epic number (epic_number - 1)
+- `{next_epic_num}` - Next epic number (epic_number + 1)
+- `{epic_title}` - Title of the current epic
+- `{next_epic_title}` - Title of the next epic
+
+**Story Variables:**
+- `{total_stories}` - Total number of stories in the epic
+- `{completed_stories}` - Number of stories marked "done"
+- `{done_stories}` - Count of completed stories
+- `{pending_count}` - Number of stories not yet complete
+
+**Metrics Variables:**
+- `{completion_percentage}` - Percentage of stories completed
+- `{actual_points}` - Actual story points delivered
+- `{actual_sprints}` - Actual number of sprints used
+- `{points_per_sprint}` - Average velocity (points/sprint)
+- `{blocker_count}` - Number of blockers encountered
+- `{debt_count}` - Number of technical debt items
+- `{incident_count}` - Number of production incidents
+
+**Action Variables:**
+- `{action_count}` - Number of action items committed
+- `{prep_task_count}` - Number of preparation tasks for next epic
+- `{critical_count}` - Number of critical path items
+- `{prep_days}` - Estimated days for preparation work
+
+**Pattern Analysis Variables:**
+- `{pattern_1_description}` - Description of first pattern found
+- `{pattern_1_count}` - Number of stories where pattern appeared
+- `{pattern_2_description}` - Description of second pattern found
+
+**Date Variables:**
+- `{YYYY-MM-DD}` - Current date in ISO format
+- `{date}` - Current date for file naming
+
+**Boolean Flags:**
+- `{partial_retrospective}` - True if retro run before all stories complete
+- `{first_retrospective}` - True if no previous retro exists
+- `{next_epic_exists}` - True if next epic is defined
 
 ## Instructions
 
-### Step 1: Identify Completed Epic
+### 1. Identify Completed Epic
 
-**Read configuration to understand project structure:**
+Read `.bmad/config.yaml` to get `documentation_dir`, `sprint_artifacts`, and `user_name`.
 
-Read `.bmad/config.yaml` to get:
-- `documentation_dir` - where epics/PRD/architecture are located
-- `sprint_artifacts` - where stories and sprint-status.yaml are located
-- `user_name` - the user's name for Party Mode dialogue
+Load sprint status file from `{sprint_artifacts}/sprint-status.yaml` (primary) or `{documentation_dir}/sprint-status.yaml` (fallback).
 
-**Load sprint status file:**
+Read ALL development_status entries from sprint-status.yaml and find the highest epic number with at least one story marked "done". Extract epic number from keys like "epic-X-retrospective" or story keys like "X-Y-story-name". Set detected_epic = highest epic number found.
 
-Read the sprint status file from either:
-- `{sprint_artifacts}/sprint-status.yaml` (primary)
-- `{documentation_dir}/sprint-status.yaml` (fallback)
-
-**Detect completed epic:**
-
-1. Read ALL development_status entries from sprint-status.yaml
-2. Find the highest epic number with at least one story marked "done"
-3. Extract epic number from keys like "epic-X-retrospective" or story keys like "X-Y-story-name"
-4. Set detected_epic = highest epic number found with completed stories
-
-**Present finding to user:**
+Present finding to user using Party Mode:
 
 ```
 Bob (Scrum Master): "Welcome to the retrospective, {user_name}. Let me help you identify which epic we just completed. I'll check sprint-status first, but you're the ultimate authority on what we're reviewing today."
@@ -69,1137 +91,295 @@ Bob (Scrum Master): "Welcome to the retrospective, {user_name}. Let me help you 
 Bob (Scrum Master): "Based on sprint-status.yaml, it looks like Epic {detected_epic} was recently completed. Is that the epic you want to review today?"
 ```
 
-Use AskUserQuestion tool to confirm or get correct epic number:
+Use AskUserQuestion tool to confirm or get correct epic number. If user selects different epic, prompt for the correct number. If no epic detected, ask user directly or scan story directory.
 
-```yaml
-questions:
-  - question: "Is Epic {detected_epic} the epic you want to review?"
-    header: "Epic Selection"
-    multiSelect: false
-    options:
-      - label: "Yes, Epic {detected_epic}"
-        description: "Review the detected epic"
-      - label: "Different epic number"
-        description: "I'll specify which epic to review"
-```
+Verify epic completion by finding all stories for the epic (keys starting with "{epic_number}-", excluding epic key and retrospective key). Count total stories and stories with status = "done".
 
-**If user selects "Different epic number":**
-- Prompt user to provide the correct epic number
-- Set epic_number = user-provided number
+If epic is not complete, present status and use AskUserQuestion to let user decide: (1) Complete remaining stories first, (2) Continue with partial retrospective, or (3) Run sprint-planning. If user chooses to halt, end workflow. If continuing, set partial_retrospective = true and warn about potential gaps.
 
-**If no epic detected in sprint-status:**
-- Ask user directly which epic number they completed
-- Fall back to scanning story directory for highest numbered story files
+### 2. Deep Story Analysis - Extract Lessons from Implementation
 
-**Verify epic completion status:**
-
-1. Find all stories for the epic in sprint-status.yaml:
-   - Look for keys starting with "{epic_number}-" (e.g., "1-1-", "1-2-")
-   - Exclude epic key itself ("epic-{epic_number}")
-   - Exclude retrospective key ("epic-{epic_number}-retrospective")
-
-2. Count total stories and stories with status = "done"
-
-3. Determine if complete: true if all stories done, false otherwise
-
-**If epic is not complete:**
-
-```
-Alice (Product Owner): "Wait, Bob - I'm seeing that Epic {epic_number} isn't actually complete yet."
-
-Bob (Scrum Master): "Let me check... you're right, Alice."
-
-**Epic Status:**
-- Total Stories: {total_stories}
-- Completed (Done): {done_stories}
-- Pending: {pending_count}
-
-**Pending Stories:**
-{list pending story keys}
-
-Bob (Scrum Master): "{user_name}, we typically run retrospectives after all stories are done. What would you like to do?"
-
-**Options:**
-1. Complete remaining stories before running retrospective (recommended)
-2. Continue with partial retrospective (not ideal, but possible)
-3. Run sprint-planning to refresh story tracking
-```
-
-Use AskUserQuestion tool to let user decide.
-
-**If user chooses to halt:**
-- End workflow with message about completing remaining stories first
-
-**If user chooses to continue:**
-- Set partial_retrospective = true
-- Warn that partial retro might miss lessons from pending stories
-
-### Step 2: Deep Story Analysis - Extract Lessons from Implementation
-
-**Introduce analysis phase:**
-
-```
-Bob (Scrum Master): "Before we start the team discussion, let me review all the story records to surface key themes. This'll help us have a richer conversation."
-
-Charlie (Senior Dev): "Good idea - those dev notes always have gold in them."
-```
-
-**For each story in epic, read the complete story file:**
+Introduce analysis phase in Party Mode.
 
 Read all story files matching pattern: `{sprint_artifacts}/{epic_number}-*-*.md`
 
-**Extract and analyze from each story:**
+For each story, extract and analyze:
 
-**Dev Notes and Struggles:**
-- Look for sections: "## Dev Notes", "## Implementation Notes", "## Challenges", "## Development Log"
-- Identify where developers struggled or made mistakes
-- Note unexpected complexity or gotchas discovered
-- Record technical decisions that didn't work out
-- Track where estimates were way off (too high or too low)
+**Dev Notes and Struggles:** Look for sections "Dev Notes", "Implementation Notes", "Challenges", "Development Log". Identify where developers struggled, unexpected complexity, technical decisions that didn't work, estimate accuracy.
 
-**Review Feedback Patterns:**
-- Look for: "## Review", "## Code Review", "## SM Review", "## Scrum Master Review"
-- Identify recurring feedback themes across stories
-- Note which types of issues came up repeatedly
-- Track quality concerns or architectural misalignments
-- Document praise or exemplary work
+**Review Feedback Patterns:** Look for "Review", "Code Review", "SM Review", "Scrum Master Review". Identify recurring feedback themes, quality concerns, architectural misalignments, exemplary work.
 
-**Lessons Learned:**
-- Look for: "## Lessons Learned", "## Retrospective Notes", "## Takeaways"
-- Extract explicit lessons documented during development
-- Identify "aha moments" or breakthroughs
-- Note what would be done differently
-- Track successful experiments or approaches
+**Lessons Learned:** Look for "Lessons Learned", "Retrospective Notes", "Takeaways". Extract explicit lessons, "aha moments", what would be done differently, successful experiments.
 
-**Technical Debt Incurred:**
-- Look for: "## Technical Debt", "## TODO", "## Known Issues", "## Future Work"
-- Document shortcuts taken and why
-- Track debt items that affect next epic
-- Note severity and priority
+**Technical Debt Incurred:** Look for "Technical Debt", "TODO", "Known Issues", "Future Work". Document shortcuts taken, debt affecting next epic, severity and priority.
 
-**Testing and Quality Insights:**
-- Look for: "## Testing", "## QA Notes", "## Test Results"
-- Note testing challenges or surprises
-- Track bug patterns or regression issues
-- Document test coverage gaps
+**Testing and Quality Insights:** Look for "Testing", "QA Notes", "Test Results". Note testing challenges, bug patterns, coverage gaps.
 
-**Synthesize patterns across all stories:**
+Synthesize patterns across all stories:
+- Common struggles (issues in 2+ stories)
+- Recurring review feedback themes
+- Breakthrough moments and innovations
+- Velocity patterns and trends
 
-**Common Struggles:**
-- Identify issues that appeared in 2+ stories
-- Example: "3 out of 5 stories had API authentication issues"
-- Note areas where team consistently struggled
+Present findings to team in Party Mode before moving to next step.
 
-**Recurring Review Feedback:**
-- Identify feedback themes
-- Example: "Error handling was flagged in every review"
-- Track where team improved over epic course
+### 3. Load and Integrate Previous Epic Retrospective
 
-**Breakthrough Moments:**
-- Document key discoveries
-- Example: "Story 3 discovered the caching pattern we used for rest of epic"
-- Track innovative solutions worth repeating
+Calculate prev_epic_num = epic_number - 1.
 
-**Velocity Patterns:**
-- Calculate average completion time per story
-- Note velocity trends
-- Example: "First 2 stories took 3x longer than estimated"
+If prev_epic_num >= 1, search for previous retrospective file matching pattern: `{sprint_artifacts}/epic-{prev_epic_num}-retro-*.md`
 
-```
-Bob (Scrum Master): "Okay, I've reviewed all {total_stories} story records. I found some really interesting patterns we should discuss."
+If previous retro found, read the complete file and extract:
+- Action items committed
+- Lessons learned
+- Process improvements
+- Technical debt flagged
+- Team agreements
+- Preparation tasks
 
-Dana (QA Engineer): "I'm curious what you found, Bob. I noticed some things in my testing too."
+Cross-reference with current epic execution:
 
-Bob (Scrum Master): "We'll get to all of it. But first, let me load the previous epic's retro to see if we learned from last time."
-```
+**Action Item Follow-Through:** For each action item from Epic {prev_epic_num} retro, check if it was completed by looking for evidence in current epic's story records. Mark each: ✅ Completed, ⏳ In Progress, ❌ Not Addressed.
 
-### Step 3: Load and Integrate Previous Epic Retrospective
+**Lessons Applied:** For each lesson from Epic {prev_epic_num}, check if team applied it. Document successes and missed opportunities.
 
-**Calculate previous epic number:**
+**Process Improvements Effectiveness:** For each process change, assess if it helped. Did it improve velocity, quality, or satisfaction? Should we keep, modify, or abandon?
 
-prev_epic_num = epic_number - 1
+**Technical Debt Status:** For each debt item from Epic {prev_epic_num}, check if addressed. Did unaddressed debt cause problems in Epic {epic_number}?
 
-**If prev_epic_num >= 1:**
+Present findings in Party Mode with specific counts (completed, in-progress, not addressed).
 
-Search for previous retrospective file:
-- Pattern: `{sprint_artifacts}/epic-{prev_epic_num}-retro-*.md`
+If no previous retro found, acknowledge this is likely the first retrospective and set first_retrospective = true.
 
-**If previous retro found:**
+### 4. Preview Next Epic with Change Detection
 
-```
-Bob (Scrum Master): "I found our retrospective from Epic {prev_epic_num}. Let me see what we committed to back then..."
-```
+Calculate next_epic_num = epic_number + 1.
 
-Read the complete previous retrospective file.
+Attempt to load next epic by checking sharded file first: `{documentation_dir}/*epic*/epic-{next_epic_num}.md`. If not found, fallback to whole document: `{documentation_dir}/*epic*.md` and extract Epic {next_epic_num} section.
 
-**Extract key elements:**
-- Action items committed - what did team agree to improve?
-- Lessons learned - what insights were captured?
-- Process improvements - what changes were agreed upon?
-- Technical debt flagged - what debt was documented?
-- Team agreements - what commitments were made?
-- Preparation tasks - what was needed for this epic?
-
-**Cross-reference with current epic execution:**
-
-**Action Item Follow-Through:**
-- For each action item from Epic {prev_epic_num} retro, check if it was completed
-- Look for evidence in current epic's story records
-- Mark each: ✅ Completed, ⏳ In Progress, ❌ Not Addressed
-
-**Lessons Applied:**
-- For each lesson from Epic {prev_epic_num}, check if team applied it
-- Look for evidence in dev notes, review feedback, or outcomes
-- Document successes and missed opportunities
-
-**Process Improvements Effectiveness:**
-- For each process change agreed to, assess if it helped
-- Did it improve velocity, quality, or team satisfaction?
-- Should we keep, modify, or abandon the change?
-
-**Technical Debt Status:**
-- For each debt item from Epic {prev_epic_num}, check if addressed
-- Did unaddressed debt cause problems in Epic {epic_number}?
-
-```
-Bob (Scrum Master): "Interesting... in Epic {prev_epic_num}'s retro, we committed to {action_count} action items."
-
-Alice (Product Owner): "How'd we do on those, Bob?"
-
-Bob (Scrum Master): "We completed {completed_count}, made progress on {in_progress_count}, but didn't address {not_addressed_count}."
-
-Charlie (Senior Dev): *looking concerned* "Which ones didn't we address?"
-
-Bob (Scrum Master): "We'll discuss that in the retro. Some of them might explain challenges we had this epic."
-
-Elena (Junior Dev): "That's... actually pretty insightful."
-
-Bob (Scrum Master): "That's why we track this stuff. Pattern recognition helps us improve."
-```
-
-**If no previous retro found:**
-
-```
-Bob (Scrum Master): "I don't see a retrospective for Epic {prev_epic_num}. Either we skipped it, or this is your first retro."
-
-Alice (Product Owner): "Probably our first one. Good time to start the habit!"
-```
-
-Set first_retrospective = true
-
-### Step 4: Preview Next Epic with Change Detection
-
-**Calculate next epic number:**
-
-next_epic_num = epic_number + 1
-
-```
-Bob (Scrum Master): "Before we dive into the discussion, let me take a quick look at Epic {next_epic_num} to understand what's coming."
-
-Alice (Product Owner): "Good thinking - helps us connect what we learned to what we're about to do."
-```
-
-**Attempt to load next epic:**
-
-**Try sharded first (more specific):**
-- Check if file exists: `{documentation_dir}/*epic*/epic-{next_epic_num}.md`
-- If found, load it
-
-**Fallback to whole document:**
-- Check if file exists: `{documentation_dir}/*epic*.md`
-- If found, load entire epics document and extract Epic {next_epic_num} section
-
-**If next epic found:**
-
-Analyze next epic for:
+If next epic found, analyze for:
 - Epic title and objectives
 - Planned stories and complexity estimates
 - Dependencies on Epic {epic_number} work
-- New technical requirements or capabilities needed
+- New technical requirements
 - Potential risks or unknowns
 - Business goals and success criteria
 
-**Identify dependencies on completed work:**
-- What components from Epic {epic_number} does Epic {next_epic_num} rely on?
-- Are all prerequisites complete and stable?
-- Any incomplete work that creates blocking dependencies?
+Identify dependencies on completed work, note potential gaps or preparation needed (technical setup, knowledge gaps, refactoring, documentation).
 
-**Note potential gaps or preparation needed:**
-- Technical setup required (infrastructure, tools, libraries)
-- Knowledge gaps to fill (research, training, spikes)
-- Refactoring needed before starting next epic
-- Documentation or specifications to create
+Present next epic preview in Party Mode with dependency and preparation analysis. Set next_epic_exists = true.
 
-```
-Bob (Scrum Master): "Alright, I've reviewed Epic {next_epic_num}: '{next_epic_title}'"
+If next epic NOT found, acknowledge end of roadmap or incomplete planning. Set next_epic_exists = false.
 
-Alice (Product Owner): "What are we looking at?"
+### 5. Initialize Retrospective with Rich Context
 
-Bob (Scrum Master): "{story_count} stories planned, building on the {dependency_description} from Epic {epic_number}."
+Read `{bmad_folder}/_cfg/agent-manifest.csv` to identify participating agents. Ensure key roles present: Product Owner, Scrum Master, Developers, Testing/QA, Architect.
 
-Charlie (Senior Dev): "Dependencies concern me. Did we finish everything we need for that?"
+Present epic summary in Party Mode with complete formatted output including:
+- Delivery metrics (completed stories, velocity, duration, average velocity)
+- Quality and technical metrics (blockers, tech debt, test coverage, incidents)
+- Business outcomes (goals achieved, success criteria)
 
-Bob (Scrum Master): "Good question - that's exactly what we need to explore in this retro."
-```
+If next epic exists, include next epic preview section with dependencies, preparation needed, and technical prerequisites.
 
-Set next_epic_exists = true
+Set ground rules in Party Mode:
+- Team roster
+- Focus on learning and preparation
+- Psychological safety (no blame, focus on systems)
+- Everyone's voice matters
+- Specific examples over generalizations
 
-**If next epic NOT found:**
+WAIT for user to respond or indicate readiness.
 
-```
-Bob (Scrum Master): "Hmm, I don't see Epic {next_epic_num} defined yet."
+### 6. Epic Review Discussion - What Went Well, What Didn't
 
-Alice (Product Owner): "We might be at the end of the roadmap, or we haven't planned that far ahead yet."
+Start with successes in Party Mode. Have team members share what went well, engage user directly with "What stood out to you as going well?"
 
-Bob (Scrum Master): "No problem. We'll still do a thorough retro on Epic {epic_number}. The lessons will be valuable whenever we plan the next work."
-```
+WAIT for user to respond, then have team members react to user's input.
 
-Set next_epic_exists = false
+Transition to challenges. Create safe space for team to share struggles, allow natural disagreements and conflicts to emerge. Facilitate conflict resolution by helping identify systemic issues rather than blame.
 
-### Step 5: Initialize Retrospective with Rich Context
+Synthesize user's input: "So it sounds like the core issue was {root_cause}, not any individual person's fault."
 
-**Load agent manifest:**
+Surface patterns from story analysis that team may not have noticed. Engage user: "Did you notice these patterns during the epic?"
 
-Read `{bmad_folder}/_cfg/agent-manifest.csv` to identify which agents participated in Epic {epic_number}.
+WAIT for user to share observations.
 
-**Ensure key roles present:**
-- Product Owner
-- Scrum Master (facilitating)
-- Developers
-- Testing/QA
-- Architect
+If previous retrospective exists, review follow-through on commitments. Present status of previous action items with evidence of impact. Engage user: "Looking at what we committed to last time and what we actually did - what's your reaction?"
 
-**Present epic summary:**
+WAIT for user to respond.
 
-```
-Bob (Scrum Master): "Alright team, everyone's here. Let me set the stage for our retrospective."
+Summarize epic review with success themes, challenge themes, and key insights. Allow team members and user to add final thoughts.
 
-═══════════════════════════════════════════════════════════
-🔄 TEAM RETROSPECTIVE - Epic {epic_number}: {epic_title}
-═══════════════════════════════════════════════════════════
+### 7. Next Epic Preparation Discussion - Interactive and Collaborative
 
-Bob (Scrum Master): "Here's what we accomplished together."
+If next epic doesn't exist, skip to Step 8.
 
-**EPIC {epic_number} SUMMARY:**
+If next epic exists, present next epic and ask "are we ready? What do we need to prepare?"
 
-Delivery Metrics:
-- Completed: {completed_stories}/{total_stories} stories ({completion_percentage}%)
-- Velocity: {actual_points} story points
-- Duration: {actual_sprints} sprints
-- Average velocity: {points_per_sprint} points/sprint
+Have team members surface concerns (dependency concerns, technical concerns, testing infrastructure needs, knowledge gaps). Engage user: "The team is surfacing some real concerns here. What's your sense of our readiness?"
 
-Quality and Technical:
-- Blockers encountered: {blocker_count}
-- Technical debt items: {debt_count}
-- Test coverage: {coverage_info}
-- Production incidents: {incident_count}
+WAIT for user to share assessment.
 
-Business Outcomes:
-- Goals achieved: {goals_met}/{total_goals}
-- Success criteria: {criteria_status}
+Create realistic preparation plan with team providing technical prep items and estimates. Surface business vs. technical tension naturally. Facilitate finding middle ground between stakeholder pressure and technical reality.
 
-Alice (Product Owner): "Those numbers tell a good story. {completion_percentage}% completion is {excellent/concerning}."
+Engage user to validate or adjust preparation strategy: "The team is finding a workable compromise here. Does this approach make sense to you?"
 
-Charlie (Senior Dev): "I'm more interested in that technical debt number - {debt_count} items is {concerning/manageable}."
+WAIT for user response.
 
-Dana (QA Engineer): "{incident_count} production incidents - {clean epic/we should talk about those}."
-```
-
-**If next epic exists:**
-
-```
-═══════════════════════════════════════════════════════════
-**NEXT EPIC PREVIEW:** Epic {next_epic_num}: {next_epic_title}
-═══════════════════════════════════════════════════════════
-
-Dependencies on Epic {epic_number}:
-{list_dependencies}
-
-Preparation Needed:
-{list_preparation_gaps}
-
-Technical Prerequisites:
-{list_technical_prereqs}
-
-Bob (Scrum Master): "And here's what's coming next. Epic {next_epic_num} builds on what we just finished."
-
-Elena (Junior Dev): "Wow, that's a lot of dependencies on our work."
-
-Charlie (Senior Dev): "Which means we better make sure Epic {epic_number} is actually solid before moving on."
-```
-
-**Set ground rules:**
-
-```
-Bob (Scrum Master): "Team assembled for this retrospective:"
-
-{list_participating_agents}
-
-Bob (Scrum Master): "{user_name}, you're joining us as Project Lead. Your perspective is crucial here."
-
-{user_name} (Project Lead): [Participating in the retrospective]
-
-Bob (Scrum Master): "Our focus today:"
-1. Learning from Epic {epic_number} execution
-2. Preparing for Epic {next_epic_num} success
-
-Bob (Scrum Master): "Ground rules: psychological safety first. No blame, no judgment. We focus on systems and processes, not individuals. Everyone's voice matters. Specific examples are better than generalizations."
-
-Alice (Product Owner): "And everything shared here stays in this room - unless we decide together to escalate something."
-
-Bob (Scrum Master): "Exactly. {user_name}, any questions before we dive in?"
-```
-
-**WAIT for user to respond or indicate readiness**
-
-### Step 6: Epic Review Discussion - What Went Well, What Didn't
-
-**Start with successes:**
-
-```
-Bob (Scrum Master): "Let's start with the good stuff. What went well in Epic {epic_number}?"
-
-Bob (Scrum Master): *pauses, creating space*
-
-Alice (Product Owner): "I'll start. The user authentication flow we delivered exceeded my expectations. The UX is smooth, and early user feedback has been really positive."
-
-Charlie (Senior Dev): "I'll add to that - the caching strategy we implemented in Story {breakthrough_story_num} was a game-changer. We cut API calls by 60% and it set the pattern for the rest of the epic."
-
-Dana (QA Engineer): "From my side, testing went smoother than usual. The dev team's documentation was way better this epic - actually usable test plans!"
-
-Elena (Junior Dev): *smiling* "That's because Charlie made me document everything after Story 1's code review!"
-
-Charlie (Senior Dev): *laughing* "Tough love pays off."
-```
-
-**Engage user in discussion:**
-
-```
-Bob (Scrum Master): "{user_name}, what stood out to you as going well in this epic?"
-```
-
-**WAIT for user to respond** - this is a KEY USER INTERACTION moment
-
-After user responds, have 1-2 team members react to or build on what user shared.
-
-**Transition to challenges:**
-
-```
-Bob (Scrum Master): "Okay, we've celebrated some real wins. Now let's talk about challenges - where did we struggle? What slowed us down?"
-
-Bob (Scrum Master): *creates safe space with tone and pacing*
-
-Elena (Junior Dev): *hesitates* "Well... I really struggled with the database migrations in Story {difficult_story_num}. The documentation wasn't clear, and I had to redo it three times. Lost almost a full sprint on that story alone."
-
-Charlie (Senior Dev): *defensive* "Hold on - I wrote those migration docs, and they were perfectly clear. The issue was that the requirements kept changing mid-story!"
-
-Alice (Product Owner): *frustrated* "That's not fair, Charlie. We only clarified requirements once, and that was because the technical team didn't ask the right questions during planning!"
-
-Charlie (Senior Dev): *heat rising* "We asked plenty of questions! You said the schema was finalized, then two days into development you wanted to add three new fields!"
-
-Bob (Scrum Master): *intervening calmly* "Let's take a breath here. This is exactly the kind of thing we need to unpack."
-
-Bob (Scrum Master): "Elena, you spent almost a full sprint on Story {difficult_story_num}. Charlie, you're saying requirements changed. Alice, you feel the right questions weren't asked up front."
-
-Bob (Scrum Master): "{user_name}, you have visibility across the whole project. What's your take on this situation?"
-```
-
-**WAIT for user to respond and help facilitate conflict resolution**
-
-Use user's response to guide discussion toward systemic understanding rather than blame.
-
-```
-Bob (Scrum Master): [Synthesizes user's input] "So it sounds like the core issue was {root_cause}, not any individual person's fault."
-
-Elena (Junior Dev): "That makes sense. If we'd had {preventive_measure}, I probably could have avoided those redos."
-
-Charlie (Senior Dev): *softening* "Yeah, and I could have been clearer about assumptions in the docs. Sorry for getting defensive, Alice."
-
-Alice (Product Owner): "I appreciate that. I could've been more proactive about flagging the schema additions earlier, too."
-
-Bob (Scrum Master): "This is good. We're identifying systemic improvements, not assigning blame."
-```
-
-**Surface patterns from story analysis:**
-
-```
-Bob (Scrum Master): "Speaking of patterns, I noticed something when reviewing all the story records..."
-
-Bob (Scrum Master): "{pattern_1_description} - this showed up in {pattern_1_count} out of {total_stories} stories."
-
-Dana (QA Engineer): "Oh wow, I didn't realize it was that widespread."
-
-Bob (Scrum Master): "Yeah. And there's more - {pattern_2_description} came up in almost every code review."
-
-Charlie (Senior Dev): "That's... actually embarrassing. We should've caught that pattern earlier."
-
-Bob (Scrum Master): "No shame, Charlie. Now we know, and we can improve. {user_name}, did you notice these patterns during the epic?"
-```
-
-**WAIT for user to share their observations**
-
-**If previous retrospective exists, review follow-through:**
-
-```
-Bob (Scrum Master): "Before we move on, I want to circle back to Epic {prev_epic_num}'s retrospective."
-
-Bob (Scrum Master): "We made some commitments in that retro. Let's see how we did."
-
-Bob (Scrum Master): "Action item 1: {prev_action_1}. Status: {prev_action_1_status}"
-
-Alice (Product Owner): "We {nailed/didn't do} that one!"
-
-Charlie (Senior Dev): "And it {helped/hurt}! I noticed {evidence_of_impact}."
-
-Bob (Scrum Master): "{user_name}, looking at what we committed to last time and what we actually did - what's your reaction?"
-```
-
-**WAIT for user to respond**
-
-**Summarize epic review:**
-
-```
-Bob (Scrum Master): "Alright, we've covered a lot of ground. Let me summarize what I'm hearing..."
-
-Bob (Scrum Master): "**Successes:**"
-{list_success_themes}
-
-Bob (Scrum Master): "**Challenges:**"
-{list_challenge_themes}
-
-Bob (Scrum Master): "**Key Insights:**"
-{list_insight_themes}
-
-Bob (Scrum Master): "Does that capture it? Anyone have something important we missed?"
-```
-
-Allow team members and user to add any final thoughts on epic review.
-
-### Step 7: Next Epic Preparation Discussion - Interactive and Collaborative
-
-**If next epic doesn't exist:**
-
-```
-Bob (Scrum Master): "Normally we'd discuss preparing for the next epic, but since Epic {next_epic_num} isn't defined yet, let's skip to action items."
-```
-
-Skip to Step 8.
-
-**If next epic exists:**
-
-```
-Bob (Scrum Master): "Now let's shift gears. Epic {next_epic_num} is coming up: '{next_epic_title}'"
-
-Bob (Scrum Master): "The question is: are we ready? What do we need to prepare?"
-
-Alice (Product Owner): "From my perspective, we need to make sure {dependency_concern_1} from Epic {epic_number} is solid before we start building on it."
-
-Charlie (Senior Dev): *concerned* "I'm worried about {technical_concern_1}. We have {technical_debt_item} from this epic that'll blow up if we don't address it before Epic {next_epic_num}."
-
-Dana (QA Engineer): "And I need {testing_infrastructure_need} in place, or we're going to have the same testing bottleneck we had in Story {bottleneck_story_num}."
-
-Elena (Junior Dev): "I'm less worried about infrastructure and more about knowledge. I don't understand {knowledge_gap} well enough to work on Epic {next_epic_num}'s stories."
-
-Bob (Scrum Master): "{user_name}, the team is surfacing some real concerns here. What's your sense of our readiness?"
-```
-
-**WAIT for user to share their assessment**
-
-Use user's input to guide deeper exploration of preparation needs.
-
-**Create realistic preparation plan:**
-
-```
-Alice (Product Owner): [Reacts to what user said] "I agree with {user_name} about {point_of_agreement}, but I'm still worried about {lingering_concern}."
-
-Charlie (Senior Dev): "Here's what I think we need technically before Epic {next_epic_num} can start..."
-
-Charlie (Senior Dev): "1. {tech_prep_item_1} - estimated {hours_1} hours"
-Charlie (Senior Dev): "2. {tech_prep_item_2} - estimated {hours_2} hours"
-Charlie (Senior Dev): "3. {tech_prep_item_3} - estimated {hours_3} hours"
-
-Elena (Junior Dev): "That's like {total_hours} hours! That's a full sprint of prep work!"
-
-Charlie (Senior Dev): "Exactly. We can't just jump into Epic {next_epic_num} on Monday."
-
-Alice (Product Owner): *frustrated* "But we have stakeholder pressure to keep shipping features. They're not going to be happy about a 'prep sprint.'"
-
-Bob (Scrum Master): "Let's think about this differently. What happens if we DON'T do this prep work?"
-
-Dana (QA Engineer): "We'll hit blockers in the middle of Epic {next_epic_num}, velocity will tank, and we'll ship late anyway."
-
-Charlie (Senior Dev): "Worse - we'll ship something built on top of {technical_concern_1}, and it'll be fragile."
-
-Bob (Scrum Master): "{user_name}, you're balancing stakeholder pressure against technical reality. How do you want to handle this?"
-```
-
-**WAIT for user to provide direction on preparation approach**
-
-**Explore middle ground:**
-
-```
-Alice (Product Owner): [Potentially disagrees with user's approach] "I hear what you're saying, {user_name}, but from a business perspective, {business_concern}."
-
-Charlie (Senior Dev): [Potentially supports or challenges] "The business perspective is valid, but {technical_counter_argument}."
-
-Bob (Scrum Master): "We have healthy tension here between business needs and technical reality. That's good - it means we're being honest."
-
-Bob (Scrum Master): "Let's explore a middle ground. Charlie, which of your prep items are absolutely critical vs. nice-to-have?"
-
-Charlie (Senior Dev): "{critical_prep_item_1} and {critical_prep_item_2} are non-negotiable. {nice_to_have_prep_item} can wait."
-
-Alice (Product Owner): "And can any of the critical prep happen in parallel with starting Epic {next_epic_num}?"
-
-Charlie (Senior Dev): *thinking* "Maybe. If we tackle {first_critical_item} before the epic starts, we could do {second_critical_item} during the first sprint."
-
-Dana (QA Engineer): "But that means Story 1 of Epic {next_epic_num} can't depend on {second_critical_item}."
-
-Alice (Product Owner): *looking at epic plan* "Actually, Stories 1 and 2 are about {independent_work}, so they don't depend on it. We could make that work."
-
-Bob (Scrum Master): "{user_name}, the team is finding a workable compromise here. Does this approach make sense to you?"
-```
-
-**WAIT for user to validate or adjust preparation strategy**
-
-**Work through preparation needs across all dimensions:**
-
+Work through preparation needs across all dimensions:
 - Dependencies on Epic {epic_number} work
 - Technical setup and infrastructure
 - Knowledge gaps and research needs
 - Documentation or specification work
 - Testing infrastructure
 - Refactoring or debt reduction
-- External dependencies (APIs, integrations, etc.)
+- External dependencies
 
-For each area, facilitate discussion that:
-- Identifies specific needs with concrete examples
-- Estimates effort realistically based on Epic {epic_number} experience
-- Assigns ownership to specific agents
-- Determines criticality and timing
-- Surfaces risks of NOT doing the preparation
-- Explores parallel work opportunities
-- Brings user in for key decisions
+For each area, facilitate discussion identifying specific needs, estimating effort, assigning ownership, determining criticality, surfacing risks, exploring parallel work.
 
-**Summarize preparation plan:**
+Summarize preparation plan categorized as: CRITICAL (must complete before epic), PARALLEL (can happen during early stories), NICE-TO-HAVE (would help but not blocking).
 
-```
-Bob (Scrum Master): "I'm hearing a clear picture of what we need before Epic {next_epic_num}. Let me summarize..."
+Present total effort estimate and ask: "Does this preparation plan work for you?"
 
-**CRITICAL PREPARATION (Must complete before epic starts):**
-{list_critical_prep_items_with_owners_and_estimates}
+WAIT for user final validation.
 
-**PARALLEL PREPARATION (Can happen during early stories):**
-{list_parallel_prep_items_with_owners_and_estimates}
+### 8. Synthesize Action Items with Significant Change Detection
 
-**NICE-TO-HAVE PREPARATION (Would help but not blocking):**
-{list_nice_to_have_prep_items}
+Introduce action item capture: "Let's capture concrete action items from everything we've discussed. I want specific, achievable actions with clear owners. Not vague aspirations."
 
-Bob (Scrum Master): "Total critical prep effort: {critical_hours} hours ({critical_days} days)"
-
-Alice (Product Owner): "That's manageable. We can communicate that to stakeholders."
-
-Bob (Scrum Master): "{user_name}, does this preparation plan work for you?"
-```
-
-**WAIT for user final validation of preparation plan**
-
-### Step 8: Synthesize Action Items with Significant Change Detection
-
-```
-Bob (Scrum Master): "Let's capture concrete action items from everything we've discussed."
-
-Bob (Scrum Master): "I want specific, achievable actions with clear owners. Not vague aspirations."
-```
-
-**Synthesize themes into actionable improvements:**
-
-Create specific action items with:
-- Clear description of the action
-- Assigned owner (specific agent or role)
-- Timeline or deadline
-- Success criteria (how we'll know it's done)
-- Category (process, technical, documentation, team, etc.)
-
-**Ensure action items are SMART:**
+Synthesize themes into actionable improvements with SMART criteria:
 - Specific: Clear and unambiguous
 - Measurable: Can verify completion
 - Achievable: Realistic given constraints
 - Relevant: Addresses real issues from retro
 - Time-bound: Has clear deadline
 
-**Present action items:**
+Create action items with clear description, assigned owner, timeline/deadline, success criteria, and category.
 
-```
-Bob (Scrum Master): "Based on our discussion, here are the action items I'm proposing..."
+Present action items in Party Mode with formatted sections:
+- Process Improvements
+- Technical Debt
+- Documentation
+- Team Agreements
+- Epic {next_epic_num} Preparation Tasks
+- Critical Path items
 
-═══════════════════════════════════════════════════════════
-📝 EPIC {epic_number} ACTION ITEMS:
-═══════════════════════════════════════════════════════════
+Allow team to negotiate timelines and priorities. Engage user for priority decisions when team needs direction.
 
-**Process Improvements:**
-
-1. {action_item_1}
-   Owner: {agent_1}
-   Deadline: {timeline_1}
-   Success criteria: {criteria_1}
-
-2. {action_item_2}
-   Owner: {agent_2}
-   Deadline: {timeline_2}
-   Success criteria: {criteria_2}
-
-Charlie (Senior Dev): "I can own action item 1, but {timeline_1} is tight. Can we push it to {alternative_timeline}?"
-
-Bob (Scrum Master): "What do others think? Does that timing still work?"
-
-Alice (Product Owner): "{alternative_timeline} works for me, as long as it's done before Epic {next_epic_num} starts."
-
-Bob (Scrum Master): "Agreed. Updated to {alternative_timeline}."
-
-**Technical Debt:**
-
-1. {debt_item_1}
-   Owner: {agent_3}
-   Priority: {priority_1}
-   Estimated effort: {effort_1}
-
-2. {debt_item_2}
-   Owner: {agent_4}
-   Priority: {priority_2}
-   Estimated effort: {effort_2}
-
-Dana (QA Engineer): "For debt item 1, can we prioritize that as high? It caused testing issues in three different stories."
-
-Charlie (Senior Dev): "I marked it medium because {reasoning}, but I hear your point."
-
-Bob (Scrum Master): "{user_name}, this is a priority call. Testing impact vs. {reasoning} - how do you want to prioritize it?"
-```
-
-**WAIT for user to help resolve priority discussions**
-
-```
-**Documentation:**
-1. {doc_need_1}
-   Owner: {agent_5}
-   Deadline: {timeline_3}
-
-2. {doc_need_2}
-   Owner: {agent_6}
-   Deadline: {timeline_4}
-
-**Team Agreements:**
-- {agreement_1}
-- {agreement_2}
-- {agreement_3}
-
-Bob (Scrum Master): "These agreements are how we're committing to work differently going forward."
-
-Elena (Junior Dev): "I like agreement 2 - that would've saved me on Story {difficult_story_num}."
-
-═══════════════════════════════════════════════════════════
-🚀 EPIC {next_epic_num} PREPARATION TASKS:
-═══════════════════════════════════════════════════════════
-
-**Technical Setup:**
-[ ] {setup_task_1}
-    Owner: {owner_1}
-    Estimated: {est_1}
-
-[ ] {setup_task_2}
-    Owner: {owner_2}
-    Estimated: {est_2}
-
-**Knowledge Development:**
-[ ] {research_task_1}
-    Owner: {owner_3}
-    Estimated: {est_3}
-
-**Cleanup/Refactoring:**
-[ ] {refactor_task_1}
-    Owner: {owner_4}
-    Estimated: {est_4}
-
-**Total Estimated Effort:** {total_hours} hours ({total_days} days)
-
-═══════════════════════════════════════════════════════════
-⚠️ CRITICAL PATH:
-═══════════════════════════════════════════════════════════
-
-**Blockers to Resolve Before Epic {next_epic_num}:**
-
-1. {critical_item_1}
-   Owner: {critical_owner_1}
-   Must complete by: {critical_deadline_1}
-
-2. {critical_item_2}
-   Owner: {critical_owner_2}
-   Must complete by: {critical_deadline_2}
-```
+WAIT for user to help resolve priority discussions.
 
 **CRITICAL ANALYSIS - Detect if discoveries require epic updates:**
 
-Check if any of the following are true based on retrospective discussion:
-- Architectural assumptions from planning proven wrong during Epic {epic_number}
-- Major scope changes or descoping that affects next epic
-- Technical approach needs fundamental change for Epic {next_epic_num}
+Check if any of the following are true:
+- Architectural assumptions proven wrong during Epic {epic_number}
+- Major scope changes affecting next epic
+- Technical approach needs fundamental change
 - Dependencies discovered that Epic {next_epic_num} doesn't account for
-- User needs significantly different than originally understood
-- Performance/scalability concerns that affect Epic {next_epic_num} design
-- Security or compliance issues discovered that change approach
+- User needs significantly different than understood
+- Performance/scalability concerns affecting Epic {next_epic_num} design
+- Security or compliance issues discovered
 - Integration assumptions proven incorrect
 - Team capacity or skill gaps more severe than planned
-- Technical debt level unsustainable without intervention
+- Technical debt level unsustainable
 
-**If significant discoveries detected:**
+If significant discoveries detected, trigger SIGNIFICANT DISCOVERY ALERT in Party Mode:
 
-```
-═══════════════════════════════════════════════════════════
-🚨 SIGNIFICANT DISCOVERY ALERT 🚨
-═══════════════════════════════════════════════════════════
+Present significant changes identified with impact descriptions. Show how Epic {next_epic_num}'s current plan assumes things that Epic {epic_number} proved wrong. List likely changes needed.
 
-Bob (Scrum Master): "{user_name}, we need to flag something important."
+Recommend:
+1. Review and update Epic {next_epic_num} definition
+2. Update affected stories
+3. Update architecture/technical specs if applicable
+4. Hold alignment session with Product Owner
+5. Update PRD sections affected
 
-Bob (Scrum Master): "During Epic {epic_number}, the team uncovered findings that may require updating the plan for Epic {next_epic_num}."
+Mark "Epic Update Required: YES - Schedule epic planning review session"
 
-**Significant Changes Identified:**
+Engage user: "This is significant. We need to address this before committing to Epic {next_epic_num}'s current plan. How do you want to handle it?"
 
-1. {significant_change_1}
-   Impact: {impact_description_1}
+WAIT for user to decide on handling significant changes.
 
-2. {significant_change_2}
-   Impact: {impact_description_2}
+If user agrees, add epic review session to critical path.
 
-Charlie (Senior Dev): "Yeah, when we discovered {technical_discovery}, it fundamentally changed our understanding of {affected_area}."
+If no significant discoveries, confirm that Epic {next_epic_num} plan is still sound.
 
-Alice (Product Owner): "And from a product perspective, {product_discovery} means Epic {next_epic_num}'s stories are based on wrong assumptions."
+Finalize action plan and ensure user approves the complete plan.
 
-Dana (QA Engineer): "If we start Epic {next_epic_num} as-is, we're going to hit walls fast."
+### 9. Critical Readiness Exploration - Interactive Deep Dive
 
-**Impact on Epic {next_epic_num}:**
+Introduce final readiness check: "Epic {epic_number} is marked complete in sprint-status, but is it REALLY done? I mean truly production-ready, stakeholders happy, no loose ends."
 
-The current plan for Epic {next_epic_num} assumes:
-- {wrong_assumption_1}
-- {wrong_assumption_2}
+**Explore testing and quality:** Ask user about testing verification status.
 
-But Epic {epic_number} revealed:
-- {actual_reality_1}
-- {actual_reality_2}
+WAIT for user to describe testing status.
 
-This means Epic {next_epic_num} likely needs:
-{list_likely_changes_needed}
+Have QA add context. Ask user: "Are you confident Epic {epic_number} is production-ready from a quality perspective?"
 
-**RECOMMENDED ACTIONS:**
+WAIT for user to assess quality readiness.
 
-1. Review and update Epic {next_epic_num} definition based on new learnings
-2. Update affected stories to reflect reality
-3. Consider updating architecture or technical specifications if applicable
-4. Hold alignment session with Product Owner before starting Epic {next_epic_num}
-5. Update PRD sections affected by new understanding (if applicable)
+If user expresses concerns, capture specific testing needed and add to critical path.
 
-Bob (Scrum Master): "**Epic Update Required**: YES - Schedule epic planning review session"
+**Explore deployment and release:** Ask user about deployment status (live in production, scheduled, or pending).
 
-Bob (Scrum Master): "{user_name}, this is significant. We need to address this before committing to Epic {next_epic_num}'s current plan. How do you want to handle it?"
-```
+WAIT for user to provide deployment status.
 
-**WAIT for user to decide on how to handle significant changes**
+If not deployed, clarify timing and whether it works for starting Epic {next_epic_num}. Add deployment milestone to critical path.
 
-Add epic review session to critical path if user agrees.
+**Explore stakeholder acceptance:** Ask user if stakeholders have seen and accepted deliverables, and if any feedback is pending.
 
-```
-Alice (Product Owner): "I agree with {user_name}'s approach. Better to adjust the plan now than fail mid-epic."
+WAIT for user to describe stakeholder acceptance status.
 
-Charlie (Senior Dev): "This is why retrospectives matter. We caught this before it became a disaster."
+If acceptance incomplete, discuss whether to make it a critical path item.
 
-Bob (Scrum Master): "Adding to critical path: Epic {next_epic_num} planning review session before epic kickoff."
-```
+WAIT for user decision and add to critical path if agreed.
 
-**If no significant discoveries:**
+**Explore technical health and stability:** Ask user gut-check question about how codebase feels after Epic {epic_number}.
 
-```
-Bob (Scrum Master): "Good news - nothing from Epic {epic_number} fundamentally changes our plan for Epic {next_epic_num}. The plan is still sound."
+WAIT for user to assess codebase health.
 
-Alice (Product Owner): "We learned a lot, but the direction is right."
-```
+If user expresses stability concerns, help articulate technical concerns and estimate work needed. Ask if addressing stability is worth doing before Epic {next_epic_num}.
 
-**Finalize action plan:**
+WAIT for user decision and add stability work to preparation if agreed.
 
-```
-Bob (Scrum Master): "Let me show you the complete action plan..."
+**Explore unresolved blockers:** Ask user about unresolved blockers or technical issues carried forward.
 
-Bob (Scrum Master): "That's {total_action_count} action items, {prep_task_count} preparation tasks, and {critical_count} critical path items."
+WAIT for user to surface any blockers.
 
-Bob (Scrum Master): "Everyone clear on what they own?"
-```
+If blockers identified, capture them, describe impact if left unresolved, assign ownership, add to critical path with priority and deadline.
 
-Give each agent with assignments a moment to acknowledge ownership.
+Synthesize readiness assessment covering: Testing & Quality, Deployment, Stakeholder Acceptance, Technical Health, Unresolved Blockers. For each, show status and any action needed.
 
-**Ensure user approves the complete action plan**
+Ask user: "Does this assessment match your understanding?"
 
-### Step 9: Critical Readiness Exploration - Interactive Deep Dive
+WAIT for user to confirm or correct assessment.
 
-```
-Bob (Scrum Master): "Before we close, I want to do a final readiness check."
+Present final assessment: "Epic {epic_number} is {fully complete / complete from story perspective but has {critical_work_count} critical items before Epic {next_epic_num}}."
 
-Bob (Scrum Master): "Epic {epic_number} is marked complete in sprint-status, but is it REALLY done?"
+### 10. Retrospective Closure with Celebration and Commitment
 
-Alice (Product Owner): "What do you mean, Bob?"
+Bring retrospective to close with formatted RETROSPECTIVE COMPLETE section showing:
+- Epic reviewed
+- Key takeaways (4 main lessons)
+- Commitments made (action items, prep tasks, critical path items)
+- Next steps
 
-Bob (Scrum Master): "I mean truly production-ready, stakeholders happy, no loose ends that'll bite us later."
+Have team members acknowledge commitments and express excitement for next epic.
 
-Bob (Scrum Master): "{user_name}, let's walk through this together."
-```
+Ask user: "Any final thoughts before we close?"
 
-**Explore testing and quality:**
+WAIT for user to share final reflections.
 
-```
-Bob (Scrum Master): "{user_name}, tell me about the testing for Epic {epic_number}. What verification has been done?"
-```
+Acknowledge user's input and adjourn meeting in Party Mode.
 
-**WAIT for user to describe testing status**
+### 11. Save Retrospective and Update Sprint Status
 
-```
-Dana (QA Engineer): [Responds to what user shared] "I can add to that - {additional_testing_context}."
+Ensure `{sprint_artifacts}/` folder exists.
 
-Dana (QA Engineer): "But honestly, {testing_concern_if_any}."
-
-Bob (Scrum Master): "{user_name}, are you confident Epic {epic_number} is production-ready from a quality perspective?"
-```
-
-**WAIT for user to assess quality readiness**
-
-**If user expresses concerns:**
-
-```
-Bob (Scrum Master): "Okay, let's capture that. What specific testing is still needed?"
-
-Dana (QA Engineer): "I can handle {testing_work_needed}, estimated {testing_hours} hours."
-
-Bob (Scrum Master): "Adding to critical path: Complete {testing_work_needed} before Epic {next_epic_num}."
-```
-
-Add testing completion to critical path.
-
-**Explore deployment and release:**
-
-```
-Bob (Scrum Master): "{user_name}, what's the deployment status for Epic {epic_number}? Is it live in production, scheduled for deployment, or still pending?"
-```
-
-**WAIT for user to provide deployment status**
-
-**If not yet deployed:**
-
-```
-Charlie (Senior Dev): "If it's not deployed yet, we need to factor that into Epic {next_epic_num} timing."
-
-Bob (Scrum Master): "{user_name}, when is deployment planned? Does that timing work for starting Epic {next_epic_num}?"
-```
-
-**WAIT for user to clarify deployment timeline**
-
-Add deployment milestone to critical path with agreed timeline.
-
-**Explore stakeholder acceptance:**
-
-```
-Bob (Scrum Master): "{user_name}, have stakeholders seen and accepted the Epic {epic_number} deliverables?"
-
-Alice (Product Owner): "This is important - I've seen 'done' epics get rejected by stakeholders and force rework."
-
-Bob (Scrum Master): "{user_name}, any feedback from stakeholders still pending?"
-```
-
-**WAIT for user to describe stakeholder acceptance status**
-
-**If acceptance incomplete or feedback pending:**
-
-```
-Alice (Product Owner): "We should get formal acceptance before moving on. Otherwise Epic {next_epic_num} might get interrupted by rework."
-
-Bob (Scrum Master): "{user_name}, how do you want to handle stakeholder acceptance? Should we make it a critical path item?"
-```
-
-**WAIT for user decision**
-
-Add stakeholder acceptance to critical path if user agrees.
-
-**Explore technical health and stability:**
-
-```
-Bob (Scrum Master): "{user_name}, this is a gut-check question: How does the codebase feel after Epic {epic_number}?"
-
-Bob (Scrum Master): "Stable and maintainable? Or are there concerns lurking?"
-
-Charlie (Senior Dev): "Be honest, {user_name}. We've all shipped epics that felt... fragile."
-```
-
-**WAIT for user to assess codebase health**
-
-**If user expresses stability concerns:**
-
-```
-Charlie (Senior Dev): "Okay, let's dig into that. What's causing those concerns?"
-
-Charlie (Senior Dev): [Helps user articulate technical concerns]
-
-Bob (Scrum Master): "What would it take to address these concerns and feel confident about stability?"
-
-Charlie (Senior Dev): "I'd say we need {stability_work_needed}, roughly {stability_hours} hours."
-
-Bob (Scrum Master): "{user_name}, is addressing this stability work worth doing before Epic {next_epic_num}?"
-```
-
-**WAIT for user decision**
-
-Add stability work to preparation sprint if user agrees.
-
-**Explore unresolved blockers:**
-
-```
-Bob (Scrum Master): "{user_name}, are there any unresolved blockers or technical issues from Epic {epic_number} that we're carrying forward?"
-
-Dana (QA Engineer): "Things that might create problems for Epic {next_epic_num} if we don't deal with them?"
-
-Bob (Scrum Master): "Nothing is off limits here. If there's a problem, we need to know."
-```
-
-**WAIT for user to surface any blockers**
-
-**If blockers identified:**
-
-```
-Bob (Scrum Master): "Let's capture those blockers and figure out how they affect Epic {next_epic_num}."
-
-Charlie (Senior Dev): "For {blocker_1}, if we leave it unresolved, it'll {impact_description_1}."
-
-Alice (Product Owner): "That sounds critical. We need to address that before moving forward."
-
-Bob (Scrum Master): "Agreed. Adding to critical path: Resolve {blocker_1} before Epic {next_epic_num} kickoff."
-
-Bob (Scrum Master): "Who owns that work?"
-```
-
-Assign blocker resolution to appropriate agent.
-Add to critical path with priority and deadline.
-
-**Synthesize readiness assessment:**
-
-```
-Bob (Scrum Master): "Okay {user_name}, let me synthesize what we just uncovered..."
-
-**EPIC {epic_number} READINESS ASSESSMENT:**
-
-Testing & Quality: {quality_status}
-{If concerns: ⚠️ Action needed: {quality_action_needed}}
-
-Deployment: {deployment_status}
-{If pending: ⚠️ Scheduled for: {deployment_date}}
-
-Stakeholder Acceptance: {acceptance_status}
-{If incomplete: ⚠️ Action needed: {acceptance_action_needed}}
-
-Technical Health: {stability_status}
-{If concerns: ⚠️ Action needed: {stability_action_needed}}
-
-Unresolved Blockers: {blocker_status}
-{If exist: ⚠️ Must resolve: {blocker_list}}
-
-Bob (Scrum Master): "{user_name}, does this assessment match your understanding?"
-```
-
-**WAIT for user to confirm or correct assessment**
-
-```
-Bob (Scrum Master): "Based on this assessment, Epic {epic_number} is {fully complete and clear to proceed / complete from story perspective but has {critical_work_count} critical items before Epic {next_epic_num}}."
-
-Alice (Product Owner): "This level of thoroughness is why retrospectives are valuable."
-
-Charlie (Senior Dev): "Better to catch this now than three stories into the next epic."
-```
-
-### Step 10: Retrospective Closure with Celebration and Commitment
-
-```
-Bob (Scrum Master): "We've covered a lot of ground today. Let me bring this retrospective to a close."
-
-═══════════════════════════════════════════════════════════
-✅ RETROSPECTIVE COMPLETE
-═══════════════════════════════════════════════════════════
-
-Bob (Scrum Master): "Epic {epic_number}: {epic_title} - REVIEWED"
-
-**Key Takeaways:**
-
-1. {key_lesson_1}
-2. {key_lesson_2}
-3. {key_lesson_3}
-4. {key_lesson_4}
-
-Alice (Product Owner): "That first takeaway is huge - {impact_of_lesson_1}."
-
-Charlie (Senior Dev): "And lesson 2 is something we can apply immediately."
-
-Bob (Scrum Master): "Commitments made today:"
-- Action Items: {action_count}
-- Preparation Tasks: {prep_task_count}
-- Critical Path Items: {critical_count}
-
-Dana (QA Engineer): "That's a lot of commitments. We need to actually follow through this time."
-
-Bob (Scrum Master): "Agreed. Which is why we'll review these action items in our next standup."
-
-═══════════════════════════════════════════════════════════
-🎯 NEXT STEPS:
-═══════════════════════════════════════════════════════════
-
-1. Execute Preparation Sprint (Est: {prep_days} days)
-2. Complete Critical Path items before Epic {next_epic_num}
-3. Review action items in next standup
-4. {Epic {next_epic_num} planning review session / Begin Epic {next_epic_num} planning when prep complete}
-
-Elena (Junior Dev): "{prep_days} days of prep work is significant, but necessary."
-
-Alice (Product Owner): "I'll communicate the timeline to stakeholders. They'll understand if we frame it as 'ensuring Epic {next_epic_num} success.'"
-
-═══════════════════════════════════════════════════════════
-
-Bob (Scrum Master): "Before we wrap, I want to take a moment to acknowledge the team."
-
-Bob (Scrum Master): "Epic {epic_number} delivered {completed_stories} stories with {velocity_description} velocity. We overcame {blocker_count} blockers. We learned a lot. That's real work by real people."
-
-Charlie (Senior Dev): "Hear, hear."
-
-Alice (Product Owner): "I'm proud of what we shipped."
-
-Dana (QA Engineer): "And I'm excited about Epic {next_epic_num} - especially now that we're prepared for it."
-
-Bob (Scrum Master): "{user_name}, any final thoughts before we close?"
-```
-
-**WAIT for user to share final reflections**
-
-```
-Bob (Scrum Master): [Acknowledges what user shared] "Thank you for that, {user_name}."
-
-Bob (Scrum Master): "Alright team - great work today. We learned a lot from Epic {epic_number}. Let's use these insights to make Epic {next_epic_num} even better."
-
-Bob (Scrum Master): "See you all when prep work is done. Meeting adjourned!"
-
-═══════════════════════════════════════════════════════════
-```
-
-### Step 11: Save Retrospective and Update Sprint Status
-
-**Ensure retrospectives folder exists:**
-
-Check if `{sprint_artifacts}/` folder exists. Create if needed.
-
-**Generate comprehensive retrospective summary document including:**
-
+Generate comprehensive retrospective summary document including all sections discussed:
 - Epic summary and metrics
 - Team participants
-- Successes and strengths identified
-- Challenges and growth areas
+- Successes and challenges
 - Key insights and learnings
 - Previous retro follow-through analysis (if applicable)
 - Next epic preview and dependencies
@@ -1210,48 +390,56 @@ Check if `{sprint_artifacts}/` folder exists. Create if needed.
 - Readiness assessment
 - Commitments and next steps
 
-**Format as readable markdown with clear sections.**
+Format as readable markdown with clear sections.
 
-**Set filename:**
+Set filename: `{sprint_artifacts}/epic-{epic_number}-retro-{YYYY-MM-DD}.md`
 
-Use format: `{sprint_artifacts}/epic-{epic_number}-retro-{YYYY-MM-DD}.md`
+Save retrospective document using Write tool.
 
-Example: `{sprint_artifacts}/epic-1-retro-2025-01-14.md`
-
-**Save retrospective document using Write tool.**
-
-```
-✅ Retrospective document saved: {sprint_artifacts}/epic-{epic_number}-retro-{date}.md
-```
-
-**Update sprint status file:**
-
+Update sprint status file:
 1. Read the FULL sprint-status.yaml file
 2. Find development_status key "epic-{epic_number}-retrospective"
-3. Verify current status (typically "optional" or "pending")
-4. Update to: `epic-{epic_number}-retrospective: done`
-5. Save file, preserving ALL comments and structure including STATUS DEFINITIONS
+3. Update to: `epic-{epic_number}-retrospective: done`
+4. Save file, preserving ALL comments and structure
 
-**If update successful:**
+Report success or warn if retrospective key not found.
 
-```
-✅ Retrospective marked as completed in sprint-status.yaml
+### 12. Final Summary and Handoff
 
-Retrospective key: epic-{epic_number}-retrospective
-Status: {previous_status} → done
-```
+Present final summary showing:
+- Epic reviewed
+- Retrospective status and file location
+- Commitments made (counts)
+- Next steps (numbered list)
+  1. Review retrospective summary
+  2. Execute preparation sprint
+  3. Review action items in next standup
+  4. Schedule Epic {next_epic_num} planning review (if epic update needed) OR Begin Epic {next_epic_num} planning when prep complete
 
-**If retrospective key not found:**
+Include team performance summary and reminder if epic update required.
 
-```
-⚠️ Could not update retrospective status: epic-{epic_number}-retrospective not found in sprint-status.yaml
+Close with team members saying farewell in Party Mode.
 
-Retrospective document was saved successfully, but sprint-status.yaml may need manual update.
-```
+## Workflow
 
-### Step 12: Final Summary and Handoff
+1. **Epic Identification** → Detect completed epic from sprint-status.yaml, confirm with user, verify completion status
+2. **Story Analysis** → Read all story files, extract dev notes/struggles, review feedback, lessons learned, technical debt, testing insights, synthesize patterns
+3. **Previous Retro Integration** → Load previous epic's retrospective (if exists), cross-reference action items, assess what was completed/applied
+4. **Next Epic Preview** → Load next epic definition (if exists), analyze dependencies and preparation needs
+5. **Context Setup** → Load agent manifest, present epic summary with metrics, set ground rules, wait for user readiness
+6. **Epic Review Discussion** → Party Mode discussion of successes, challenges, patterns, previous retro follow-through, with user actively participating
+7. **Next Epic Preparation** → Party Mode discussion of readiness and preparation needs, facilitate business vs. technical tension, create preparation plan with user validation
+8. **Action Item Synthesis** → Create SMART action items, detect significant discoveries requiring epic updates, get user approval on complete plan
+9. **Readiness Exploration** → Deep dive on testing, deployment, stakeholder acceptance, technical health, blockers with user assessments
+10. **Closure and Celebration** → Summarize key takeaways, acknowledge team, get user's final reflections
+11. **Document and Update** → Save comprehensive retrospective document, update sprint-status.yaml marking retro as done
+12. **Handoff** → Present final summary with clear next steps and team performance
 
-Present final summary:
+## Report
+
+### Success Output
+
+When the retrospective completes successfully, provide a comprehensive summary:
 
 ```
 **✅ Retrospective Complete, {user_name}!**
@@ -1280,177 +468,124 @@ Present final summary:
    - Track progress on commitments
    - Adjust timelines if needed
 
-{If epic update needed:}
-4. **IMPORTANT: Schedule Epic {next_epic_num} planning review session**
-   - Significant discoveries from Epic {epic_number} require epic updates
-   - Review and update affected stories
-   - Align team on revised approach
-   - Do NOT start Epic {next_epic_num} until review is complete
-
-{If no epic update needed:}
-4. **Begin Epic {next_epic_num} planning when preparation complete**
-   - Run epic-tech-context for Epic {next_epic_num}
-   - Or continue with existing contexted epics
-   - Ensure all critical path items are done first
+4. [Epic update required OR begin epic planning when prep complete]
 
 **Team Performance:**
 Epic {epic_number} delivered {completed_stories} stories with {velocity_summary}. The retrospective surfaced {insight_count} key insights and {significant_discovery_count} significant discoveries. The team is well-positioned for Epic {next_epic_num} success.
 
-{If significant discoveries:}
-⚠️ **REMINDER**: Epic update required before starting Epic {next_epic_num}
-
----
-
-Bob (Scrum Master): "Great session today, {user_name}. The team did excellent work."
-
-Alice (Product Owner): "See you at epic planning!"
-
-Charlie (Senior Dev): "Time to knock out that prep work."
+[If significant discoveries:] ⚠️ **REMINDER**: Epic update required before starting Epic {next_epic_num}
 ```
 
-## Examples
+### Partial Retrospective Output
 
-### Example 1: Standard Epic Retrospective
+When retrospective is run before all stories are complete, include warnings:
 
-**Scenario:** User just completed Epic 1 (authentication system) with 5 stories. All stories are done. Epic 2 is planned (user profiles).
+```
+⚠️ **Partial Retrospective Completed**
 
-**Execution:**
+Epic {epic_number} retrospective completed with {completed_stories}/{total_stories} stories done.
 
-1. **Detect epic:** Sprint-status shows Epic 1 with 5/5 stories done
-2. **Story analysis:** Review all 5 story files, extract dev notes, review feedback, lessons
-3. **Previous retro:** None found (first epic)
-4. **Next epic preview:** Epic 2 loaded, identifies dependency on Epic 1 auth components
-5. **Team discussion:** Party Mode conversation about what went well (auth flow, caching), what didn't (migration issues, changing requirements), patterns discovered (error handling gaps)
-6. **Preparation:** Team identifies need for auth refactoring (4 hours), testing infrastructure (6 hours) before Epic 2
-7. **Action items:** 3 process improvements, 2 tech debt items, 1 documentation need
-8. **Readiness check:** Testing complete, deployed to staging, stakeholders happy, no blockers
-9. **Save:** Retrospective document saved to `{sprint_artifacts}/epic-1-retro-2025-01-14.md`
+**Pending Stories:**
+- {story_key_1}
+- {story_key_2}
 
-**Outcome:** Team has clear preparation plan (10 hours work) and 6 action items before starting Epic 2.
+**Limitations:**
+This retrospective analyzed only completed stories. Lessons from pending stories may require follow-up retrospective or review when stories complete.
 
-### Example 2: Retrospective with Significant Discovery
+[Standard success output follows]
+```
 
-**Scenario:** User completed Epic 2 (user profiles) but discovered during implementation that the original architecture approach for file uploads won't scale. Epic 3 is planned (file sharing feature).
+### Significant Discovery Output
 
-**Execution:**
+When significant discoveries require epic updates, emphasize the critical alert:
 
-1. **Detect epic:** Epic 2 complete (4/4 stories done)
-2. **Story analysis:** Story 3 dev notes reveal file upload performance issues, need for different storage approach
-3. **Previous retro:** Epic 1 retro loaded, team had committed to "improve error handling" (completed ✅) and "add integration tests" (not done ❌)
-4. **Next epic preview:** Epic 3 loaded, HEAVILY depends on file upload functionality
-5. **Team discussion:** Discovery that current file upload approach won't scale emerges during challenges discussion
-6. **Significant change detection:** System detects architectural assumption violated, Epic 3 affected
-7. **Alert triggered:** "SIGNIFICANT DISCOVERY ALERT" - Epic 3 assumes file uploads work at scale, but Epic 2 revealed this is wrong
-8. **User decision:** User agrees to schedule Epic 3 planning review session to redesign file sharing approach
-9. **Action items:** Include "Review and update Epic 3 based on file upload discovery" as critical path item
-10. **Save:** Retrospective saved with significant discovery documented
+```
+🚨 **SIGNIFICANT DISCOVERY ALERT** 🚨
 
-**Outcome:** Epic 3 planning review scheduled, prevented team from building file sharing feature on broken foundation.
+During Epic {epic_number}, the team uncovered findings that require updating the plan for Epic {next_epic_num}.
 
-### Example 3: Partial Retrospective (Epic Not Fully Complete)
+**Significant Changes Identified:**
+1. {significant_change_1} - Impact: {impact_description_1}
+2. {significant_change_2} - Impact: {impact_description_2}
 
-**Scenario:** User wants to run retrospective for Epic 4 but 2 out of 6 stories are still in progress.
+**Impact on Epic {next_epic_num}:**
+The current plan assumes {wrong_assumptions}, but Epic {epic_number} revealed {actual_reality}.
 
-**Execution:**
+**REQUIRED ACTIONS:**
+- Schedule Epic {next_epic_num} planning review session BEFORE starting epic
+- Update epic definition and affected stories
+- Update architecture/technical specifications if needed
+- Hold alignment session with Product Owner
 
-1. **Detect epic:** Epic 4 shows 4/6 stories done, 2 pending
-2. **Warning presented:** Bob (Scrum Master) warns that partial retro might miss lessons from pending stories
-3. **User decision:** User presented with options: (1) Complete stories first (2) Continue partial retro (3) Refresh sprint-status
-4. **User chooses:** Continue with partial retro (accepts limitations)
-5. **Flag set:** partial_retrospective = true
-6. **Story analysis:** Only analyzes 4 completed stories, notes that 2 stories are excluded
-7. **Team discussion:** Charlie warns "we might miss important lessons from pending stories"
-8. **Action items:** Standard action items created, but noted that may need follow-up after stories 5-6 complete
-9. **Save:** Retrospective saved with note about partial completion
+⚠️ DO NOT START Epic {next_epic_num} until review is complete
 
-**Outcome:** Retrospective completed with limitations documented, team aware of potential gaps.
+[Standard success output follows]
+```
 
-## Notes
+### Error Outputs
 
-**Party Mode is central to this workflow:**
-- All agent dialogue must use "Name (Role): dialogue" format
-- Create authentic team dynamics (disagreements, emotions, perspectives)
-- User is active participant, not observer
-- Scrum Master maintains psychological safety (no blame)
+**Epic Detection Failure:**
+```
+❌ Unable to detect completed epic from sprint-status.yaml
 
-**Deep story analysis is critical:**
-- Don't skip reading ALL story files
-- Extract patterns across stories, not just individual lessons
-- Synthesize recurring themes (struggles, review feedback, breakthroughs)
+Attempted locations:
+- {sprint_artifacts}/sprint-status.yaml
+- {documentation_dir}/sprint-status.yaml
 
-**Previous retro integration creates accountability:**
-- Always load and review previous epic's retrospective
-- Check follow-through on action items (completed, in-progress, not addressed)
-- Create continuity and learning loop
+Please verify:
+1. Sprint status file exists and is readable
+2. Development_status section has entries
+3. At least one epic has stories marked "done"
 
-**Significant change detection prevents misalignment:**
-- Actively check if Epic {N} discoveries affect Epic {N+1} plan
-- Flag architectural assumption violations
-- Trigger epic review session if needed
-- Don't let team start next epic on wrong assumptions
+You can manually specify epic number to continue.
+```
 
-**Critical readiness exploration prevents premature next epic:**
-- Don't assume "done" in sprint-status means truly ready
-- Verify testing, deployment, stakeholder acceptance, stability
-- Surface blockers and concerns before moving forward
-- Add critical path items as needed
+**File Access Errors:**
+```
+❌ Unable to access required files
 
-**Action items must be SMART:**
-- Specific, Measurable, Achievable, Relevant, Time-bound
-- Avoid vague aspirations like "improve code quality"
-- Prefer "Add error handling validation to PR checklist by next sprint"
+Missing or inaccessible:
+- [List missing files]
 
-**File locations:**
-- Sprint status: `{sprint_artifacts}/sprint-status.yaml` or `{documentation_dir}/sprint-status.yaml`
-- Story files: `{sprint_artifacts}/{epic_number}-{story_number}-*.md`
-- Epic files: `{documentation_dir}/*epic*/epic-{epic_number}.md` (sharded) or `{documentation_dir}/*epic*.md` (whole)
-- Previous retro: `{sprint_artifacts}/epic-{prev_epic_num}-retro-*.md`
-- Output retro: `{sprint_artifacts}/epic-{epic_number}-retro-{YYYY-MM-DD}.md`
+Please verify:
+1. .bmad/config.yaml exists with correct paths
+2. Sprint artifacts folder is accessible
+3. Story files exist for Epic {epic_number}
+```
 
-## Troubleshooting
+**Sprint Status Update Failure:**
+```
+⚠️ Retrospective saved but sprint-status update failed
 
-**Issue:** Can't detect completed epic
+Retrospective document: {sprint_artifacts}/epic-{epic_number}-retro-{date}.md ✅
+Sprint status update: ❌
 
-**Solution:**
-- Check sprint-status.yaml exists and is readable
-- Verify development_status section has entries
-- Fall back to asking user directly for epic number
-- Can scan story directory as last resort
+Could not find key "epic-{epic_number}-retrospective" in sprint-status.yaml.
 
-**Issue:** No previous retrospective found but should exist
+Manual action required:
+Add or update this key in {sprint_artifacts}/sprint-status.yaml:
+  epic-{epic_number}-retrospective: done
+```
 
-**Solution:**
-- Check file naming: `epic-{N}-retro-*.md` pattern
-- Verify retrospectives folder location
-- Ask user if they skipped previous retro
-- Treat as first retrospective if truly missing
+### Output Files Generated
 
-**Issue:** Next epic not found
+The workflow generates these files:
 
-**Solution:**
-- This is normal if at end of roadmap
-- Skip next epic preparation discussion (Step 7)
-- Focus on general action items and lessons learned
-- Still create valuable retrospective without next epic context
+**Primary Output:**
+- `{sprint_artifacts}/epic-{epic_number}-retro-{YYYY-MM-DD}.md` - Comprehensive retrospective summary with all discussion, analysis, action items, and commitments
 
-**Issue:** User doesn't engage in Party Mode discussion
-
-**Solution:**
-- Explicitly prompt user with direct questions
-- Use AskUserQuestion tool if needed for key decisions
-- Have team members ask user questions directly
-- Create space for user input with "WAIT for user" moments
-
-**Issue:** Too many action items created
-
-**Solution:**
-- Focus on most impactful items only
-- Combine related items
-- Prioritize ruthlessly (critical vs nice-to-have)
-- Aim for 5-10 total action items, not 20+
-- Better to complete few items than partially address many
-
-## Output Files
-
-- `{sprint_artifacts}/epic-{epic_number}-retro-{YYYY-MM-DD}.md` - Comprehensive retrospective summary
+**Updated Files:**
 - `{sprint_artifacts}/sprint-status.yaml` - Updated with retrospective marked as "done"
+
+### Party Mode Dialogue Reporting
+
+Throughout the workflow, all agent interactions are reported using Party Mode format:
+
+```
+Bob (Scrum Master): "Welcome to the retrospective, {user_name}."
+Alice (Product Owner): "I'm excited to review what we accomplished."
+Charlie (Senior Dev): "And what we learned - especially the hard lessons."
+{user_name} (Project Lead): [User's actual response]
+```
+
+This creates an immersive, authentic team discussion experience where the user is an active participant, not an observer.

@@ -1,13 +1,55 @@
 # Common Operations Reference
 
-## File Operations
+## Purpose
 
-### Load Project Configuration
+This reference document provides reusable patterns, operations, and code snippets for BMM workflow agents. It serves as a centralized guide for common tasks including file operations, delegation patterns, status management, validation, error handling, and CLAUDE.md maintenance.
+
+**Use this reference when:**
+- Reading or updating sprint status files
+- Delegating work to subagents
+- Validating story or context files
+- Handling errors gracefully
+- Managing CLAUDE.md file maps
+- Converting between absolute and project-relative paths
+
+## Variables
+
+**Configuration Variables:**
+- `{documentation_dir}` - Documentation folder (typically `.bmad`)
+- `{sprint_artifacts}` - Sprint artifacts folder (typically `.bmad/sprint-artifacts`)
+- `{story_path}` - Stories folder (`{sprint_artifacts}/stories`)
+- `{bmad_folder}` - BMAD configuration folder (`.bmad`)
+- `{project_name}` - Project name from config
+- `{user_name}` - User name from config
+- `{user_skill_level}` - User skill level from config
+
+**Story Variables:**
+- `{story_key}` - Story identifier matching pattern `{epic}-{story}-{name}`
+- `{epic}` - Epic identifier (e.g., `epic-1`)
+- `{status}` - Story status (backlog, drafted, ready-for-dev, in-progress, review, done)
+- `{date}` - Current date for change log entries
+
+**Path Variables:**
+- `{path}` - Generic file path placeholder
+- `{file_path}` - Absolute file path
+- `{projectRoot}` - Project root directory
+
+**Delegation Variables:**
+- `{agent-name}` - Subagent identifier (e.g., `pm`, `dev`, `architect`)
+- `{description}` - Task description for delegation
+
+## Instructions
+
+This is a reference document, not an executable workflow. Consult the relevant sections below as needed during workflow execution.
+
+### File Operations
+
+**1. Load Project Configuration**
 ```javascript
 // Read .bmad/config.yaml
 {
   documentation_dir: string,        // e.g., .bmad
-  sprint_artifacts: string,     // e.g., .bmad/sprint-artifacts
+  sprint_artifacts: string,         // e.g., .bmad/sprint-artifacts
   user_name: string,
   user_skill_level: string,
   bmad_folder: string,
@@ -15,7 +57,7 @@
 }
 ```
 
-### Read Sprint Status
+**2. Read Sprint Status**
 ```yaml
 # File: {sprint_artifacts}/sprint-status.yaml
 development_status:
@@ -25,20 +67,21 @@ development_status:
   1-3-story: backlog
 ```
 
-**Find first story by status:**
+**Finding first story by status:**
 - Read ALL lines (preserve order)
 - Match pattern: `{epic}-{story}-{name}`
 - NOT an epic (`epic-X`) or retrospective
 - Status equals target value
 
-### Update Sprint Status
+**3. Update Sprint Status**
 1. Load FULL file
 2. Find `development_status[{story_key}]`
 3. Verify current status
 4. Update to new status
 5. Save file, preserving ALL comments and structure
 
-### Update Story File
+**4. Update Story File**
+
 **Add section:**
 Append to end of file with `---` separator
 
@@ -51,9 +94,9 @@ Change `Status: {old}` → `Status: {new}`
 - {date} - {description} - {outcome}
 ```
 
-## Delegation Patterns
+### Delegation Patterns
 
-### Delegate to Subagent (Task Tool)
+**5. Delegate to Subagent (Task Tool)**
 ```xml
 <invoke name="Task">
   <parameter name="subagent_type">bmad:{agent-name}</parameter>
@@ -76,7 +119,8 @@ Expected Output:
 </invoke>
 ```
 
-### Parallel Delegation
+**6. Parallel Delegation**
+
 For independent operations, invoke multiple Task calls in SINGLE message:
 ```xml
 <function_calls>
@@ -88,14 +132,14 @@ For independent operations, invoke multiple Task calls in SINGLE message:
 
 **Critical:** ONE message = parallel execution, multiple messages = sequential
 
-## Status Updates
+### Status Management
 
-### Story Status Progression
+**7. Story Status Progression**
 ```
 backlog → drafted → ready-for-dev → in-progress → review → done
 ```
 
-### Auto-Continue Decision Tree
+**8. Auto-Continue Decision Tree**
 ```
 IF workflow_complete AND next_workflow_ready AND no_user_input_needed:
   → Auto-continue with SlashCommand tool
@@ -103,31 +147,31 @@ ELSE:
   → Pause and report next steps
 ```
 
-## Validation
+### Validation
 
-### Story File Validation
+**9. Story File Validation**
 - [ ] Story key matches pattern
 - [ ] All required sections exist
 - [ ] Status field present
 - [ ] Acceptance criteria listed
 - [ ] Tasks defined
 
-### Context File Validation
+**10. Context File Validation**
 - [ ] All paths are project-relative (not absolute)
 - [ ] XML structure is valid
 - [ ] No invented information
 - [ ] All sources referenced
 
-## Error Handling
+### Error Handling
 
-### File Not Found
+**11. File Not Found**
 ```
 ⚠️ {File type} not found: {path}
 
 {Suggested action to resolve}
 ```
 
-### Prerequisites Missing
+**12. Prerequisites Missing**
 ```
 ⚠️ Prerequisites not met
 
@@ -138,7 +182,7 @@ Please run:
 2. {next command}
 ```
 
-### No Stories Available
+**13. No Stories Available**
 ```
 📋 No {status} stories found
 
@@ -149,9 +193,9 @@ Next Steps:
 2. {action 2}
 ```
 
-## Path Handling
+### Path Handling
 
-### Convert to Project-Relative
+**14. Convert to Project-Relative**
 ```javascript
 // Bad: /Users/user/project/src/auth.ts
 // Good: src/auth.ts
@@ -159,15 +203,10 @@ Next Steps:
 const projectRelative = absolutePath.replace(projectRoot, '').replace(/^\//, '');
 ```
 
-### Common Path Variables
-- `{documentation_dir}` - Usually `.bmad`
-- `{sprint_artifacts}` - Usually `.bmad/sprint-artifacts`
-- `{story_path}` - `{sprint_artifacts}/stories`
-- `{bmad_folder}` - `.bmad`
+### CLAUDE.md Operations
 
-## CLAUDE.md Operations
+**15. Update File Map**
 
-### Update File Map
 **Purpose:** Keep CLAUDE.md navigation index current when files are created
 
 **When to call:**
@@ -228,3 +267,37 @@ Task(
 - Alphabetical order maintained automatically
 - File descriptions extracted from comments or inferred
 - Subfolder CLAUDE.md auto-created when directory > 30 files
+
+## Workflow
+
+This is a reference document without a linear workflow. Agents should consult relevant sections based on their current task:
+
+1. **Before starting any workflow:** Load project configuration
+2. **When reading sprint data:** Use sprint status reading pattern
+3. **When updating story status:** Follow sprint status update procedure
+4. **When delegating work:** Use appropriate delegation pattern (single or parallel)
+5. **When validating files:** Apply relevant validation checklist
+6. **When encountering errors:** Use standardized error reporting format
+7. **When handling paths:** Convert to project-relative format
+8. **After creating files:** Update CLAUDE.md file maps
+
+## Report
+
+Agents using this reference should not generate separate reports. Instead:
+
+**Integration Approach:**
+- Apply patterns directly within workflow execution
+- Follow error handling templates for consistent user communication
+- Use validation checklists to verify work quality
+- Document any deviations from standard patterns in workflow reports
+
+**When Creating New Workflows:**
+- Reference specific sections by number (e.g., "Using delegation pattern from Common Operations #5")
+- Maintain consistency with established patterns
+- Report any gaps or needed additions to this reference
+
+**Quality Standards:**
+- All file operations must preserve structure and comments
+- All paths in context files must be project-relative
+- All delegations must include complete context
+- All error messages must be actionable

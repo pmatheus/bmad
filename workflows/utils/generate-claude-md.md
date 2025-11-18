@@ -4,8 +4,6 @@ description: Generate project-level CLAUDE.md with file map, coding standards, a
 
 # Generate CLAUDE.md - Project Context & Navigation
 
-Generates comprehensive CLAUDE.md file combining navigation (file map), coding standards (from profiles), and operational guidance. CLAUDE.md becomes the primary context file for AI agents working on the project.
-
 ## Purpose
 
 Creates living documentation that serves three critical functions:
@@ -13,29 +11,38 @@ Creates living documentation that serves three critical functions:
 2. **Standards**: Top 10-15 critical coding rules inline, full standards in .bmad/standards/
 3. **Operations**: Common tasks, troubleshooting, environment setup
 
+Generates comprehensive CLAUDE.md file combining navigation (file map), coding standards (from profiles), and operational guidance. CLAUDE.md becomes the primary context file for AI agents working on the project.
+
 **Key Principles:**
 1. **Profile Inheritance**: ALWAYS copy default profile + specific profile (nextjs, python, rust, etc.)
 2. **Size Discipline**: Root ≤420 lines, subfolder ≤200 lines
 3. **Living Document**: Auto-updated by workflows when files created
 4. **AI-Optimized**: Structured sections with semantic tags
 
-## Quick Start
+**Philosophy**: CLAUDE.md is the "README for AI agents" - provides complete context for effective autonomous work. Combines navigation (file map), standards (critical rules), and operations (common tasks) in single, size-constrained file.
 
-```bash
-# Prerequisites: Project initialized, .bmad/config.yaml exists
-/bmad:meta:generate-claude-md
+## Variables
 
-# Workflow will:
-# 1. Detect framework (Next.js, Python, Rust, etc.)
-# 2. Copy default profile standards → .bmad/standards/
-# 3. Overlay specific profile standards → .bmad/standards/
-# 4. Extract top 10-15 critical rules
-# 5. Generate file map (directory-level)
-# 6. Create root CLAUDE.md (≤420 lines)
-# 7. Create subfolder CLAUDE.md for large directories (>30 files)
-```
+The following variables are used throughout this workflow and must be extracted from `.bmad/config.yaml`:
 
-## Prerequisites
+- **`{documentation_dir}`** - The root directory of the project documentation and source code (from config.yaml)
+- **`{project_name}`** - The name of the project (from config.yaml)
+- **`{document_output_language}`** - Language for documentation output (from config.yaml)
+- **`{communication_language}`** - Language for agent communication (from config.yaml)
+- **`{profile}`** - Detected framework profile (nextjs, python, rust, flutter, edge-functions, or default)
+- **`{ISO date}`** - Current date in ISO format (YYYY-MM-DD)
+- **`{line_count}`** - Number of lines in generated CLAUDE.md files
+- **`{file_count}`** - Number of files scanned or processed
+- **`{test_command}`** - Framework-specific command to run tests
+- **`{test_watch_command}`** - Framework-specific command to run tests in watch mode
+- **`{test_coverage_command}`** - Framework-specific command to generate coverage reports
+- **`{install_command}`** - Framework-specific command to install dependencies
+- **`{db_setup_command}`** - Framework-specific command to initialize database
+- **`{dev_command}`** - Framework-specific command to start development server
+
+## Instructions
+
+### Prerequisites
 
 See [shared/prerequisites.md#meta-generate-claude-md](../shared/prerequisites.md)
 
@@ -44,9 +51,9 @@ See [shared/prerequisites.md#meta-generate-claude-md](../shared/prerequisites.md
 - [ ] ~/agent-os/profiles/ directory accessible
 - [ ] ~/agent-os/profiles/default/ exists (REQUIRED - base for all profiles)
 
-## Instructions
+### Step-by-Step Process
 
-### 1. Load Configuration
+**1. Load Configuration**
 
 See [shared/common-operations.md#load-configuration](../shared/common-operations.md)
 
@@ -59,9 +66,9 @@ Read from `.bmad/config.yaml`:
 - Verify ~/agent-os/profiles/ accessible
 - Verify ~/agent-os/profiles/default/ exists
 
-### 2. Detect Project Framework
+**2. Detect Project Framework**
 
-**Scan for framework indicators** (check in project root and documentation_dir):
+Scan for framework indicators (check in project root and documentation_dir):
 
 **Next.js:**
 - package.json contains `"next": "..."`
@@ -113,7 +120,7 @@ else:
 - Look for "Tech Stack" or "Technology" section
 - Override auto-detection if explicit framework specified
 
-### 3. Analyze Project Structure
+**3. Analyze Project Structure**
 
 **Count files by type:**
 ```bash
@@ -141,7 +148,7 @@ find {documentation_dir} -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js
 - API clients, database connections
 - Shared types, interfaces
 
-### 4. Copy Profile Standards to .bmad/standards/ (WITH INHERITANCE)
+**4. Copy Profile Standards to .bmad/standards/ (WITH INHERITANCE)**
 
 **CRITICAL**: All profiles inherit from default. ALWAYS copy both.
 
@@ -200,9 +207,9 @@ for file in exclude_inherited_files:
 - Specific profile (overlay/extensions)
 - Excluded files removed (if configured)
 
-### 5. Extract Top 10-15 Critical Rules
+**5. Extract Top 10-15 Critical Rules**
 
-**Scan all files in .bmad/standards/** for critical rules:
+Scan all files in .bmad/standards/ for critical rules:
 
 **Priority order:**
 1. Security rules (validation, auth, secrets)
@@ -246,9 +253,9 @@ for file in exclude_inherited_files:
    - **See**: .bmad/standards/global/coding-style.md
 ```
 
-### 6. Generate Directory-Level File Map
+**6. Generate Directory-Level File Map**
 
-**For each major directory**, generate summary:
+For each major directory, generate summary:
 
 ```markdown
 ### Source Code
@@ -272,7 +279,7 @@ for file in exclude_inherited_files:
 
 **Total**: 15-20 lines for file map section
 
-### 7. Generate Core Context & Purpose (60-80 lines)
+**7. Generate Core Context & Purpose (60-80 lines)**
 
 **7.1 Project Overview** (15-25 lines):
 
@@ -332,7 +339,7 @@ List 10-15 most important files:
 {Insert directory-level summary from Step 6}
 ```
 
-### 8. Generate Guidelines & Constraints (180-220 lines)
+**8. Generate Guidelines & Constraints (180-220 lines)**
 
 **8.1 Code Style & Guidelines** (60-80 lines):
 
@@ -479,7 +486,7 @@ Fixes #123
 </system_context>
 ```
 
-### 9. Generate Workflow & Troubleshooting (80-100 lines)
+**9. Generate Workflow & Troubleshooting (80-100 lines)**
 
 **9.1 Common Tasks** (50-60 lines):
 
@@ -544,7 +551,7 @@ Fixes #123
 **Troubleshooting**: .bmad/standards/troubleshooting.md
 ```
 
-### 10. Generate Technical Context (20-40 lines)
+**10. Generate Technical Context (20-40 lines)**
 
 ```markdown
 ## Technical Context
@@ -568,49 +575,11 @@ Fixes #123
 - **Styling**: {Tailwind, CSS Modules, styled-components, etc.}
 ```
 
-### 11. Assemble Root CLAUDE.md
+**11. Create Subfolder CLAUDE.md Files**
 
-**Combine all sections** in order:
+For each directory with > 30 files:
 
-```markdown
-# {Project Name}
-
-Generated: {ISO date} | Profile: {profile} ({default + specific}) | Auto-maintained by BMAD workflows
-
-## Core Context & Purpose
-{Section from Step 7}
-
-## Guidelines & Constraints
-{Section from Step 8}
-
-## Workflow & Troubleshooting
-{Section from Step 9}
-
-## Technical Context
-{Section from Step 10}
-
----
-
-**Maintenance**: This file is auto-updated by BMAD workflows when files are created.
-**Manual Updates**: Feel free to customize project-specific sections.
-**Size Limit**: 420 lines max. If exceeded, content moved to .bmad/standards/.
-```
-
-**Count lines:**
-```python
-line_count = len(assembled_content.split('\n'))
-```
-
-**If > 420 lines:**
-- Compress descriptions (remove articles, abbreviate)
-- Move less critical content to .bmad/standards/
-- Link to moved content
-
-### 12. Create Subfolder CLAUDE.md Files
-
-**For each directory with > 30 files:**
-
-**12.1 Generate File Map** (150-170 lines):
+**11.1 Generate File Map** (150-170 lines):
 
 Read all files in directory:
 ```python
@@ -636,7 +605,7 @@ for file in sorted(directory_files):
 ... (alphabetically sorted, all files in directory)
 ```
 
-**12.2 Generate Local Context** (30-50 lines):
+**11.2 Generate Local Context** (30-50 lines):
 
 ```markdown
 ## Module Overview
@@ -677,16 +646,16 @@ for file in sorted(directory_files):
 **Files**: {file count}
 ```
 
-**12.3 Assemble Subfolder CLAUDE.md:**
+**11.3 Assemble Subfolder CLAUDE.md:**
 
 ```markdown
 # {Directory Name} - {Purpose}
 
-{Module Overview from 12.2}
+{Module Overview from 11.2}
 
-{File Map from 12.1}
+{File Map from 11.1}
 
-{Local Context from 12.2}
+{Local Context from 11.2}
 ```
 
 **Verify ≤ 200 lines:**
@@ -696,9 +665,9 @@ for file in sorted(directory_files):
 
 **Write to:** `{directory}/CLAUDE.md`
 
-### 13. Validation & Enforcement
+**12. Validation & Enforcement**
 
-**13.1 Verify Line Counts:**
+**12.1 Verify Line Counts:**
 ```python
 root_lines = count_lines(root_claude_md)
 assert root_lines <= 420, f"Root CLAUDE.md exceeds 420 lines ({root_lines})"
@@ -708,14 +677,14 @@ for subfolder_claude in subfolder_claudes:
     assert lines <= 200, f"{subfolder_claude} exceeds 200 lines ({lines})"
 ```
 
-**13.2 Verify Completeness:**
+**12.2 Verify Completeness:**
 - All required sections present
 - Links to .bmad/standards/ valid
 - No broken references
 - Proper markdown formatting
 - AI-friendly tags present (<system_context>, <critical_notes>)
 
-**13.3 Verify Profile Inheritance:**
+**12.3 Verify Profile Inheritance:**
 ```bash
 # Check default profile copied
 test -d {documentation_dir}/.bmad/standards/global
@@ -728,47 +697,121 @@ if [ "$profile" != "default" ]; then
 fi
 ```
 
-### 14. Write Files
+## Workflow
 
-**Write root CLAUDE.md:**
-```python
-write_file(f"{documentation_dir}/CLAUDE.md", root_claude_md_content)
+### Execution Sequence
+
+1. **Configuration Phase**
+   - Load .bmad/config.yaml
+   - Validate prerequisites
+   - Set up workspace variables
+
+2. **Discovery Phase**
+   - Detect project framework/profile
+   - Analyze project structure
+   - Count files and directories
+   - Identify core files
+
+3. **Standards Assembly Phase**
+   - Create .bmad/standards/ directory
+   - Copy default profile (base layer)
+   - Overlay specific profile (extensions)
+   - Apply exclusions if configured
+   - Extract top 10-15 critical rules
+
+4. **Content Generation Phase**
+   - Generate project overview
+   - Generate tech stack summary
+   - Generate core files listing
+   - Generate directory-level file map
+   - Generate guidelines section (code style, testing, environment)
+   - Generate workflow section (common tasks, troubleshooting)
+   - Generate technical context
+
+5. **Assembly Phase**
+   - Combine all sections for root CLAUDE.md
+   - Verify line count ≤ 420
+   - Compress if needed
+   - Generate subfolder CLAUDE.md files for directories > 30 files
+   - Verify subfolder line counts ≤ 200
+
+6. **Validation Phase**
+   - Verify all required sections present
+   - Check link validity
+   - Verify markdown formatting
+   - Confirm profile inheritance
+   - Test file existence
+
+7. **Write Phase**
+   - Write root CLAUDE.md
+   - Write subfolder CLAUDE.md files
+   - Verify files written successfully
+
+**Template Structure for Root CLAUDE.md:**
+
+```markdown
+# {Project Name}
+
+Generated: {ISO date} | Profile: {profile} ({default + specific}) | Auto-maintained by BMAD workflows
+
+## Core Context & Purpose
+{Section from content generation}
+
+## Guidelines & Constraints
+{Section from content generation}
+
+## Workflow & Troubleshooting
+{Section from content generation}
+
+## Technical Context
+{Section from content generation}
+
+---
+
+**Maintenance**: This file is auto-updated by BMAD workflows when files are created.
+**Manual Updates**: Feel free to customize project-specific sections.
+**Size Limit**: 420 lines max. If exceeded, content moved to .bmad/standards/.
 ```
 
-**Write subfolder CLAUDE.md files:**
-```python
-for directory, content in subfolder_claudes.items():
-    write_file(f"{directory}/CLAUDE.md", content)
-```
+**Auto-Continue Behavior**: NO auto-continue - This workflow completes independently. User should review and customize generated CLAUDE.md before proceeding with development.
 
-**Verify files written:**
-```bash
-test -f {documentation_dir}/CLAUDE.md
-test -d {documentation_dir}/.bmad/standards
-```
+## Report
 
-### 15. Report Results
+Upon completion, provide a structured report with the following information:
 
 ```
 ✅ CLAUDE.md Generated Successfully
 
-Root: {documentation_dir}/CLAUDE.md ({line_count} lines)
+Root File: {documentation_dir}/CLAUDE.md ({line_count} lines)
 
 Standards Directory: .bmad/standards/
   - Base standards: default profile
   - Extended by: {profile} profile
   - Total standard files: {file_count}
-  - Categories: {list categories}
+  - Categories: {list categories found}
 
 Subfolder Maps: {count} created
   - {directory}/CLAUDE.md ({line_count} lines)
   - {directory}/CLAUDE.md ({line_count} lines)
-  ...
+  ... (list all subfolder CLAUDE.md files created)
 
 Project Statistics:
   - Total files scanned: {count}
   - Major directories: {count}
   - Core files identified: {count}
+  - Framework detected: {profile}
+
+Profile Inheritance:
+  - Default profile copied: ✓
+  - Specific profile ({profile}) overlaid: {✓ or N/A if default}
+  - Exclusions applied: {count or N/A}
+
+Validation Results:
+  - Root line count: {line_count}/420 ✓
+  - Subfolder line counts: All ≤ 200 ✓
+  - Required sections: All present ✓
+  - Link validity: All valid ✓
+  - Profile inheritance: Verified ✓
 
 Next Steps:
   1. Review CLAUDE.md and customize project-specific sections
@@ -779,8 +822,7 @@ Next Steps:
 Note: Commit CLAUDE.md and .bmad/standards/ to version control.
 ```
 
-## Key Constraints
-
+**Key Constraints:**
 - **Profile inheritance**: ALWAYS copy default profile first, then specific profile
 - **Size limits**: Root ≤420 lines (strict), subfolder ≤200 lines (strict)
 - **Living document**: Will be updated by other workflows (update-claude-md)
@@ -790,14 +832,7 @@ Note: Commit CLAUDE.md and .bmad/standards/ to version control.
 - **File map accuracy**: Descriptions must be meaningful and concise
 - **Critical rules**: Extract truly critical rules, not just any rules
 
-## Auto-Continue
-
-**NO auto-continue** - This workflow completes independently.
-
-User should review and customize generated CLAUDE.md before proceeding with development.
-
-## Notes
-
+**Notes:**
 - **One-time generation**: Typically run once per project during initialization
 - **Regeneration supported**: Can regenerate if CLAUDE.md deleted (uses PRD if available)
 - **Profile inheritance is key**: Default profile provides base, specific profile extends/overrides
@@ -806,8 +841,6 @@ User should review and customize generated CLAUDE.md before proceeding with deve
 - **Living documentation**: Other workflows will update file map automatically
 - **Version control**: CLAUDE.md and .bmad/standards/ should be committed
 - **Customization encouraged**: Users can add project-specific sections
-
-**Philosophy**: CLAUDE.md is the "README for AI agents" - provides complete context for effective autonomous work. Combines navigation (file map), standards (critical rules), and operations (common tasks) in single, size-constrained file.
 
 ---
 

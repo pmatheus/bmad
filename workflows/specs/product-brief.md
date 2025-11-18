@@ -4,95 +4,63 @@ description: Interactive product brief creation through conversational discovery
 
 # Product Brief Workflow
 
-## What This Does
+## Purpose
 
-Creates a product vision document through **intent-driven conversational discovery** by:
-1. Understanding project context (hobby, startup, enterprise)
-2. Discovering the problem worth solving through natural conversation
-3. Shaping the solution vision collaboratively
-4. Identifying target users with specific stories (not demographics)
-5. Defining success measures that match their context
-6. Scoping MVP features ruthlessly
-7. Exploring relevant dimensions (market, financial, technical, organizational)
-8. Building a **living document** continuously (not at end)
-9. Refining based on feedback to fit their needs (not a template)
+Creates a product vision document through **intent-driven conversational discovery** that:
+- Understands project context (hobby, startup, enterprise)
+- Discovers the problem worth solving through natural conversation
+- Shapes the solution vision collaboratively
+- Identifies target users with specific stories (not demographics)
+- Defines success measures that match their context
+- Scopes MVP features ruthlessly
+- Explores relevant dimensions (market, financial, technical, organizational)
+- Builds a **living document** continuously (not at end)
+- Refines based on feedback to fit their needs (not a template)
 
 **Intent-driven facilitation: Adapts organically to what emerges, not template-filling.**
 
----
-
-## Prerequisites
-
-- BMAD plugin installed (`/bmad:bmm:workflows:workflow-init` run) OR standalone mode
-- Configuration file at `.bmad/config.yaml`
-- Optional: Existing research, brainstorming docs, or initial ideas
-
----
-
-## When to Use Product Brief
-
-**Level 2+ projects:**
-- Significant features requiring strategic planning
-- Market-facing products
-- Enterprise initiatives
-- Startup ventures
+**When to Use:**
+- Level 2+ projects requiring strategic planning
+- Market-facing products, enterprise initiatives, startup ventures
 - Projects needing stakeholder alignment
+- Optional but valuable for any project with strategic clarity needs
 
-**For Level 0-1 (Quick Flow):**
-- Use `/bmad:bmm:workflows:tech-spec` instead (simpler, faster)
+**For Level 0-1 (Quick Flow):** Use `/bmad:bmm:workflows:tech-spec` instead (simpler, faster)
 
-**Optional but valuable:**
-- Can enhance any project with strategic clarity
-- Recommended for Level 2+ before PRD
-- Helps clarify vision for complex projects
+## Variables
 
----
-
-## How It Works
-
-```
-1. Validate readiness → Check workflow status
-2. Begin journey → Understand context (hobby/startup/enterprise)
-3. Discover problem → What's worth solving? Why now?
-4. Shape solution → How does this work? What makes it different?
-5. Understand users → Who needs this? (stories, not demographics)
-6. Define success → What does winning look like?
-7. Scope MVP → Core vs nice-to-have vs future
-8. Explore context → Market, financial, technical (only what emerges)
-9. Refine document → Show what we've built, get feedback
-10. Complete brief → Save and guide next steps
-```
-
-**Key behavior:**
-- **Living document:** Writes continuously throughout conversation
-- **Context-adaptive:** Adjusts tone and depth to project type
-- **Discovery-focused:** "Why" and "What matters" over template-filling
-- **Natural flow:** Only explores what emerges naturally
-- **User-driven:** Document structure reflects their needs, not rigid template
-
----
+| Variable | Description | Source |
+|----------|-------------|--------|
+| `standalone_mode` | Boolean flag indicating if running standalone (true) or within workflow (false) | Determined by presence of `.bmad/bmm-workflow-status.yaml` |
+| `project_name` | Name of the project | `.bmad/config.yaml` |
+| `documentation_dir` | Directory for documentation output | `.bmad/config.yaml` |
+| `user_name` | User's name for personalized communication | `.bmad/config.yaml` |
+| `user_skill_level` | User's expertise level (expert/intermediate/beginner) | `.bmad/config.yaml` |
+| `communication_language` | Language for agent communication | `.bmad/config.yaml` |
+| `document_output_language` | Language for document generation | `.bmad/config.yaml` |
+| `project_level` | Project complexity level (0-3) | `.bmad/bmm-workflow-status.yaml` (if exists) |
+| `workflow_status` | Current status of all workflows | `.bmad/bmm-workflow-status.yaml` (if exists) |
+| `context_type` | Project context detected (hobby/startup/enterprise) | Inferred from conversation |
+| `date` | Current date for file naming | System date (YYYY-MM-DD format) |
 
 ## Instructions
 
-### Step 1: Validate Workflow Readiness
+### 1. Validate Workflow Readiness
 
 **Check for workflow status file:**
-
-1. Check if `.bmad/bmm-workflow-status.yaml` exists
+- Check if `.bmad/bmm-workflow-status.yaml` exists
 
 **If status file NOT found (standalone mode):**
-
-Set `standalone_mode = true`
-
-Display: "Product Brief can run standalone or as part of BMM workflow path. Running in standalone mode - great for exploring your product vision!"
+- Set `standalone_mode = true`
+- Display: "Product Brief can run standalone or as part of BMM workflow path. Running in standalone mode - great for exploring your product vision!"
 
 **If status file found (workflow mode):**
-
-1. Load COMPLETE file: `.bmad/bmm-workflow-status.yaml`
-2. Parse `workflow_status` section
-3. Check status of "product-brief" workflow
-4. Get `project_level` from metadata
-5. Find first non-completed workflow
+- Load COMPLETE file: `.bmad/bmm-workflow-status.yaml`
+- Parse `workflow_status` section
+- Check status of "product-brief" workflow
+- Get `project_level` from metadata
+- Find first non-completed workflow
+- Set `standalone_mode = false`
 
 **Validation checks:**
 
@@ -108,7 +76,6 @@ Product Brief is most valuable for Level 2+ projects, but can help clarify visio
 ⚠️ Product Brief already completed: {file_path}
 Re-running will overwrite the existing brief. Continue? (y/n)
 ```
-
 Use AskUserQuestion for confirmation.
 
 **If product-brief not next expected workflow:**
@@ -117,13 +84,11 @@ Use AskUserQuestion for confirmation.
 Continue with Product Brief anyway? (y/n)
 ```
 
-Set `standalone_mode = false` if workflow mode.
-
-### Step 2: Begin the Journey and Understand Context
+### 2. Begin the Journey and Understand Context
 
 **Welcome user warmly** and start with open exploration.
 
-Adapt tone to `{user_skill_level}` (from config):
+Adapt tone to `{user_skill_level}`:
 - **Expert:** "Let's define your product vision. What are you building?"
 - **Intermediate:** "I'm here to help shape your product vision. Tell me about your idea."
 - **Beginner:** "Hi! I'm going to help you figure out exactly what you want to build. Let's start with your idea - what got you excited about this?"
@@ -133,42 +98,39 @@ Adapt tone to `{user_skill_level}` (from config):
 - What are you hoping to build?
 - Who is this for - yourself, a business, users you know?
 
-**Listen for context clues that reveal their situation:**
-- **Personal/hobby project:** Fun, learning, small audience
+**Listen for context clues:**
+- **Personal/hobby:** Fun, learning, small audience
 - **Startup/solopreneur:** Market opportunity, competition matters
 - **Enterprise/corporate:** Stakeholders, compliance, strategic alignment
 - **Technical enthusiasm:** Implementation focused
 - **Business opportunity:** Market/revenue focused
 - **Problem frustration:** Solution focused
 
-**Sense from their initial response:**
-- How formal/casual they want to be
-- Whether they think in business or technical terms
-- If they have existing materials to share
-- Their confidence level with the domain
+**Sense from initial response:**
+- Formality level they prefer
+- Business vs technical thinking style
+- Existing materials to share
+- Domain confidence level
 
 Ask: "What's the project name, and what got you excited about building this?"
 
-**From this first exchange, create initial document sections:**
+**Create initial document sections:**
 - Project name
 - Executive summary (initial)
 - Initial vision
 
-**If they mention existing documents** (research, brainstorming, etc.):
-- Load and analyze these materials
-- Extract key themes and insights
-- Reference naturally: "I see from your research that..."
-- Use to accelerate discovery, not repeat questions
-
-**Document loading strategy:**
+**If they mention existing documents:**
 - Search for product brief: `{documentation_dir}/*brief*.md` or `{documentation_dir}/*brief*/index.md` (sharded)
 - Search for research: `{documentation_dir}/*research*.md` or `{documentation_dir}/*research*/index.md` (sharded)
 - Search for brainstorming: `{documentation_dir}/*brainstorm*.md` or `{documentation_dir}/*brainstorm*/index.md` (sharded)
 - If sharded (index.md found): Read index, then read ALL section files
+- Extract key themes and insights
+- Reference naturally: "I see from your research that..."
+- Use to accelerate discovery, not repeat questions
 
 **Begin writing to product-brief document** with initial sections.
 
-### Step 3: Discover the Problem Worth Solving
+### 3. Discover the Problem Worth Solving
 
 Guide problem discovery through **natural conversation** (not interrogation).
 
@@ -205,18 +167,18 @@ Guide problem discovery through **natural conversation** (not interrogation).
 - If they're technical: explore implementation challenges
 - If they're business-focused: quantify impact
 
-**Immediately capture what emerges** (even if preliminary):
+**Immediately capture what emerges:**
 - Problem statement
 - Problem impact (if metrics, costs, or business impact mentioned)
 - Existing solutions gaps (if current solutions or competitors mentioned)
 
 Reflect understanding: "So the core issue is {problem_summary}, and {impact_if_mentioned}. Let me capture that..."
 
-### Step 4: Shape the Solution Vision
+### 4. Shape the Solution Vision
 
 Transition naturally from problem to solution.
 
-**Explore based on their energy and context:**
+**Explore based on energy and context:**
 
 **For builders/makers:**
 - "How do you envision this working?"
@@ -253,7 +215,7 @@ Use findings to sharpen differentiation discussion
 
 Continue building the living document.
 
-### Step 5: Understand the People Who Need This
+### 5. Understand the People Who Need This
 
 Discover target users through **storytelling, not demographics**.
 
@@ -298,7 +260,7 @@ Discover target users through **storytelling, not demographics**.
 - Secondary user segment (only if truly different needs)
 - User journey (if workflow discussed)
 
-### Step 6: Define What Success Looks Like
+### 6. Define What Success Looks Like
 
 Explore success measures that **match their context**.
 
@@ -329,7 +291,7 @@ Explore success measures that **match their context**.
 
 Keep the document growing with each discovery.
 
-### Step 7: Discover the MVP Scope
+### 7. Discover the MVP Scope
 
 **CRITICAL: Focus on FEATURES not epics** - epics come in Phase 2.
 
@@ -367,7 +329,7 @@ Guide MVP scoping based on their maturity:
 - Future vision features (if future features mentioned)
 - MVP success criteria (if success criteria for MVP mentioned)
 
-### Step 8: Explore Relevant Context Dimensions
+### 8. Explore Relevant Context Dimensions
 
 **CRITICAL: Only explore what emerges naturally** - skip what doesn't matter.
 
@@ -423,7 +385,7 @@ Capture as: Timeline constraints
 **Skip anything that hasn't naturally emerged.**
 **Don't force sections that don't fit their context.**
 
-### Step 9: Refine and Complete the Living Document
+### 9. Refine and Complete the Living Document
 
 Review what's been captured with the user.
 
@@ -457,7 +419,7 @@ Create executive summary that captures the essence.
 
 **The document should reflect their world, not force their world into a template.**
 
-### Step 10: Complete and Save the Product Brief
+### 10. Complete and Save the Product Brief
 
 The document has been building throughout conversation. Now ensure it's complete and well-organized.
 
@@ -493,6 +455,95 @@ If `standalone_mode != true`:
 4. Save file, preserving ALL comments and structure
 5. Find first non-completed workflow (next workflow)
 
+## Workflow
+
+```
+1. Validate readiness
+   → Check workflow status
+   → Determine standalone vs workflow mode
+   → Validate project level and sequence
+   ↓
+2. Begin journey
+   → Understand context (hobby/startup/enterprise)
+   → Load existing documents if mentioned
+   → Create initial document sections
+   ↓
+3. Discover problem
+   → What's worth solving?
+   → Why now?
+   → Capture problem statement and impact
+   ↓
+4. Shape solution
+   → How does this work?
+   → What makes it different?
+   → Web research if competitors mentioned
+   ↓
+5. Understand users
+   → Who needs this? (stories, not demographics)
+   → Capture user segments and journeys
+   ↓
+6. Define success
+   → What does winning look like?
+   → Capture metrics (if relevant to context)
+   ↓
+7. Scope MVP
+   → Core vs nice-to-have vs future
+   → Challenge feature creep ruthlessly
+   ↓
+8. Explore context
+   → Market, financial, technical (only what emerges)
+   → Skip irrelevant sections
+   ↓
+9. Refine document
+   → Show what we've built
+   → Get feedback and refine
+   ↓
+10. Complete brief
+    → Final adjustments
+    → Save and guide next steps
+    → Update workflow status
+```
+
+**Key behavior:**
+- **Living document:** Writes continuously throughout conversation
+- **Context-adaptive:** Adjusts tone and depth to project type
+- **Discovery-focused:** "Why" and "What matters" over template-filling
+- **Natural flow:** Only explores what emerges naturally
+- **User-driven:** Document structure reflects their needs, not rigid template
+
+**Prerequisites:**
+- BMAD plugin installed (`/bmad:bmm:workflows:workflow-init` run) OR standalone mode
+- Configuration file at `.bmad/config.yaml`
+- Optional: Existing research, brainstorming docs, or initial ideas
+
+**Related Workflows:**
+
+**Before product-brief:**
+- `/bmad:bmm:workflows:workflow-init` - Initialize project (RECOMMENDED)
+- `/bmad:bmm:workflows:research` - Market/domain research (optional, for additional context)
+- `/bmad:bmm:workflows:brainstorm-project` - Brainstorming (optional, product-brief can do discovery)
+
+**After product-brief:**
+- `/bmad:bmm:workflows:prd` - Detailed requirements (Level 2+) (RECOMMENDED next step)
+- `/bmad:bmm:workflows:architecture` - Technical design (after PRD)
+
+**Alternatives:**
+- `/bmad:bmm:workflows:tech-spec` - For Level 0-1 projects (simpler, faster)
+
+**Navigation:**
+```
+Level 2+ Flow:
+  workflow-init
+    ↓
+  product-brief (you are here) ← Optional but valuable
+    ↓
+  prd → architecture → create-epics-and-stories
+    ↓
+  dev-story
+```
+
+## Report
+
 Display completion message:
 ```
 **✅ Product Brief Complete, {user_name}!**
@@ -514,6 +565,160 @@ The next phase will take your brief and create the detailed planning artifacts n
 
 Remember: This brief captures YOUR vision. It grew from our conversation, not from a rigid template. It's ready to guide the next phase of bringing your idea to life.
 ```
+
+**Success Criteria:**
+
+✅ **Product vision captured** through natural conversation
+
+✅ **Living document built** continuously (not at end)
+
+✅ **Context-adapted** to project type (hobby/startup/enterprise)
+
+✅ **Users understood** through stories (not demographics)
+
+✅ **MVP scoped ruthlessly** (core vs nice-to-have vs future)
+
+✅ **Only relevant sections** included (no template bloat)
+
+✅ **Ready for PRD** (clear vision to elaborate on)
+
+**Output Files:**
+
+**1. Product Brief** (`{documentation_dir}/product-brief-{project_name}-{date}.md`)
+
+Structure varies by project type:
+
+**Hobby project (2-3 pages):**
+```markdown
+# Product Brief: {Project Name}
+
+## Executive Summary
+{Vision}
+
+## Problem
+{What's being solved}
+
+## Solution
+{How it works}
+
+## Users
+{Who needs this}
+
+## Success
+{How we'll know it's working}
+
+## MVP Features
+{What we're building first}
+
+## Technical Preferences
+{If discussed}
+```
+
+**Startup venture (5-7 pages):**
+```markdown
+# Product Brief: {Project Name}
+
+## Executive Summary
+
+## Problem
+- Problem statement
+- Impact and cost
+- Existing solutions gaps
+
+## Solution
+- Proposed solution
+- Key differentiators
+
+## Target Users
+- Primary user segment
+- User journey
+
+## Success Metrics
+- Success metrics
+- Business objectives
+
+## MVP Scope
+- Core features
+- Out of scope
+- Future vision
+
+## Market Analysis
+{From WebSearch}
+
+## Financial Considerations
+
+## Technical Preferences
+
+## Timeline Constraints
+```
+
+**Enterprise initiative (10+ pages):**
+```markdown
+# Product Brief: {Project Name}
+
+## Executive Summary
+
+## Problem
+- Problem statement
+- Business impact
+- Stakeholder drivers
+
+## Solution
+- Proposed solution
+- Organizational transformation
+
+## Users and Stakeholders
+- Primary users
+- Secondary users
+- Stakeholders (champions, skeptics)
+
+## Success Metrics
+- KPIs
+- Business objectives
+
+## MVP Scope
+- Pilot scope
+- Full rollout features
+- Future phases
+
+## Organizational Context
+- Strategic alignment
+- Stakeholder buy-in
+- Change management
+
+## Risks and Assumptions
+- Key risks
+- Mitigation strategies
+- Critical assumptions
+
+## Timeline Constraints
+- Pilot timeline
+- Full rollout timeline
+- Critical milestones
+```
+
+**2. Modified Files (if workflow mode):**
+
+Workflow Status (`.bmad/bmm-workflow-status.yaml`)
+```yaml
+workflow_status:
+  product-brief: "{documentation_dir}/product-brief-{project_name}-{date}.md"  # ← Updated
+```
+
+**Typical Usage:**
+1. User has Level 2+ project idea
+2. Runs product-brief workflow
+3. Conversational discovery (30-60 minutes)
+4. Living document built continuously
+5. Refined based on feedback
+6. Proceeds to PRD workflow with clear vision
+
+**Time:** 30-60 minutes (depending on project complexity)
+
+**Document length varies:**
+- Hobby: 2-3 pages
+- Startup: 5-7 pages
+- Enterprise: 10+ pages
 
 ---
 
@@ -1084,194 +1289,6 @@ User keeps adding features: "Oh, and it should also..."
 
 ---
 
-## Related Workflows
-
-**Before product-brief:**
-- `/bmad:bmm:workflows:workflow-init` - Initialize project (RECOMMENDED)
-- `/bmad:bmm:workflows:research` - Market/domain research (optional, for additional context)
-- `/bmad:bmm:workflows:brainstorm-project` - Brainstorming (optional, product-brief can do discovery)
-
-**After product-brief:**
-- `/bmad:bmm:workflows:prd` - Detailed requirements (Level 2+) (RECOMMENDED next step)
-- `/bmad:bmm:workflows:architecture` - Technical design (after PRD)
-
-**Alternatives:**
-- `/bmad:bmm:workflows:tech-spec` - For Level 0-1 projects (simpler, faster)
-
-**Navigation:**
-```
-Level 2+ Flow:
-  workflow-init
-    ↓
-  product-brief (you are here) ← Optional but valuable
-    ↓
-  prd → architecture → create-epics-and-stories
-    ↓
-  dev-story
-```
-
----
-
-## Success Criteria
-
-✅ **Product vision captured** through natural conversation
-
-✅ **Living document built** continuously (not at end)
-
-✅ **Context-adapted** to project type (hobby/startup/enterprise)
-
-✅ **Users understood** through stories (not demographics)
-
-✅ **MVP scoped ruthlessly** (core vs nice-to-have vs future)
-
-✅ **Only relevant sections** included (no template bloat)
-
-✅ **Ready for PRD** (clear vision to elaborate on)
-
----
-
-## Configuration
-
-Reads from `.bmad/config.yaml`:
-
-```yaml
-project_name: "project-name"
-documentation_dir: "docs/bmad"
-user_name: "Developer"
-communication_language: "English"
-document_output_language: "English"
-user_skill_level: "intermediate"  # expert/intermediate/beginner
-```
-
----
-
-## Output Files
-
-### Created Files
-
-**1. Product Brief** (`{documentation_dir}/product-brief-{project_name}-{date}.md`)
-
-**Structure varies by project type:**
-
-**Hobby project (2-3 pages):**
-```markdown
-# Product Brief: {Project Name}
-
-## Executive Summary
-{Vision}
-
-## Problem
-{What's being solved}
-
-## Solution
-{How it works}
-
-## Users
-{Who needs this}
-
-## Success
-{How we'll know it's working}
-
-## MVP Features
-{What we're building first}
-
-## Technical Preferences
-{If discussed}
-```
-
-**Startup venture (5-7 pages):**
-```markdown
-# Product Brief: {Project Name}
-
-## Executive Summary
-
-## Problem
-- Problem statement
-- Impact and cost
-- Existing solutions gaps
-
-## Solution
-- Proposed solution
-- Key differentiators
-
-## Target Users
-- Primary user segment
-- User journey
-
-## Success Metrics
-- Success metrics
-- Business objectives
-
-## MVP Scope
-- Core features
-- Out of scope
-- Future vision
-
-## Market Analysis
-{From WebSearch}
-
-## Financial Considerations
-
-## Technical Preferences
-
-## Timeline Constraints
-```
-
-**Enterprise initiative (10+ pages):**
-```markdown
-# Product Brief: {Project Name}
-
-## Executive Summary
-
-## Problem
-- Problem statement
-- Business impact
-- Stakeholder drivers
-
-## Solution
-- Proposed solution
-- Organizational transformation
-
-## Users and Stakeholders
-- Primary users
-- Secondary users
-- Stakeholders (champions, skeptics)
-
-## Success Metrics
-- KPIs
-- Business objectives
-
-## MVP Scope
-- Pilot scope
-- Full rollout features
-- Future phases
-
-## Organizational Context
-- Strategic alignment
-- Stakeholder buy-in
-- Change management
-
-## Risks and Assumptions
-- Key risks
-- Mitigation strategies
-- Critical assumptions
-
-## Timeline Constraints
-- Pilot timeline
-- Full rollout timeline
-- Critical milestones
-```
-
-**Modified Files (if workflow mode):**
-
-**2. Workflow Status** (`.bmad/bmm-workflow-status.yaml`)
-```yaml
-workflow_status:
-  product-brief: "{documentation_dir}/product-brief-{project_name}-{date}.md"  # ← Updated
-```
-
----
-
 ## Notes
 
 - **Intent-driven, not template-driven:** Adapts to what emerges naturally
@@ -1283,19 +1300,15 @@ workflow_status:
 - **Only what emerges:** Skips irrelevant sections (no template bloat)
 - **Document reflects their world:** Structure matches their needs, not rigid template
 
-**Typical usage:**
-1. User has Level 2+ project idea
-2. Runs product-brief workflow
-3. Conversational discovery (30-60 minutes)
-4. Living document built continuously
-5. Refined based on feedback
-6. Proceeds to PRD workflow with clear vision
+**Configuration:**
 
-**Time:** 30-60 minutes (depending on project complexity)
+Reads from `.bmad/config.yaml`:
 
-**Document length varies:**
-- Hobby: 2-3 pages
-- Startup: 5-7 pages
-- Enterprise: 10+ pages
-
-**For Level 0-1 projects:** Use tech-spec workflow instead (simpler, faster)
+```yaml
+project_name: "project-name"
+documentation_dir: "docs/bmad"
+user_name: "Developer"
+communication_language: "English"
+document_output_language: "English"
+user_skill_level: "intermediate"  # expert/intermediate/beginner
+```

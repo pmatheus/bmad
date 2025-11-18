@@ -4,11 +4,11 @@ description: Automate complete story lifecycle (create-story → story-context �
 
 # Bring to Life - Automated Story Development Workflow
 
-Automates the complete story development lifecycle for all stories until context depleted (<20%), using **Ultra Think dependency analysis** to intelligently determine when to run stories sequentially vs in parallel.
-
 ## Purpose
 
 Creates a fully automated development pipeline with intelligent execution strategy. Uses **priority-based selection** (pending fixes > dependencies > backlog) and **independence analysis** (file conflicts, API changes, dependencies) to determine optimal execution mode. Coordinated through file-based state (sprint-status.yaml).
+
+Automates the complete story development lifecycle for all stories until context depleted (<20%), using **Ultra Think dependency analysis** to intelligently determine when to run stories sequentially vs in parallel.
 
 Each story executes: create → context → dev → review → done.
 
@@ -18,8 +18,7 @@ Each story executes: create → context → dev → review → done.
 3. **Dynamic Re-analysis:** Ultra Think runs every iteration (dependencies change as work completes)
 4. **Correctness Over Speed:** Never sacrifice quality for parallelism
 
-## Quick Start
-
+**Quick Start:**
 ```bash
 # Prerequisites: epics created, sprint planning run, stories in backlog
 /bmad:phase-4:bring-to-life
@@ -36,7 +35,28 @@ Each story executes: create → context → dev → review → done.
 # 7. Continue until context < 20% or all stories done
 ```
 
-## Prerequisites
+## Variables
+
+- `{sprint_artifacts}`: Directory containing sprint artifacts (sprint-status.yaml, checkpoint files, lock files)
+- `{stories_dir}`: Directory containing story markdown files
+- `{documentation_dir}`: Directory for project documentation (CLAUDE.md location)
+- `{epic_key}`: Epic identifier (e.g., "epic-3", "epic-4")
+- `{story_key}`: Story identifier (e.g., "3-1", "3-2", "4-1")
+- `{worker_id}`: Worker identifier (e.g., "worker-seq-1", "worker-par-1", "worker-par-2")
+- `{mode}`: Execution mode ("SEQUENTIAL" or "PARALLEL")
+- `{tier}`: Priority tier ("PRIORITY_1_FIXES" | "PRIORITY_2_DEPENDENCIES" | "PRIORITY_3_BACKLOG")
+- `{cluster_size}`: Number of stories in selected cluster (1 = sequential, 2+ = parallel)
+- `{context_threshold}`: Context usage percentage threshold for checkpoint (default: 20%)
+- `{remaining_context}`: Current context window usage percentage
+- `{stories_completed}`: Count of successfully completed stories in session
+- `{date}`: Current date
+- `{time}`: Current time
+- `{retry_count}`: Number of retry attempts for a story or epic (max: 2)
+- `{max_retries}`: Maximum retry attempts allowed (stories: 2, epics: 2)
+
+## Instructions
+
+### Prerequisites
 
 See [shared/prerequisites.md#phase-4-bring-to-life](../shared/prerequisites.md)
 
@@ -50,8 +70,6 @@ See [shared/prerequisites.md#phase-4-bring-to-life](../shared/prerequisites.md)
 - Workflow will **automatically generate** epic context for any epic with status "backlog"
 - You do not need to manually run epic-tech-context before bring-to-life
 - If epic context generation fails, the epic will be marked "blocked" and workflow continues with other epics
-
-## Instructions
 
 ### Critical Execution Strategy Rule
 
@@ -97,13 +115,13 @@ See [shared/prerequisites.md#phase-4-bring-to-life](../shared/prerequisites.md)
 
 **Key insight:** Status doesn't determine mode, independence does. Blocked stories can run in parallel if they're independent of each other.
 
-### 1. Load Configuration and Verify
+### Step 1: Load Configuration and Verify
 
 See [shared/common-operations.md#load-configuration](../shared/common-operations.md)
 
 Verify: sprint-status.yaml, epics.md or epic-{N}.md files exist.
 
-### 1.5 CLAUDE.md Validation
+### Step 1.5: CLAUDE.md Validation
 
 **Purpose:** Ensure agents can navigate project during multi-story development
 
@@ -182,20 +200,25 @@ Task(
 
 **Timing:** After Step 1 (config loaded), before Step 2 (initialize tracking)
 
-### 2. Initialize Progress Tracking
+### Step 2: Initialize Progress Tracking
 
 Check for `{sprint_artifacts}/bring-to-life-checkpoint.md`:
-- **Exists:** Resume from checkpoint (extract completed count, dependency graph state)
-- **Missing:** Start fresh (stories_completed = 0)
+- **Exists:** Resume from checkpoint (extract completed count, dependency graph state, retry counts)
+- **Missing:** Start fresh (stories_completed = 0, empty retry tracking)
 - **Initialize:** context_threshold = 20%
 
-### 2.5. Ultra Think: Dependency Analysis & Story Clustering
+**Load retry tracking state from checkpoint:**
+- Extract `Retry Tracking State` section
+- Restore retry counts for stories and epics
+- Initialize retry tracking infrastructure (if new session)
+
+### Step 2.5: Ultra Think - Dependency Analysis & Story Clustering
 
 **PURPOSE:** Analyze ALL candidate stories to determine optimal execution strategy (sequential vs parallel) based on independence, not status.
 
 **CRITICAL PRINCIPLE:** Status (blocked/review/backlog) determines PRIORITY, not execution mode. Independence determines whether stories can run in parallel.
 
-#### Step 1: Gather All Candidate Stories
+#### Substep 1: Gather All Candidate Stories
 
 ```python
 def gather_all_candidates():
@@ -258,7 +281,7 @@ def gather_all_candidates():
     return candidates
 ```
 
-#### Step 2: Detect Review Outcomes
+#### Substep 2: Detect Review Outcomes
 
 ```python
 def has_pending_review_issues(story_key):
@@ -288,7 +311,7 @@ def has_pending_review_issues(story_key):
     return False
 ```
 
-#### Step 3: Analyze Story Independence (Conflict Detection)
+#### Substep 3: Analyze Story Independence (Conflict Detection)
 
 ```python
 def stories_conflict(story_a, story_b):
@@ -397,7 +420,7 @@ def clearly_independent(story_a, story_b):
     return modules_a.isdisjoint(modules_b)
 ```
 
-#### Step 4: Form Independent Clusters
+#### Substep 4: Form Independent Clusters
 
 ```python
 def form_independent_clusters(stories):
@@ -437,7 +460,7 @@ def form_independent_clusters(stories):
     return clusters
 ```
 
-#### Step 5: Select Next Cluster (Priority + Independence)
+#### Substep 5: Select Next Cluster (Priority + Independence)
 
 ```python
 def select_next_cluster():
@@ -467,7 +490,7 @@ def select_next_cluster():
     return clusters[0], tier
 ```
 
-#### Step 6: Detect Epics Needing Context
+#### Substep 6: Detect Epics Needing Context
 
 ```python
 def get_epics_needing_context():
@@ -495,9 +518,7 @@ def get_epics_needing_context():
 - Cluster size 1 → Sequential execution
 - Cluster size 2+ → Parallel execution (verified independent)
 
----
-
-### 2.6. Retry Tracking Infrastructure
+### Step 2.6: Retry Tracking Infrastructure
 
 **Purpose:** Track retry attempts for stories and epics to prevent infinite loops while allowing recovery from transient failures (worker timeouts, network issues, etc.).
 
@@ -604,18 +625,18 @@ def get_previous_status(story_key):
 
 **OUTCOME:** Retry tracking infrastructure ready for use in worker handling and epic context generation.
 
-### 3. Main Loop: Intelligent Story Development
+### Step 3: Main Loop - Intelligent Story Development
 
-**CRITICAL:** Uses Ultra Think (Section 2.5) to determine execution strategy dynamically.
+**CRITICAL:** Uses Ultra Think (Step 2.5) to determine execution strategy dynamically.
 
 ```python
 WHILE remaining_context > 20%:
   # 3A: Run Ultra Think - Get next story cluster
-  story_cluster, tier = select_next_cluster()  # From Section 2.5
+  story_cluster, tier = select_next_cluster()  # From Step 2.5
 
   IF story_cluster is None:
     # No candidate stories available - check WHY
-    epics_needing_context = get_epics_needing_context()  # From Section 2.5, Step 6
+    epics_needing_context = get_epics_needing_context()  # From Step 2.5, Substep 6
 
     IF epics_needing_context:
       # AUTOMATIC EPIC CONTEXT GENERATION
@@ -659,7 +680,7 @@ WHILE remaining_context > 20%:
         IF result.status == "completed":
           # Epic context generated successfully
           update_sprint_status(epic_key, "contexted")
-          clear_retry_count(epic_key)  # From Section 2.6
+          clear_retry_count(epic_key)  # From Step 2.6
           PRINT f"✅ {epic_key} contexted"
 
         ELIF result.status == "timeout":
@@ -667,12 +688,12 @@ WHILE remaining_context > 20%:
           PRINT f"⏱️  Epic context timeout: {epic_key}"
 
           # Track retry attempt
-          retry_count = get_retry_count(epic_key)  # From Section 2.6
+          retry_count = get_retry_count(epic_key)  # From Step 2.6
 
           IF retry_count < 2:
             # Allow retry
             update_sprint_status(epic_key, "backlog")  # Will retry next iteration
-            increment_retry_count(epic_key)  # From Section 2.6
+            increment_retry_count(epic_key)  # From Step 2.6
             PRINT f"   ↩️  Will retry (attempt {retry_count + 1}/2)"
           ELSE:
             # Max retries exceeded
@@ -753,13 +774,13 @@ WHILE remaining_context > 20%:
       PRINT f"⏱️  Worker timeout on {story_key} ({worker_id})"
 
       # Reset story status to enable retry
-      previous_status = get_previous_status(story_key)  # From Section 2.6
+      previous_status = get_previous_status(story_key)  # From Step 2.6
       update_sprint_status(story_key, previous_status)
 
       # Track retry attempt
-      retry_count = get_retry_count(story_key)  # From Section 2.6
+      retry_count = get_retry_count(story_key)  # From Step 2.6
       IF retry_count < 2:
-        increment_retry_count(story_key)  # From Section 2.6
+        increment_retry_count(story_key)  # From Step 2.6
         PRINT f"   ↩️  Reset to '{previous_status}' - will retry (attempt {retry_count + 1}/2)"
       ELSE:
         # Max retries exceeded
@@ -806,7 +827,7 @@ WHILE remaining_context > 20%:
       PRINT f"✅ {story_key} completed by {worker_id}"
 
       # Clear retry count on success
-      clear_retry_count(story_key)  # From Section 2.6
+      clear_retry_count(story_key)  # From Step 2.6
 
       # Remove worker lock
       remove_worker_lock(story_key)
@@ -837,7 +858,7 @@ WHILE remaining_context > 20%:
 
   # 3E: Sprint Status Validation & Sync
   # Run validation before next iteration to detect and fix status desync issues
-  validate_sprint_status()  # From Section 3E below
+  validate_sprint_status()  # From Step 3E below
 
   # Loop continues - Ultra Think will re-analyze available stories
   # (Dependencies may have resolved, new stories may be available)
@@ -850,9 +871,9 @@ WHILE remaining_context > 20%:
 3. **Safety validation:** Double-checks conflicts before parallel launch
 4. **Blocker handling:** Distinguishes critical (halt) vs non-critical (log and continue)
 
-### 3A: Story Selection via Ultra Think (Executed in Step 3)
+### Step 3A: Story Selection via Ultra Think
 
-**This section is now handled by Section 2.5's `select_next_cluster()` function.**
+**This section is now handled by Step 2.5's `select_next_cluster()` function.**
 
 **Selection process:**
 1. **Gather candidates** by priority tier (fixes > dependencies > backlog)
@@ -874,91 +895,12 @@ depends_on: ["2-2", "2-3"]  # Explicit dependencies (or [] for none)
 - Stories with pending issues get highest priority (Tier 1)
 
 **Independence criteria:**
-- ✅ **Independent:** No shared files, different modules, no dependencies
-- ❌ **Conflicting:** Shared files, same API endpoints, dependency chain, same epic (unless clearly separate)
+- Independent: No shared files, different modules, no dependencies
+- Conflicting: Shared files, same API endpoints, dependency chain, same epic (unless clearly separate)
 
----
+### Step 3B: Worker Launch (Conditional: Sequential vs Parallel)
 
-### 3E: Sprint Status Validation
-
-**Purpose:** Detect and fix sprint status desync issues that can cause premature workflow stops. Runs after each main loop iteration.
-
-```python
-def validate_sprint_status():
-    """
-    Validate sprint status consistency and detect issues:
-    1. Stories marked 'done' but missing completion markers
-    2. Orphaned 'in-progress' stories (no active worker)
-    3. Stories with invalid status values
-
-    This prevents:
-    - Status desync blocking progress
-    - Orphaned stories preventing new work
-    - Invalid states causing workflow errors
-    """
-    issues_detected = False
-
-    for story_key, status in sprint_status:
-        # Skip non-story entries
-        if is_epic_or_retro(story_key):
-            continue
-
-        # VALIDATION 1: Stories marked 'done' should have completion markers
-        if status == "done":
-            story_file = f"{stories_dir}/{story_key}.md"
-
-            if not file_exists(story_file):
-                WARN f"⚠️  Status desync: {story_key} marked 'done' but no story file exists"
-                issues_detected = True
-                continue
-
-            story_content = read_file(story_file)
-
-            # Check for completion marker (added by story-done workflow)
-            if "## Story Completion" not in story_content:
-                WARN f"⚠️  Status desync: {story_key} marked 'done' but missing completion section"
-                WARN f"   This may indicate story-done workflow didn't complete properly"
-                issues_detected = True
-                # Don't auto-fix - might be mid-workflow or user intentional
-
-        # VALIDATION 2: In-progress stories should have active worker locks
-        elif status == "in-progress":
-            # Check if worker is still active (has lock)
-            if not has_active_worker_lock(story_key):  # From Section 2.6
-                WARN f"⚠️  Orphaned in-progress: {story_key} - no active worker lock"
-                WARN f"   Resetting to backlog for retry"
-
-                # Reset to backlog (will be retried in next iteration)
-                previous_status = get_previous_status(story_key)  # From Section 2.6
-                update_sprint_status(story_key, previous_status)
-
-                PRINT f"   ✅ Reset {story_key} to '{previous_status}'"
-                issues_detected = True
-
-        # VALIDATION 3: Check for invalid status values
-        valid_statuses = ["backlog", "in-progress", "review", "done", "blocked", "contexted"]
-        if status not in valid_statuses:
-            WARN f"⚠️  Invalid status: {story_key} has status '{status}'"
-            WARN f"   Valid statuses: {valid_statuses}"
-            issues_detected = True
-
-    if issues_detected:
-        PRINT "🔍 Sprint status validation found issues (see warnings above)"
-        PRINT "   Issues have been auto-fixed where safe"
-    else:
-        # Silent success - no need to log on every iteration
-        pass
-
-    return issues_detected
-```
-
-**OUTCOME:** Sprint status is validated and corrected before next iteration, preventing premature workflow stops.
-
----
-
-### 3B: Worker Launch (Conditional: Sequential vs Parallel)
-
-**MODE SELECTION:** Determined by cluster size from Section 3
+**MODE SELECTION:** Determined by cluster size from Step 3
 
 **Sequential Mode (cluster_size == 1):**
 - Launch single worker
@@ -969,8 +911,6 @@ def validate_sprint_status():
 - Launch ALL workers in SINGLE message (true parallelism)
 - Wait for all completions before proceeding
 - Used for: multiple independent stories in cluster
-
----
 
 **Worker prompt template (used for both modes):**
 
@@ -1086,7 +1026,7 @@ Task(
 # ← All three launched in SINGLE message = true parallelism
 ```
 
-### 3C-E: Monitor, Aggregate, Check Context
+### Step 3C-E: Monitor, Aggregate, Check Context
 
 See [shared/common-operations.md#context-monitoring](../shared/common-operations.md)
 
@@ -1096,7 +1036,82 @@ See [shared/common-operations.md#context-monitoring](../shared/common-operations
 - Update stories_completed
 - Check context window (< 20% → save checkpoint)
 
-### Checkpoint System
+### Step 3E: Sprint Status Validation
+
+**Purpose:** Detect and fix sprint status desync issues that can cause premature workflow stops. Runs after each main loop iteration.
+
+```python
+def validate_sprint_status():
+    """
+    Validate sprint status consistency and detect issues:
+    1. Stories marked 'done' but missing completion markers
+    2. Orphaned 'in-progress' stories (no active worker)
+    3. Stories with invalid status values
+
+    This prevents:
+    - Status desync blocking progress
+    - Orphaned stories preventing new work
+    - Invalid states causing workflow errors
+    """
+    issues_detected = False
+
+    for story_key, status in sprint_status:
+        # Skip non-story entries
+        if is_epic_or_retro(story_key):
+            continue
+
+        # VALIDATION 1: Stories marked 'done' should have completion markers
+        if status == "done":
+            story_file = f"{stories_dir}/{story_key}.md"
+
+            if not file_exists(story_file):
+                WARN f"⚠️  Status desync: {story_key} marked 'done' but no story file exists"
+                issues_detected = True
+                continue
+
+            story_content = read_file(story_file)
+
+            # Check for completion marker (added by story-done workflow)
+            if "## Story Completion" not in story_content:
+                WARN f"⚠️  Status desync: {story_key} marked 'done' but missing completion section"
+                WARN f"   This may indicate story-done workflow didn't complete properly"
+                issues_detected = True
+                # Don't auto-fix - might be mid-workflow or user intentional
+
+        # VALIDATION 2: In-progress stories should have active worker locks
+        elif status == "in-progress":
+            # Check if worker is still active (has lock)
+            if not has_active_worker_lock(story_key):  # From Step 2.6
+                WARN f"⚠️  Orphaned in-progress: {story_key} - no active worker lock"
+                WARN f"   Resetting to backlog for retry"
+
+                # Reset to backlog (will be retried in next iteration)
+                previous_status = get_previous_status(story_key)  # From Step 2.6
+                update_sprint_status(story_key, previous_status)
+
+                PRINT f"   ✅ Reset {story_key} to '{previous_status}'"
+                issues_detected = True
+
+        # VALIDATION 3: Check for invalid status values
+        valid_statuses = ["backlog", "in-progress", "review", "done", "blocked", "contexted"]
+        if status not in valid_statuses:
+            WARN f"⚠️  Invalid status: {story_key} has status '{status}'"
+            WARN f"   Valid statuses: {valid_statuses}"
+            issues_detected = True
+
+    if issues_detected:
+        PRINT "🔍 Sprint status validation found issues (see warnings above)"
+        PRINT "   Issues have been auto-fixed where safe"
+    else:
+        # Silent success - no need to log on every iteration
+        pass
+
+    return issues_detected
+```
+
+**OUTCOME:** Sprint status is validated and corrected before next iteration, preventing premature workflow stops.
+
+### Step 4: Checkpoint System
 
 **Enhanced checkpoint tracks execution strategy context for intelligent resumption.**
 
@@ -1141,7 +1156,7 @@ When context < 20% or critical blocker:
 - 🚫 {story-key}: {blocker-reason}
   - Critical: {yes/no}
   - Worker: {worker-id}
-  - Retry Count: {count}  # From retry tracking (Section 2.6)
+  - Retry Count: {count}  # From retry tracking (Step 2.6)
   - Review Outcome: {BLOCKED | CHANGES_REQUESTED | worker_timeout | worker_failed | max_retries}
   - Action Items: {extracted from review if available}
 ...
@@ -1219,7 +1234,7 @@ When context < 20% or critical blocker:
 
 Save to: `{sprint_artifacts}/bring-to-life-checkpoint.md`
 
-**Checkpoint Loading (Section 2):**
+**Checkpoint Loading (Step 2):**
 
 When resuming from checkpoint:
 1. Extract `stories_completed` count
@@ -1237,25 +1252,165 @@ The checkpoint file now includes retry counts, which should be:
 3. **Saved on checkpoint:** Include current retry counts in checkpoint
 4. **Used for decisions:** Check retry counts before attempting work on stories/epics
 
-### Final Report
+## Workflow
+
+### Execution Flow
+
+1. **Initialize** (Steps 1-2.6)
+   - Load configuration and verify prerequisites
+   - Validate CLAUDE.md existence (optional generation)
+   - Initialize or resume progress tracking with retry counts
+   - Setup Ultra Think dependency analysis infrastructure
+   - Setup retry tracking infrastructure
+
+2. **Main Development Loop** (Step 3)
+   - Run Ultra Think analysis to select next story cluster
+   - Check if epic context generation needed (automatic)
+   - Determine execution mode (sequential vs parallel)
+   - Launch worker(s) based on cluster size
+   - Monitor worker completion with timeout/retry handling
+   - Validate sprint status after each iteration
+   - Check context usage (< 20% triggers checkpoint)
+   - Repeat until context depleted, all done, or critical blocker
+
+3. **Worker Lifecycle** (Step 3B)
+   - Claim story via sprint-status.yaml lock
+   - Execute: create-story → story-context → dev-story → code-review
+   - Mandatory review outcome loop (max 3 retries)
+   - Handle outcomes: APPROVED → story-done, CHANGES_REQUESTED → retry dev, BLOCKED → report
+   - Release story lock and update status
+
+4. **Checkpoint and Completion** (Step 4)
+   - Save checkpoint with comprehensive state (completed, blocked, retry counts, dependencies)
+   - Provide next run strategy recommendations
+   - Display final report with summary and next steps
+
+### Key Decision Points
+
+- **CLAUDE.md missing?** → Ask user to generate (recommended) or continue without
+- **No candidate stories?** → Check for epics needing context, auto-generate if needed
+- **Cluster size = 1?** → Sequential mode (single worker)
+- **Cluster size ≥ 2?** → Parallel mode (all workers in single message)
+- **Worker timeout/failure?** → Track retry, reset status, continue if under max retries
+- **Critical blocker?** → Save checkpoint and halt
+- **Context < 20%?** → Save checkpoint and halt
+- **All stories done?** → Save final checkpoint, recommend retrospectives
+
+### Coordination Mechanisms
+
+- **File-based state:** sprint-status.yaml for story status tracking
+- **Worker locks:** Prevent race conditions via {sprint_artifacts}/.locks/{story_key}.lock
+- **Retry tracking:** Prevent infinite loops via retry counts in checkpoint
+- **Epic context:** Automatic generation when stories blocked by missing epic context
+- **Status validation:** Periodic checks to detect and fix orphaned/desync states
+
+## Report
+
+### Progress Reporting
+
+Throughout execution, report the following:
+
+**Iteration Start:**
+```
+Strategy: {tier}, Cluster Size: {cluster_size}
+Stories: [{story_keys}]
+Mode: {SEQUENTIAL | PARALLEL}
+```
+
+**Worker Completion:**
+```
+✅ {story_key} completed by {worker_id}
+```
+
+**Worker Issues:**
+```
+⏱️  Worker timeout on {story_key} ({worker_id})
+   ↩️  Reset to '{previous_status}' - will retry (attempt {retry_count}/2)
+
+❌ Worker failed on {story_key}: {error_msg}
+   ↩️  Reset to '{previous_status}' - will retry (attempt {retry_count}/2)
+
+🚫 Max retries exceeded - marking blocked
+```
+
+**Epic Context Generation:**
+```
+🔧 Generating context for {N} epic(s): [{epic_keys}]
+✅ {epic_key} contexted
+❌ {epic_key} failed to context: {error_msg}
+   ↩️  Will retry (attempt {retry_count}/2)
+```
+
+**Status Validation:**
+```
+🔍 Sprint status validation found issues (see warnings above)
+   Issues have been auto-fixed where safe
+
+⚠️  Status desync: {story_key} marked 'done' but missing completion section
+⚠️  Orphaned in-progress: {story_key} - no active worker lock
+   ✅ Reset {story_key} to '{previous_status}'
+```
+
+### Final Session Report
 
 ```
 🎯 Session Complete
 
-Reason: {CONTEXT_DEPLETED | ALL_DONE | BLOCKER}
+Reason: {CONTEXT_DEPLETED | ALL_DONE | CRITICAL_BLOCKER}
 
 Summary:
 - Completed: {count} stories
+- Blocked: {count} stories
+- Epics Contexted: {count}
 - Success rate: {percent}%
 - Context: {usage}%
 
+Checkpoint saved to: {sprint_artifacts}/bring-to-life-checkpoint.md
+
 Next Steps:
-[Context depleted] → Clear conversation, re-run
-[All done] → Run retrospectives
-[Blocker] → Resolve blocker, re-run
+[Context depleted] → Clear conversation, re-run /bmad:phase-4:bring-to-life
+[All done] → Run retrospectives with /bmad:phase-4:retrospective
+[Critical blocker] → Resolve blocker, then re-run /bmad:phase-4:bring-to-life
+
+See checkpoint file for:
+- Detailed dependency graph state
+- Retry tracking state
+- Recommended next run strategy
+- Specific stories to tackle
 ```
 
-## Key Constraints
+### Checkpoint Report Format
+
+Save comprehensive checkpoint to `{sprint_artifacts}/bring-to-life-checkpoint.md` with sections:
+- Session Summary (counts, mode, tier, context)
+- Completed Stories (with tier, mode, worker ID)
+- Epic Context Generation (contexted and blocked)
+- Blocked Stories (with retry counts, outcomes, action items)
+- Retry Tracking State (active retries, max retries reached)
+- Dependency Graph State (priority tiers)
+- Next Run Strategy (recommendations)
+- Resumption Instructions
+- Context Notes (observations, patterns)
+
+### Structured Worker Reports
+
+Workers return JSON format:
+```json
+{
+  "worker_id": "worker-par-1",
+  "story_key": "3-1",
+  "mode": "PARALLEL",
+  "status": "completed" | "blocked" | "timeout" | "failed",
+  "outcome": "approved" | "blocked" | "max_retries",
+  "retry_count": 0,
+  "blocker": {
+    "reason": "description",
+    "critical": true | false
+  }
+}
+```
+
+### Key Constraints
 
 - **File locks prevent races:** Workers use sprint-status.yaml atomically (read-modify-write)
 - **Review loop enforced:** Workers MUST NOT skip review validation (non-negotiable)
@@ -1266,8 +1421,10 @@ Next Steps:
 - **Ultra Think re-analysis:** Runs every iteration (dependencies change as work completes)
 - **Enhanced checkpoints:** Track dependency graph state, not just completion count
 - **Safety validation:** Double-check conflicts before parallel launch (prevent race conditions)
+- **Retry limits:** Max 2 retries per story/epic (prevents infinite loops)
+- **Auto-epic-context:** Automatically generates epic context when needed (no manual intervention)
 
-## Auto-Continue
+### Auto-Continue
 
 **NO auto-continue** - This is a terminal workflow that runs until complete or blocked.
 
@@ -1276,25 +1433,14 @@ User re-runs manually after:
 - Resolving blockers
 - All stories complete (moves to retrospectives)
 
-## Notes
+### Performance Philosophy
 
-- **Intelligent parallelism:** Uses Ultra Think to determine optimal execution strategy
-- **Priority-aware:** Always handles pending issues before new work
-- **Independence analysis:** Detects conflicts (file overlap, API changes, dependencies)
-- **Dynamic mode selection:** Sequential for dependent work, parallel for independent work
-- **Enhanced dependency tracking:** Respects explicit deps + detects implicit conflicts
-- **File-based coordination:** No shared state, clean worker isolation
-- **Enhanced checkpoint system:** Multi-session workflows with strategic context
-- **Review enforcement:** Quality loop runs automatically, non-negotiable
-- **No user prompts:** Fully autonomous until context depleted or critical blocker
+Intelligent automation over blind parallelism. Prioritize correctness (handle pending issues first), maximize efficiency (parallel when safe), respect constraints (context + dependencies), provide clear resumption path (enhanced checkpoints with strategic guidance).
 
-**Performance:**
+**Performance characteristics:**
 - Sequential mode: 1 story at a time (when conflicts exist or single story remaining)
 - Parallel mode: 2-4 stories simultaneously (when verified independent)
 - Speed gain: Varies by project (highly dependent work → minimal gain; independent work → 3-4x faster)
-
-**Philosophy:**
-Intelligent automation over blind parallelism. Prioritize correctness (handle pending issues first), maximize efficiency (parallel when safe), respect constraints (context + dependencies), provide clear resumption path (enhanced checkpoints with strategic guidance).
 
 ---
 

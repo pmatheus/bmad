@@ -4,17 +4,11 @@ description: Guide human-centered design processes using empathy-driven methodol
 
 # Design Thinking
 
-## What This Does
+## Purpose
 
-Walks you through the structured design thinking process - Empathize, Define, Ideate, Prototype, and Test - to create solutions deeply rooted in user needs. This workflow applies human-centered design methodologies to solve complex problems with empathy and creativity.
+This workflow guides you through the structured design thinking process - Empathize, Define, Ideate, Prototype, and Test - to create solutions deeply rooted in user needs. It applies human-centered design methodologies to solve complex problems with empathy and creativity.
 
-## Prerequisites
-
-- BMAD plugin installed
-- `/workflow-init` run (creates `.bmad/config.yaml`)
-
-## When to Use
-
+**When to Use:**
 - Designing new products, services, or features
 - Solving complex user experience problems
 - Conducting user research and insight gathering
@@ -22,132 +16,198 @@ Walks you through the structured design thinking process - Empathize, Define, Id
 - Improving existing solutions based on user feedback
 - When you need to deeply understand user needs before building
 
+**Prerequisites:**
+- BMAD plugin installed
+- `/workflow-init` run (creates `.bmad/config.yaml`)
+
+## Variables
+
+The following variables are loaded from `.bmad/config.yaml`:
+
+- `documentation_dir` - Directory path where design thinking output documents will be saved
+- `user_name` - User's name for personalization of the workflow
+- `communication_language` - Preferred language for communication and documentation
+- `[date]` - Current date in appropriate format for file naming
+
 ## Instructions
 
-### Step 1: Load Configuration
+1. **Load Configuration**
+   - Read configuration from `.bmad/config.yaml`
+   - Extract `documentation_dir`, `user_name`, and `communication_language`
+   - Prepare output file path: `{documentation_dir}/design-thinking-[date].md`
 
-Read configuration from `.bmad/config.yaml`:
-- `documentation_dir` - Where to save the design thinking output
-- `user_name` - Your name for personalization
-- `communication_language` - Preferred language
+2. **Gather Design Context**
+   - Ask the user about their design challenge:
+     - What problem or opportunity are you exploring?
+     - Who are the primary users or stakeholders?
+     - What constraints exist (time, budget, technology)?
+     - What does success look like for this project?
+     - Any existing research or context to consider?
+   - If context data is provided (e.g., product context, user research), load and incorporate it
 
-### Step 2: Gather Design Context
+3. **Delegate to Design Thinking Coach Agent**
+   - Use the Task tool to invoke the `bmad-design-thinking-coach` subagent
+   - Pass the design context gathered in step 2
+   - The agent will guide through all 5 design thinking phases (see Workflow section)
 
-Ask the user about their design challenge:
-- What problem or opportunity are you exploring?
-- Who are the primary users or stakeholders?
-- What constraints exist (time, budget, technology)?
-- What does success look like for this project?
-- Any existing research or context to consider?
+4. **Generate Output Document**
+   - Create comprehensive design thinking documentation in `{documentation_dir}/design-thinking-[date].md`
+   - Include all content specified in Report section below
+   - Ensure document is well-structured and actionable
 
-If context data is provided (e.g., product context, user research), load and incorporate it.
+5. **Confirm Completion**
+   - Inform the user: "Design thinking session complete! Your human-centered design work has been saved to `{documentation_dir}/design-thinking-[date].md`"
+   - Provide brief summary of key insights and next steps
 
-### Step 3: Delegate to Design Thinking Coach Agent
+## Workflow
 
-Use the Task tool to invoke the `bmad-design-thinking-coach` subagent with the design context gathered.
+The Design Thinking Coach agent guides through 5 sequential phases:
 
-The agent will guide through the 5 design thinking phases:
+### Phase 1: EMPATHIZE
+Build deep understanding of users through:
+- User interviews and observation
+- Empathy mapping exercises
+- Pain point identification
+- Pattern recognition in user behavior
+- Emotional and contextual insights
 
-1. **EMPATHIZE** - Build deep understanding of users
-   - User interviews, observation, empathy mapping
-   - Pain point identification
-   - Pattern recognition in user behavior
+**Deliverables:** User insights, empathy maps, pain points
 
-2. **DEFINE** - Frame the problem clearly
-   - Point of View (POV) statements
-   - "How Might We" questions
-   - Problem insights and opportunity areas
+### Phase 2: DEFINE
+Frame the problem clearly through:
+- Point of View (POV) statements
+- "How Might We" (HMW) questions
+- Problem insights and opportunity areas
+- Clear problem definition rooted in user needs
 
-3. **IDEATE** - Generate diverse solutions
-   - Brainstorming, SCAMPER, Worst Possible Idea
-   - 15-30 ideas minimum
-   - Clustering and selecting top 2-3 concepts
+**Deliverables:** POV statements, HMW questions, problem definition
 
-4. **PROTOTYPE** - Make ideas tangible
-   - Low-fidelity prototypes (paper, wireframes, mockups)
-   - Minimum viable to test assumptions
-   - Focus on what needs validation
+### Phase 3: IDEATE
+Generate diverse solutions through:
+- Brainstorming techniques (SCAMPER, Worst Possible Idea, etc.)
+- Generate 15-30 ideas minimum
+- Clustering related ideas
+- Selecting top 2-3 concepts for prototyping
 
-5. **TEST** - Validate with users
-   - Test with 5-7 users
-   - Observe what they do, not just what they say
-   - Synthesize learnings and plan iteration
+**Deliverables:** 15-30 ideas, clustered themes, top 2-3 selected concepts
 
-### Step 4: Generate Output Document
+### Phase 4: PROTOTYPE
+Make ideas tangible through:
+- Low-fidelity prototypes (paper, wireframes, mockups)
+- Minimum viable to test assumptions
+- Focus on what needs validation
+- Resist polish too early - intentionally rough
 
-Create design thinking output in `{documentation_dir}/design-thinking-[date].md` with:
-- Design challenge statement
-- User insights and empathy findings
-- Problem definition (POV, HMW questions)
-- Generated ideas and selected concepts
-- Prototype approach and description
-- Testing plan and user feedback
-- Key learnings and next iteration plan
-- Success metrics
+**Deliverables:** Low-fidelity prototypes, testing scenarios
 
-### Step 5: Confirm Completion
+### Phase 5: TEST
+Validate with users through:
+- Test with 5-7 users (reveals 85% of usability issues)
+- Observe what they do, not just what they say
+- Synthesize learnings
+- Plan next iteration
 
-Inform the user:
-"Design thinking session complete! Your human-centered design work has been saved to `{documentation_dir}/design-thinking-[date].md`"
+**Deliverables:** User feedback, key learnings, iteration plan
 
-## Output Files
-
-- `{documentation_dir}/design-thinking-[date].md` - Complete design thinking documentation
-
-## Examples
-
-**Example 1: Mobile App for Fitness Tracking**
-
-User Context:
-- Designing fitness app for busy professionals
-- Existing apps feel overwhelming and time-consuming
-- Need differentiation in crowded market
-
-Process:
-1. Empathize: Interviews reveal users want "micro-workouts" during work breaks
-2. Define: POV - Busy professionals need guilt-free fitness that fits their schedule
-3. Ideate: Generate 20 ideas, select "5-minute office workout challenges"
-4. Prototype: Paper prototype of notification flow and exercise animations
-5. Test: Users love simplicity but want social accountability features
-6. Next Iteration: Add team challenges and progress sharing
-
-**Example 2: Healthcare Patient Portal**
-
-User Context:
-- Hospital redesigning patient portal
-- Low adoption rates and user complaints
-- Particularly challenging for elderly users
-
-Process:
-1. Empathize: Shadowing elderly patients reveals technology anxiety and vision issues
-2. Define: HMW - How might we make health information accessible to all ages?
-3. Ideate: Voice interface, simplified navigation, family proxy access
-4. Prototype: High-contrast wireframes with large fonts and voice navigation
-5. Test: Elderly users successfully complete tasks with voice guidance
-6. Key Learning: Family proxy access is critical feature, not nice-to-have
-
-**Example 3: Retail Store Experience Redesign**
-
-User Context:
-- Specialty store wants to compete with online shopping
-- Customers coming in but not converting
-- Staff interactions feel transactional
-
-Process:
-1. Empathize: Observation shows customers want expert advice but hesitate to ask
-2. Define: POV - Shoppers need approachable expertise to make confident decisions
-3. Ideate: Expert stations, product storytelling, hands-on demos, personal shoppers
-4. Prototype: Mockup of "Discovery Zone" with expert on duty and demo products
-5. Test: Customers spend 3x longer in store, conversion up 40%
-6. Next Steps: Roll out to 3 pilot stores before chain-wide implementation
-
-## Notes
-
-- Full design thinking cycle typically takes 4-8 hours depending on complexity
+**Process Notes:**
+- Full cycle typically takes 4-8 hours depending on complexity
 - Empathy phase requires access to real users - plan accordingly
-- Low-fidelity prototypes are intentionally rough - resist polish too early
-- Testing with 5-7 users reveals 85% of usability issues
 - Design thinking is iterative - multiple cycles are normal
 - Energy checkpoints help manage intensity of creative work
-- Framework selection adapts to your specific design context
 - Best conducted as collaborative workshop when possible
+
+## Report
+
+The workflow generates a comprehensive design thinking document at `{documentation_dir}/design-thinking-[date].md` containing:
+
+**Required Sections:**
+
+1. **Design Challenge Statement**
+   - Clear articulation of the problem or opportunity
+   - User/stakeholder identification
+   - Constraints and success criteria
+
+2. **User Insights and Empathy Findings**
+   - Key insights from user interviews and observation
+   - Empathy maps and pain points
+   - User behavior patterns
+   - Emotional and contextual understanding
+
+3. **Problem Definition**
+   - Point of View (POV) statements
+   - "How Might We" questions
+   - Opportunity areas identified
+
+4. **Ideation Results**
+   - All generated ideas (15-30 minimum)
+   - Idea clusters and themes
+   - Selected concepts (top 2-3) with rationale
+
+5. **Prototype Approach and Description**
+   - Prototype type and fidelity level
+   - What assumptions are being tested
+   - Visual descriptions or references
+
+6. **Testing Plan and User Feedback**
+   - Testing methodology (5-7 users)
+   - User feedback summary
+   - Observation notes
+   - Validation or invalidation of assumptions
+
+7. **Key Learnings**
+   - What worked and what didn't
+   - Surprising insights
+   - Critical features vs. nice-to-haves
+
+8. **Next Iteration Plan**
+   - Specific changes to make
+   - Additional questions to explore
+   - Timeline and next steps
+
+9. **Success Metrics**
+   - How success will be measured
+   - Key performance indicators
+
+**Example Output Structure:**
+
+```markdown
+# Design Thinking: [Challenge Name]
+Date: [date]
+
+## Design Challenge
+[Problem statement and context]
+
+## Phase 1: Empathize
+[User insights, empathy maps, pain points]
+
+## Phase 2: Define
+POV: [Point of view statement]
+HMW: [How might we questions]
+
+## Phase 3: Ideate
+[All ideas generated, clusters, selected concepts]
+
+## Phase 4: Prototype
+[Prototype description and approach]
+
+## Phase 5: Test
+[Testing results and user feedback]
+
+## Key Learnings
+[Major insights and discoveries]
+
+## Next Iteration
+[Specific action items and timeline]
+
+## Success Metrics
+[How we'll measure success]
+```
+
+**Completion Message Format:**
+"Design thinking session complete! Your human-centered design work has been saved to `{documentation_dir}/design-thinking-[date].md`
+
+Key Insights:
+- [Top 2-3 insights from the session]
+
+Next Steps:
+- [Immediate action items]"

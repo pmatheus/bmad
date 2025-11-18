@@ -4,20 +4,11 @@ description: Mark a drafted story as ready for development - updates story file 
 
 # Story Ready Workflow
 
-## What This Does
+## Purpose
 
-Marks a drafted story as ready for development by:
-1. Updating the story file status to `ready-for-dev`
-2. Updating `sprint-status.yaml` to track the status change
-3. Preserving sprint status file structure and order
-4. Guiding next steps (story-context or dev-story)
+Marks a drafted story as ready for development by updating the story file status to `ready-for-dev` and synchronizing the status change in `sprint-status.yaml`. This is a simple status update workflow that maintains dual synchronization between story files and sprint tracking without performing complex searching or analysis.
 
-**Simple status update workflow - no complex searching or analysis.**
-
----
-
-## Prerequisites
-
+**Prerequisites:**
 - BMAD plugin installed (`/bmad:bmm:workflows:workflow-init` run)
 - `sprint-planning` workflow run (creates `sprint-status.yaml`)
 - At least one story with status `drafted` (created via `create-story`)
@@ -25,149 +16,200 @@ Marks a drafted story as ready for development by:
 
 ---
 
-## How It Works
+## Variables
 
-```
-1. Read sprint-status.yaml → Find drafted stories
-2. Let user select which story to mark ready (or auto-select first)
-3. Update story file: Status → ready-for-dev
-4. Update sprint-status.yaml: drafted → ready-for-dev
-5. Suggest next steps (story-context recommended)
-```
+The following variables are extracted from `.bmad/config.yaml`:
 
-**Key behavior:**
-- Reads COMPLETE sprint-status.yaml (preserves order and structure)
-- Updates both story file AND sprint status (dual sync)
-- Never downgrades status (drafted → ready only)
-- Can accept story path directly or search sprint status
+- **`documentation_dir`**: Directory where `sprint-status.yaml` is located (e.g., `docs/bmad`)
+- **`sprint_artifacts`**: Directory where story files are stored (e.g., `docs/bmad/stories`)
+- **`user_name`**: User's name for personalized messages in output
+- **`story_key`**: Story identifier matching pattern `number-number-name` (e.g., `1-2-user-auth`), extracted from filename or selected by user
+- **`story_id`**: Story identifier extracted from story file metadata (e.g., `1.2`)
+- **`story_title`**: Title of the story extracted from story file
+- **`story_file`**: Full path to the story file being updated
 
 ---
 
 ## Instructions
 
-### Step 1: Load Configuration
+### 1. Load Configuration
 
-Read configuration from `.bmad/config.yaml`:
-
-```yaml
-documentation_dir: path/to/output
-sprint_artifacts: path/to/stories
-user_name: User's name
-```
-
-**Variables needed:**
+Read configuration from `.bmad/config.yaml` to obtain:
 - `documentation_dir`: Where sprint-status.yaml is located
 - `sprint_artifacts`: Where story files are stored
 - `user_name`: For personalized messages
 
-### Step 2: Find Drafted Stories
+### 2. Identify Target Story
 
 **If story path provided directly:**
-- Use the provided path
-- Extract story_key from filename (e.g., `1-2-user-auth.md` → `1-2-user-auth`)
-- Skip to Step 3
+- Use the provided path as `story_file`
+- Extract `story_key` from filename (e.g., `1-2-user-auth.md` → `1-2-user-auth`)
+- Skip to step 3
 
 **If no story path provided:**
 
 1. Load COMPLETE file: `{documentation_dir}/sprint-status.yaml`
-2. Read ALL lines from beginning to end (preserve order)
+2. Read ALL lines from beginning to end (preserve order and structure)
 3. Parse `development_status` section
 4. Find ALL stories where:
    - Key matches pattern: `number-number-name` (e.g., `1-2-user-auth`)
    - NOT an epic key (`epic-X`) or retrospective (`epic-X-retrospective`)
    - Status value equals `"drafted"`
-5. Collect up to 10 drafted stories (for display)
+5. Collect up to 10 drafted stories for display
 6. Count total drafted stories found
 
 **If no drafted stories found:**
-```
-📋 No drafted stories found in sprint-status.yaml
-
-All stories are either still in backlog or already marked ready/in-progress/done.
-
-**Options:**
-1. Run `create-story` to draft more stories
-2. Run `sprint-planning` to refresh story tracking
-```
-**HALT**
+- Display message explaining no drafted stories exist
+- Suggest running `create-story` to draft more stories or `sprint-planning` to refresh tracking
+- HALT workflow
 
 **If drafted stories found:**
+- Display list of available drafted stories (up to 10)
+- Use `AskUserQuestion` tool to let user select which story to mark ready
+- Provide options with label (story key) and description
+- In non-interactive mode: auto-select first story from list
+- Resolve `story_key` from selection and find matching story file in `{sprint_artifacts}` directory
 
-Display available stories:
-```
-**Drafted Stories Available (X found):**
-
-1. 1-1-story-title
-2. 1-2-another-story
-3. 2-1-story-name
-...
-```
-
-Use AskUserQuestion to let user select which story to mark ready:
-```yaml
-questions:
-  - question: "Which story would you like to mark as ready for development?"
-    header: "Select Story"
-    multiSelect: false
-    options:
-      - label: "1-1-story-title"
-        description: "First story in epic 1"
-      - label: "1-2-another-story"
-        description: "Second story in epic 1"
-      # ... up to 10 options
-```
-
-**If non-interactive mode:**
-- Auto-select first story from the list
-
-Resolve `story_key` from selection and find matching story file in `{sprint_artifacts}` directory.
-
-### Step 3: Update Story File
+### 3. Update Story File
 
 1. Read the story file from resolved path
 2. Extract `story_id` and `story_title` from file metadata
-3. Find the "Status:" line (usually near top of file)
-4. Update story file:
+3. Locate the "Status:" line (usually near top of file)
+4. Update the status line to:
    ```markdown
    Status: ready-for-dev
    ```
-5. Save the story file
+5. Save the updated story file
 
-**Example story file update:**
+**Example change:**
 ```diff
 - Status: drafted
 + Status: ready-for-dev
 ```
 
-### Step 4: Update Sprint Status
+### 4. Update Sprint Status File
 
 1. Load COMPLETE file: `{documentation_dir}/sprint-status.yaml`
-2. Find `development_status` key matching `{story_key}`
-3. Verify current status is `"drafted"` (expected previous state)
-4. Update:
+2. Read ALL lines preserving order, comments, and structure
+3. Locate `development_status` section
+4. Find key matching `{story_key}`
+5. Verify current status is `"drafted"` (expected previous state)
+6. Update the status value:
    ```yaml
    development_status:
      {story_key}: "ready-for-dev"
    ```
-5. Save file, preserving ALL comments and structure including STATUS DEFINITIONS
+7. Save file preserving ALL comments, structure, and STATUS DEFINITIONS
+8. Maintain exact order of all entries
 
-**If story key not found:**
-```
-⚠️ Story file updated, but could not update sprint-status: {story_key} not found
+**If story key not found in sprint-status.yaml:**
+- Display warning that story file was updated but sprint status could not be updated
+- Suggest running `sprint-planning` to refresh tracking
+- Continue workflow (partial success)
 
-You may need to run sprint-planning to refresh tracking.
-```
-
-**Example sprint-status.yaml update:**
+**Example change:**
 ```diff
 development_status:
 -  1-2-user-auth: "drafted"
 +  1-2-user-auth: "ready-for-dev"
 ```
 
-### Step 5: Confirm Completion
+### 5. Validate Status Transition
 
-Display success message:
+**Allowed transition:**
+- `drafted` → `ready-for-dev` ✅
+
+**Not allowed transitions:**
+- `ready-for-dev` → `drafted` ❌
+- `in-progress` → `drafted` ❌
+- `done` → `ready-for-dev` ❌
+
+If story is not in `drafted` status, display error message and halt.
+
+### 6. Preserve Data Integrity
+
+**Critical requirements:**
+- Always read COMPLETE sprint-status.yaml file (ALL lines from beginning to end)
+- Never skip content or sections
+- Preserve order of all stories
+- Preserve all comments and STATUS DEFINITIONS
+- Never reorder or restructure
+- Maintain dual sync between story file and sprint status
+- Update both files atomically (story file first, then sprint status)
+
+---
+
+## Workflow
+
+```
+START
+  ↓
+1. Read .bmad/config.yaml
+   → Extract: documentation_dir, sprint_artifacts, user_name
+  ↓
+2. Determine story selection mode
+   ├─→ Story path provided? → Extract story_key from filename → Go to step 4
+   └─→ No path provided? → Continue to step 3
+  ↓
+3. Search for drafted stories
+   ├─→ Read sprint-status.yaml (COMPLETE file)
+   ├─→ Parse development_status section
+   ├─→ Filter stories with status="drafted"
+   ├─→ Count drafted stories
+   │
+   ├─→ No drafted stories found?
+   │   ├─→ Display "No drafted stories" message
+   │   ├─→ Suggest: create-story or sprint-planning
+   │   └─→ HALT
+   │
+   └─→ Drafted stories found?
+       ├─→ Display list (up to 10 stories)
+       ├─→ Ask user to select story (AskUserQuestion)
+       ├─→ Non-interactive mode: auto-select first
+       └─→ Resolve story_key from selection
+  ↓
+4. Update story file
+   ├─→ Read story file from sprint_artifacts/{story_key}.md
+   ├─→ Extract: story_id, story_title from metadata
+   ├─→ Verify current status is "drafted"
+   ├─→ Update Status: drafted → ready-for-dev
+   └─→ Save story file
+  ↓
+5. Update sprint status file
+   ├─→ Read sprint-status.yaml (COMPLETE file)
+   ├─→ Locate development_status section
+   ├─→ Find story_key entry
+   ├─→ Verify current status is "drafted"
+   ├─→ Update: drafted → ready-for-dev
+   ├─→ Preserve ALL structure, comments, order
+   └─→ Save sprint-status.yaml
+  ↓
+6. Validate dual sync
+   ├─→ Story file updated? ✅
+   └─→ Sprint status updated? ✅
+  ↓
+7. Report completion (see Report section)
+  ↓
+END
+```
+
+**Key decision points:**
+- Story path provided vs. search required
+- Drafted stories found vs. none found
+- Interactive vs. non-interactive mode
+- Story key found in sprint-status vs. not found
+
+**Error handling:**
+- No drafted stories: Display helpful message, suggest next steps, halt
+- Story not found in sprint-status: Warn user, suggest sprint-planning refresh
+- Invalid status transition: Display error, halt
+
+---
+
+## Report
+
+Upon successful completion, display a structured success message:
+
 ```
 **Story Marked Ready for Development, {user_name}!**
 
@@ -197,47 +239,35 @@ Display success message:
 - For direct implementation: `/bmad:bmm:workflows:dev-story`
 ```
 
----
+**For partial success (story file updated but sprint status not found):**
 
-## Key Principles
+```
+⚠️ Story file updated, but could not update sprint-status: {story_key} not found
 
-### 1. Preserve Sprint Status Structure
+You may need to run sprint-planning to refresh tracking.
 
-**Critical:** Always read COMPLETE sprint-status.yaml file:
-- Read ALL lines from beginning to end
-- Never skip content or sections
-- Preserve order of stories
-- Preserve all comments and STATUS DEFINITIONS
-- Never reorder or restructure
+**Story file:** `{story_file}` → Status: ready-for-dev
+```
 
-**Why:** Sprint status is the single source of truth for story tracking.
+**For no drafted stories found:**
 
-### 2. Dual Sync (Story File + Sprint Status)
+```
+📋 No drafted stories found in sprint-status.yaml
 
-**Always update both:**
-1. Story file Status field
-2. sprint-status.yaml development_status entry
+All stories are either still in backlog or already marked ready/in-progress/done.
 
-**Why:** Prevents inconsistencies between story files and tracking.
+**Options:**
+1. Run `create-story` to draft more stories
+2. Run `sprint-planning` to refresh story tracking
+```
 
-### 3. Never Downgrade Status
-
-**Direction:** drafted → ready-for-dev only
-
-**Not allowed:**
-- ready-for-dev → drafted ❌
-- in-progress → drafted ❌
-- done → ready-for-dev ❌
-
-**Why:** Status only moves forward through the lifecycle.
-
-### 4. Simple Selection
-
-**Two modes:**
-1. **Direct path provided:** Use immediately, no search
-2. **No path provided:** List drafted stories, let user select
-
-**Why:** Flexible for both manual and automated workflows.
+**Report should include:**
+1. Clear success/failure indication (✅/⚠️/📋 symbols)
+2. Story details (ID, key, title, file path, new status)
+3. Files modified (story file and/or sprint-status.yaml)
+4. Actionable next steps with specific workflow commands
+5. Context about why each next step is recommended
+6. Troubleshooting guidance if partial failure or no action taken
 
 ---
 
@@ -496,8 +526,8 @@ Reads from `.bmad/config.yaml`:
 
 ```yaml
 documentation_dir: "docs/bmad"           # Where sprint-status.yaml is located
-sprint_artifacts: "docs/bmad/stories" # Where story files are stored
-user_name: "Developer"               # For personalized messages
+sprint_artifacts: "docs/bmad/stories"    # Where story files are stored
+user_name: "Developer"                   # For personalized messages
 ```
 
 ---

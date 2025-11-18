@@ -4,9 +4,9 @@ description: Comprehensive security testing using specialized CTF agents for vul
 
 # Security Test
 
-## What This Does
+## Purpose
 
-Performs comprehensive security testing on a user story or feature using 8 specialized security agents. Tests for OWASP Top 10 vulnerabilities including authentication bypass, SQL injection, XSS, IDOR, SSRF, and LLM security issues.
+Performs comprehensive security testing on user stories or features using 8 specialized CTF security agents. Tests for OWASP Top 10 vulnerabilities including authentication bypass, SQL injection, XSS, IDOR, SSRF, and LLM security issues. Generates security reports, creates fix stories for critical issues, and provides deployment decisions based on configurable severity thresholds.
 
 **Security Agents Used:**
 - ctf-auth-analyst - Authentication/authorization testing
@@ -18,19 +18,34 @@ Performs comprehensive security testing on a user story or feature using 8 speci
 - ctf-ai-prompt-injection-agent - LLM prompt injection testing
 - ctf-ai-jailbreak-agent - LLM jailbreak testing
 
-## Prerequisites
+## Variables
 
-- BMAD plugin installed
-- `/workflow-init` has been run
-- Story exists in `{sprint_artifacts}/stories/`
-- Feature is implemented (code exists)
-- Testing environment available (local/staging)
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `{sprint_artifacts}` | Directory containing sprint artifacts and stories | `.bmad/projects/{project_id}/sprints/current` |
+| `{documentation_dir}` | Directory for documentation and reports | `.bmad/projects/{project_id}/documentation` |
+| `{ID}` | Story identifier number | `001`, `002`, `003` |
+| `{Date}` | Current date for timestamps | `2025-11-18` |
+| `{Feature name}` | Name of the feature being tested | `User Login`, `Profile API` |
+| `{project_id}` | Current project identifier | From `.bmad/config.yaml` |
+
+**Configuration Variables (from `.bmad/config.yaml`):**
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `security.enabled` | Enable/disable security testing | `true` |
+| `security.severity_threshold` | Severity level that blocks deployment | `high` |
+| `security.testing_env` | Testing environment URL | `http://localhost:3000` |
+| `security.burp_proxy` | Burp Suite proxy address | `127.0.0.1:8080` |
+| `security.agents` | List of security agents to use | All 8 CTF agents |
+| `security.scope` | URLs in scope for testing | `["http://localhost:3000/*"]` |
+| `security.exclude` | Paths to exclude from testing | `["/static/*", "/assets/*"]` |
 
 ## Instructions
 
 ### Step 1: Identify Story to Test
 
-**Action:** Use AskUserQuestion to get story identifier
+Use AskUserQuestion to determine which story needs security testing.
 
 ```yaml
 questions:
@@ -48,7 +63,7 @@ questions:
 
 ### Step 2: Load Story Context
 
-**Action:** Read the story file and extract context
+Read the story file and extract relevant security context:
 
 ```bash
 # Read story
@@ -64,7 +79,7 @@ cat {sprint_artifacts}/stories/story-{ID}.md
 
 ### Step 3: Load Configuration
 
-**Action:** Read security configuration from `.bmad/config.yaml`
+Read security configuration from `.bmad/config.yaml`. If security config is missing, use defaults (all agents, threshold=high, env=localhost:3000).
 
 **Expected configuration:**
 ```yaml
@@ -73,13 +88,25 @@ security:
   severity_threshold: "high"  # Block deployment on: critical, high, medium, low
   testing_env: "http://localhost:3000"
   burp_proxy: "127.0.0.1:8080"
+  agents:
+    - ctf-auth-analyst
+    - ctf-burp-web-expert
+    - ctf-sql-injection-expert
+    - ctf-xss-expert
+    - ctf-idor-expert
+    - ctf-ssrf-expert
+    - ctf-ai-prompt-injection-agent
+    - ctf-ai-jailbreak-agent
+  scope:
+    - "http://localhost:3000/*"
+  exclude:
+    - "/static/*"
+    - "/assets/*"
 ```
-
-**If security config missing:** Use defaults (all agents, threshold=high, env=localhost:3000)
 
 ### Step 4: Delegate to Security Engineer
 
-**Action:** Use Task tool to delegate to bmad-security-engineer agent
+Use Task tool to delegate comprehensive security testing to bmad-security-engineer agent.
 
 **Prompt for Security Engineer:**
 ```
@@ -111,85 +138,9 @@ Please:
 Use the Task tool to delegate to specialized CTF agents as needed.
 ```
 
-### Step 5: Security Engineer Coordinates Testing
+### Step 5: Review Security Report
 
-**The Security Engineer will:**
-
-1. **Analyze Story**
-   - Read story file
-   - Identify attack surface (endpoints, inputs, APIs)
-   - Determine feature risk level
-
-2. **Select Appropriate Security Agents**
-
-   Based on feature type:
-   - Authentication/Authorization → ctf-auth-analyst
-   - Web application → ctf-burp-web-expert
-   - Database queries → ctf-sql-injection-expert
-   - User inputs → ctf-xss-expert
-   - API with IDs → ctf-idor-expert
-   - External requests → ctf-ssrf-expert
-   - AI/LLM features → ctf-ai-prompt-injection-agent, ctf-ai-jailbreak-agent
-
-3. **Delegate to CTF Agents**
-
-   Use Task tool to delegate to each selected agent:
-   ```
-   Task: ctf-auth-analyst
-   Prompt: Test authentication for [feature] at [endpoint].
-           Story: {sprint_artifacts}/stories/story-XXX.md
-           Focus on: JWT validation, session management, password reset
-   ```
-
-4. **Aggregate Results**
-
-   Collect findings from all agents and classify:
-   - Critical (block deployment)
-   - High (fix before deployment)
-   - Medium (fix soon)
-   - Low (track for future)
-
-5. **Generate Security Report**
-
-   Create comprehensive report with:
-   - Executive summary
-   - Findings by severity
-   - Proof of concept for each vulnerability
-   - Remediation guidance
-   - Security checklist
-   - Deployment decision
-
-6. **Create Fix Stories**
-
-   For each Critical/High issue, create a fix story:
-   ```markdown
-   # Story: Fix [Vulnerability Type] in [Feature]
-
-   ## Security Issue
-   [Description from security report]
-
-   ## Severity
-   Critical / High
-
-   ## Impact
-   [What attacker can do]
-
-   ## Acceptance Criteria
-   - [ ] [Specific fix implemented]
-   - [ ] Security re-test passes
-   - [ ] No regression in functionality
-
-   ## Remediation Steps
-   [From security report]
-
-   ## References
-   - OWASP: [Link]
-   - Original Report: {documentation_dir}/security-reports/story-XXX-security-report.md
-   ```
-
-### Step 6: Review Security Report
-
-**Action:** Display security report summary to user
+Display security report summary to user.
 
 **Report Location:** `{documentation_dir}/security-reports/story-{ID}-security-report.md`
 
@@ -219,7 +170,7 @@ NEXT STEPS:
 Full Report: {documentation_dir}/security-reports/story-{ID}-security-report.md
 ```
 
-### Step 7: Handle Results
+### Step 6: Handle Results
 
 **If Critical/High issues found:**
 
@@ -247,9 +198,9 @@ Use AskUserQuestion:
 - Allow deployment
 - Create backlog stories for Medium issues
 
-### Step 8: Update Story Metadata
+### Step 7: Update Story Metadata
 
-**Action:** Add security test results to story file
+Add security test results to the story file.
 
 **Append to story:**
 ```markdown
@@ -272,9 +223,9 @@ Use AskUserQuestion:
 **Deployment Decision**: {APPROVED/BLOCKED/CONDITIONAL}
 ```
 
-### Step 9: Update Sprint Status
+### Step 8: Update Sprint Status
 
-**Action:** Update `{sprint_artifacts}/sprint-status.yaml`
+Update `{sprint_artifacts}/sprint-status.yaml` with security testing results.
 
 **If security testing passed:**
 ```yaml
@@ -293,7 +244,110 @@ story-{ID}:
   blocking_issues: {X} critical, {X} high
 ```
 
-## Output Files
+## Workflow
+
+### Security Engineer Coordination Process
+
+The Security Engineer agent coordinates the entire security testing process:
+
+1. **Analyze Story**
+   - Read story file from `{sprint_artifacts}/stories/story-{ID}.md`
+   - Identify attack surface (endpoints, inputs, APIs)
+   - Determine feature risk level based on functionality
+
+2. **Select Appropriate Security Agents**
+
+   Based on feature type, delegate to relevant agents:
+   - Authentication/Authorization → ctf-auth-analyst
+   - Web application → ctf-burp-web-expert
+   - Database queries → ctf-sql-injection-expert
+   - User inputs → ctf-xss-expert
+   - API with IDs → ctf-idor-expert
+   - External requests → ctf-ssrf-expert
+   - AI/LLM features → ctf-ai-prompt-injection-agent, ctf-ai-jailbreak-agent
+
+3. **Delegate to CTF Agents**
+
+   Use Task tool to delegate to each selected agent:
+   ```
+   Task: ctf-auth-analyst
+   Prompt: Test authentication for [feature] at [endpoint].
+           Story: {sprint_artifacts}/stories/story-XXX.md
+           Focus on: JWT validation, session management, password reset
+   ```
+
+4. **Aggregate Results**
+
+   Collect findings from all agents and classify by severity:
+   - Critical (block deployment immediately)
+   - High (fix before deployment)
+   - Medium (fix soon, deployment conditional)
+   - Low (track for future)
+
+5. **Generate Security Report**
+
+   Create comprehensive report in `{documentation_dir}/security-reports/story-{ID}-security-report.md` with:
+   - Executive summary
+   - Findings by severity
+   - Proof of concept for each vulnerability
+   - Remediation guidance
+   - Security checklist
+   - Deployment decision
+
+6. **Create Fix Stories**
+
+   For each Critical/High issue, create a fix story in `{sprint_artifacts}/stories/`:
+   ```markdown
+   # Story: Fix [Vulnerability Type] in [Feature]
+
+   ## Security Issue
+   [Description from security report]
+
+   ## Severity
+   Critical / High
+
+   ## Impact
+   [What attacker can do]
+
+   ## Acceptance Criteria
+   - [ ] [Specific fix implemented]
+   - [ ] Security re-test passes
+   - [ ] No regression in functionality
+
+   ## Remediation Steps
+   [From security report]
+
+   ## References
+   - OWASP: [Link]
+   - Original Report: {documentation_dir}/security-reports/story-XXX-security-report.md
+   ```
+
+### Integration with Other Workflows
+
+**With `/code-review`:**
+```bash
+# In code review workflow, after functional review:
+/security-test
+```
+
+**With `/story-done`:**
+```bash
+# Check if security testing is required
+if story.requires_security_testing:
+  /security-test
+  if security_status != "approved":
+    block story-done
+```
+
+**With `/dev-story`:**
+```bash
+/dev-story         # Implement feature
+/security-test     # Security validation
+/code-review       # Final review
+/story-done        # Mark complete
+```
+
+### Output Files
 
 **Security Report:**
 - `{documentation_dir}/security-reports/story-{ID}-security-report.md`
@@ -314,92 +368,25 @@ story-{ID}:
 - `{sprint_artifacts}/sprint-status.yaml`
 - Reflects security testing status
 
-## Configuration
+### Prerequisites
 
-**Security configuration in `.bmad/config.yaml`:**
+- BMAD plugin installed
+- `/workflow-init` has been run
+- Story exists in `{sprint_artifacts}/stories/`
+- Feature is implemented (code exists)
+- Testing environment available (local/staging)
 
-```yaml
-security:
-  # Enable/disable security testing
-  enabled: true
-
-  # Severity threshold for blocking deployment
-  # Options: critical, high, medium, low
-  severity_threshold: "high"
-
-  # Testing environment URL
-  testing_env: "http://localhost:3000"
-
-  # Burp Suite proxy (if using Burp MCP)
-  burp_proxy: "127.0.0.1:8080"
-
-  # Agents to use (default: all)
-  agents:
-    - ctf-auth-analyst
-    - ctf-burp-web-expert
-    - ctf-sql-injection-expert
-    - ctf-xss-expert
-    - ctf-idor-expert
-    - ctf-ssrf-expert
-    - ctf-ai-prompt-injection-agent
-    - ctf-ai-jailbreak-agent
-
-  # Testing scope
-  scope:
-    - "http://localhost:3000/*"
-
-  # Excluded paths (don't test)
-  exclude:
-    - "/static/*"
-    - "/assets/*"
-```
-
-## Integration with Other Workflows
-
-### With `/code-review`
-
-Security testing can be integrated into code review:
-
-```bash
-# In code review workflow, after functional review:
-/security-test
-```
-
-### With `/story-done`
-
-Before marking story as done:
-
-```bash
-# Check if security testing is required
-if story.requires_security_testing:
-  /security-test
-  if security_status != "approved":
-    block story-done
-```
-
-### With `/dev-story`
-
-After implementation, before marking complete:
-
-```bash
-/dev-story         # Implement feature
-/security-test     # Security validation
-/code-review       # Final review
-/story-done        # Mark complete
-```
-
-## Notes
-
-**Security Testing Best Practices:**
+### Best Practices
 
 1. **Test Early**: Run security tests during development, not after
 2. **Test Often**: Re-test after any security-related changes
 3. **Test Thoroughly**: Use all relevant agents, don't skip tests
 4. **Document**: Save all reports for audit trail
 5. **Fix Fast**: Prioritize Critical/High issues immediately
-6. **Re-test**: Validate fixes with re-running security tests
+6. **Re-test**: Validate fixes by re-running security tests
 
-**When to Run:**
+### When to Run
+
 - After implementing authentication/authorization features
 - After adding user input fields
 - After creating API endpoints
@@ -407,28 +394,119 @@ After implementation, before marking complete:
 - After implementing LLM/AI features
 - Before any production deployment
 
-**Time Estimates:**
+### Time Estimates
+
 - Quick scan: 15-30 minutes (basic agents only)
 - Standard scan: 30-60 minutes (all relevant agents)
 - Deep scan: 1-2 hours (all agents + manual validation)
 
-**Common Issues Found:**
+### Common Issues Found
+
 - Missing input validation → XSS/SQLi
 - Missing authorization checks → IDOR
 - Weak JWT validation → Authentication bypass
 - Missing SSRF protection → Internal service access
 - Weak prompt isolation → LLM prompt injection
 
-## Troubleshooting
+## Report
+
+### Report Summary
+
+After completing security testing, provide a comprehensive summary to the user:
+
+**1. Test Overview**
+```
+Security Testing Complete - Story {ID}
+
+Feature Tested: {Feature name}
+Test Date: {Date}
+Testing Environment: {URL}
+Agents Used: {List of agents}
+Test Duration: {Duration}
+```
+
+**2. Findings Summary**
+```
+SECURITY FINDINGS:
+├── Critical Issues: {X}
+├── High Severity: {X}
+├── Medium Severity: {X}
+└── Low Severity: {X}
+
+DEPLOYMENT DECISION: {APPROVED / BLOCKED / CONDITIONAL}
+```
+
+**3. Actions Taken**
+```
+ACTIONS COMPLETED:
+✓ Security report generated
+✓ {X} fix stories created for Critical/High issues
+✓ Story metadata updated
+✓ Sprint status updated
+```
+
+**4. Next Steps**
+```
+RECOMMENDED NEXT STEPS:
+{If BLOCKED}
+1. Review security report: {path to report}
+2. Implement fixes in created stories: {list story IDs}
+3. Re-run security testing after fixes
+4. Proceed to deployment only after approval
+
+{If CONDITIONAL}
+1. Review Medium severity issues in report
+2. Deploy feature to production
+3. Schedule fixes for Medium issues in next sprint
+4. Create backlog stories for Low issues
+
+{If APPROVED}
+1. Feature is security-approved for deployment
+2. Review report for informational findings: {path to report}
+3. Proceed to /story-done
+```
+
+**5. Report Location**
+
+Provide direct paths to all generated artifacts:
+```
+GENERATED FILES:
+- Security Report: {documentation_dir}/security-reports/story-{ID}-security-report.md
+- Fix Stories: {sprint_artifacts}/stories/story-{ID}-fix-*.md
+- Updated Story: {sprint_artifacts}/stories/story-{ID}.md
+- Sprint Status: {sprint_artifacts}/sprint-status.yaml
+```
+
+**6. Issue Details (If Any Found)**
+
+For each Critical/High issue, provide brief details:
+```
+CRITICAL/HIGH ISSUES REQUIRING IMMEDIATE ATTENTION:
+
+Issue #1: {Vulnerability Type}
+- Severity: {Critical/High}
+- Component: {Affected endpoint/feature}
+- Impact: {Brief description of what attacker can do}
+- Fix Story: story-{ID}-fix-{vulnerability}.md
+- OWASP Reference: {Link}
+
+Issue #2: ...
+```
+
+### Troubleshooting Report
+
+If issues occur during security testing, report them clearly:
 
 **"No security agents available"**
 - Verify CTF agents are in `agents/` directory
 - Check plugin.json includes all 8 CTF agents
+- Solution: Review plugin configuration
 
 **"Testing environment not reachable"**
 - Check `testing_env` in config.yaml
 - Ensure application is running locally
 - Verify port is correct
+- Current config: {show current config}
 
 **"Burp Suite not working"**
 - Launch Burp via: `java -jar burpsuite_pro.jar --project-file=test.burp`
@@ -445,9 +523,9 @@ After implementation, before marking complete:
 - Focus on high-risk features only
 - Use quick scan mode
 
-## Examples
+### Example Reports
 
-### Example 1: Test Login Feature
+#### Example 1: Test Login Feature
 
 ```
 User: /security-test
@@ -487,7 +565,7 @@ Fix story created: story-006-fix-jwt-secret.md
 Report: {documentation_dir}/security-reports/story-005-security-report.md
 ```
 
-### Example 2: Test User Profile API
+#### Example 2: Test User Profile API
 
 ```
 User: /security-test
@@ -510,7 +588,7 @@ Security Engineer:
   - Creates fix stories
   - Deployment: CONDITIONAL (fix High before deploy)
 
-Claude: [Shows report]
+Claude: [Shows report with actionable next steps]
 ```
 
 ---

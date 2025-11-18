@@ -4,23 +4,30 @@ description: Apply systematic problem-solving methodologies to crack complex cha
 
 # Problem Solving
 
-## What This Does
+## Purpose
 
-Guides you through systematic problem-solving using proven methodologies to diagnose root causes, generate creative solutions, and develop implementation plans. This workflow prevents jumping to solutions prematurely by ensuring thorough diagnosis and structured evaluation.
+This workflow guides you through systematic problem-solving using proven methodologies to diagnose root causes, generate creative solutions, and develop implementation plans. It prevents jumping to solutions prematurely by ensuring thorough diagnosis and structured evaluation.
 
-## Prerequisites
-
+**Prerequisites:**
 - BMAD plugin installed
 - `/workflow-init` run (creates `.bmad/config.yaml`)
 
-## When to Use
-
+**When to Use:**
 - Tackling complex or recurring problems
 - Need root cause analysis before implementing solutions
 - Stuck with a problem that resists obvious fixes
 - Want systematic approach instead of trial-and-error
 - Managing technical, organizational, or process challenges
 - Need objective evaluation of solution alternatives
+
+## Variables
+
+The following variables are read from `.bmad/config.yaml`:
+
+- `documentation_dir` - Directory where the problem-solving analysis will be saved
+- `user_name` - User's name for personalization in communications
+- `communication_language` - Preferred language for all interactions
+- `[date]` - Current date stamp used in generated filenames (format: YYYY-MM-DD)
 
 ## Instructions
 
@@ -100,11 +107,83 @@ Create problem-solving analysis in `{documentation_dir}/problem-solution-[date].
 Inform the user:
 "Problem-solving analysis complete! Your systematic solution has been saved to `{documentation_dir}/problem-solution-[date].md`"
 
-## Output Files
+## Workflow
 
-- `{documentation_dir}/problem-solution-[date].md` - Comprehensive problem-solving documentation
+The problem-solving workflow follows this execution sequence:
 
-## Examples
+```
+1. Configuration Loading
+   └─> Read `.bmad/config.yaml`
+       └─> Extract documentation_dir, user_name, communication_language
+
+2. Problem Context Gathering
+   └─> Interactive questioning with user
+       └─> Capture problem details, impact, and success criteria
+           └─> Load any existing problem briefs or context data
+
+3. Systematic Problem Analysis (via bmad-creative-problem-solver agent)
+   └─> Problem Definition & Refinement
+       └─> Problem Diagnosis & Bounding (Is/Is Not Analysis)
+           └─> Root Cause Analysis (Five Whys/Fishbone/Systems Thinking)
+               └─> Force Field & Constraint Analysis
+                   └─> Solution Generation (10-15 ideas minimum)
+                       └─> Solution Evaluation & Selection
+                           └─> Implementation Planning
+                               └─> Monitoring & Validation Setup
+
+4. Documentation Generation
+   └─> Create `{documentation_dir}/problem-solution-[date].md`
+       └─> Include all analysis, recommendations, and plans
+
+5. User Notification
+   └─> Confirm completion with file path
+```
+
+**Key Flow Principles:**
+- No skipping diagnosis to jump to solutions
+- Minimum 10-15 solution ideas before evaluation
+- Clear criteria for solution selection
+- Implementation plan includes monitoring
+- Systematic progression through all 8 stages
+
+## Report
+
+Upon completion, the agent should report:
+
+### Immediate Feedback
+Inform the user with:
+```
+Problem-solving analysis complete! Your systematic solution has been saved to `{documentation_dir}/problem-solution-[date].md`
+```
+
+### Output Artifacts
+The workflow generates:
+- **Primary Output:** `{documentation_dir}/problem-solution-[date].md` - Comprehensive problem-solving documentation
+
+### Document Contents
+The generated document must include:
+1. **Problem Statement** - Refined, precise problem definition
+2. **Problem Boundaries** - Is/Is Not Analysis results
+3. **Root Cause Analysis** - Identified root causes and contributing factors
+4. **Force Field Analysis** - Driving forces, restraining forces, and constraints
+5. **Solution Alternatives** - All generated solutions (10-15 minimum)
+6. **Evaluation Results** - Decision matrix or evaluation framework results
+7. **Recommended Solution** - Selected solution with clear rationale
+8. **Implementation Plan** - Detailed action steps, timeline, resources, responsibilities
+9. **Success Metrics** - KPIs, targets, and validation approach
+10. **Risk Mitigation** - Identified risks and mitigation strategies
+11. **Key Learnings** - Insights gained during the problem-solving process
+
+### Success Indicators
+The report should confirm:
+- All 8 problem-solving stages completed
+- Root cause(s) identified and documented
+- Minimum 10-15 solution ideas generated
+- Evaluation criteria applied systematically
+- Implementation plan includes timeline and ownership
+- Monitoring metrics established
+
+### Examples Reference
 
 **Example 1: Software Performance Degradation**
 
@@ -156,8 +235,7 @@ Process:
 7. Implementation: 1-week calibration update with operator training, daily defect monitoring
 8. Result: Defect rate dropped to 1.5%, identified supplier quality issue for contract renegotiation
 
-## Notes
-
+### Notes
 - Systematic problem-solving takes 2-4 hours depending on complexity
 - Root cause analysis prevents treating symptoms instead of causes
 - Generating 10-15 solutions increases likelihood of breakthrough ideas

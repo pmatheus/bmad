@@ -4,24 +4,18 @@ description: Facilitate project brainstorming sessions using interactive ideatio
 
 # Brainstorm Project Workflow
 
-## What This Does
+## Purpose
 
 Facilitates interactive brainstorming sessions specifically for software/product projects using proven creative ideation techniques:
 - **Mind Mapping** - Visual organization of ideas
 - **SCAMPER** - Systematic creative thinking (Substitute, Combine, Adapt, Modify, Put to other uses, Eliminate, Reverse)
 - **Six Thinking Hats** - Multi-perspective analysis (White: Facts, Red: Emotions, Black: Risks, Yellow: Benefits, Green: Creativity, Blue: Process)
 - **Brainstorming** - Rapid idea generation
+- **SCAMPER** - Systematic creative thinking
 - **Role Storming** - Perspective-taking ideation
 - **Reverse Brainstorming** - Problem-focused thinking
 
 **Project-focused context** ensures techniques are applied to software product development.
-
-## Prerequisites
-
-- BMAD plugin installed in Claude Code
-- (Optional) workflow-status for progress tracking
-
-## When to Use This
 
 **Use brainstorm-project when:**
 - Starting a new product or feature
@@ -35,6 +29,21 @@ Facilitates interactive brainstorming sessions specifically for software/product
 - Before PRD (explore feature possibilities)
 - Before architecture (ideate technical approaches)
 - Anytime you need structured creative thinking
+
+**Prerequisites:**
+- BMAD plugin installed in Claude Code
+- (Optional) workflow-status for progress tracking
+
+## Variables
+
+The following variables are used throughout this workflow:
+
+- `{documentation_dir}` - Directory for storing documentation (from `.bmad/config.yaml`)
+- `{document_output_language}` - Language for generated documents (from `.bmad/config.yaml`)
+- `{communication_language}` - Language for communication (from `.bmad/config.yaml`)
+- `{user_name}` - User's name for personalization (from `.bmad/config.yaml`)
+- `{date}` - Current date for timestamping session outputs (format: YYYY-MM-DD)
+- `{sprint_artifacts}` - Directory for sprint artifacts (typically `.bmad/sprints/current`)
 
 ## Instructions
 
@@ -123,11 +132,9 @@ The session output will include:
 - Recommended follow-up activities
 - Integration with product-brief or PRD
 
-## Brainstorming Techniques Explained
+### Brainstorming Techniques Reference
 
-### SCAMPER
-
-Systematic creative thinking framework:
+**SCAMPER** - Systematic creative thinking framework:
 - **S**ubstitute - What can be replaced?
 - **C**ombine - What can be merged?
 - **A**dapt - What can be adjusted?
@@ -138,15 +145,11 @@ Systematic creative thinking framework:
 
 **Best for:** Feature innovation, product differentiation
 
-### Mind Mapping
-
-Visual organization of ideas radiating from central concept.
+**Mind Mapping** - Visual organization of ideas radiating from central concept.
 
 **Best for:** Understanding relationships, exploring possibilities
 
-### Six Thinking Hats
-
-Multi-perspective analysis:
+**Six Thinking Hats** - Multi-perspective analysis:
 - **White Hat** - Facts and information
 - **Red Hat** - Emotions and intuition
 - **Black Hat** - Risks and concerns
@@ -156,15 +159,11 @@ Multi-perspective analysis:
 
 **Best for:** Comprehensive evaluation, team alignment
 
-### Brainstorming (Classic)
-
-Rapid idea generation without judgment.
+**Brainstorming (Classic)** - Rapid idea generation without judgment.
 
 **Best for:** Quantity of ideas, creative freedom
 
-### Role Storming
-
-Perspective-taking from different stakeholders:
+**Role Storming** - Perspective-taking from different stakeholders:
 - User perspectives
 - Developer perspectives
 - Business perspectives
@@ -172,197 +171,146 @@ Perspective-taking from different stakeholders:
 
 **Best for:** Empathy-driven design, understanding needs
 
-### Reverse Brainstorming
-
-Focus on problems/failures to understand solutions.
+**Reverse Brainstorming** - Focus on problems/failures to understand solutions.
 
 **Best for:** Risk identification, improvement opportunities
 
-## Examples
+## Workflow
 
-### Example 1: Feature Brainstorming with SCAMPER
+1. **Initialize Session**
+   - Load configuration from `.bmad/config.yaml`
+   - Determine brainstorming approach (slash command vs. manual)
+   - Gather project context and brainstorming goals
 
-**Using Slash Command:**
+2. **Launch Brainstorming Session**
+   - If using slash command: Execute `/bmad:core:workflows:brainstorming`
+   - If using Business Analyst: Invoke with Task tool and project context
+   - Facilitator presents technique menu (if applicable)
+
+3. **Select Ideation Technique**
+   - Choose from: SCAMPER, Mind Mapping, Six Thinking Hats, Brainstorming, Role Storming, or Reverse Brainstorming
+   - Facilitator explains technique structure
+
+4. **Guided Ideation Process**
+   - Facilitator asks thought-provoking questions based on selected technique
+   - Generate ideas without judgment (quantity over quality)
+   - Capture all ideas in structured format
+   - Build on ideas organically during session
+
+5. **Organize and Capture Results**
+   - Group ideas by category/theme
+   - Identify patterns and key insights
+   - Highlight promising directions
+   - Preserve all ideas (no filtering)
+
+6. **Save Session Output**
+   - Create `{documentation_dir}/brainstorming-session-{date}.md`
+   - Include: Session metadata, all ideas, key insights, next steps
+   - Update `{sprint_artifacts}/bmm-workflow-status.yaml` (if tracking workflow progress)
+
+7. **Review and Plan Next Steps**
+   - Review session results
+   - Identify top 3-5 most promising ideas
+   - Determine how to integrate into product-brief, PRD, or architecture workflow
+
+## Report
+
+Upon completion, provide a summary report containing:
+
+### Session Overview
+- **Date:** {date}
+- **Technique Used:** [Selected brainstorming technique]
+- **Project Context:** [Brief description of project/challenge]
+- **Session Duration:** [Approximate time spent]
+- **Facilitator:** [Slash command or Business Analyst]
+
+### Ideas Generated
+- **Total Ideas:** [Count of ideas generated]
+- **Categories:** [List of categories/themes]
+- **Top Ideas:** [3-5 most promising ideas with brief descriptions]
+
+### Key Insights
+- **Patterns Identified:** [Common themes or patterns across ideas]
+- **Promising Directions:** [Areas showing most potential]
+- **Surprising Discoveries:** [Unexpected insights or directions]
+
+### Output Files Created
+- `{documentation_dir}/brainstorming-session-{date}.md` - Complete session results with all ideas, organized by technique structure
+- `{sprint_artifacts}/bmm-workflow-status.yaml` - Updated workflow status (if applicable)
+
+### Next Steps
+- **Immediate Actions:** [What to do with brainstorming results]
+- **Recommended Follow-up:** [Suggested next workflows]
+  - Use product-brief to develop product vision from brainstormed ideas
+  - Incorporate top features into PRD requirements
+  - Explore architecture options using brainstormed technical approaches
+  - Conduct research on promising directions identified
+
+### Integration Recommendations
+- **For product-brief:** [How to use brainstorming results in product vision]
+- **For PRD:** [Which features to incorporate into requirements]
+- **For architecture:** [Technical approaches to explore further]
+- **For research:** [Areas requiring deeper investigation]
+
+### Session Statistics
+- **Ideas per Category:** [Breakdown of ideas by category]
+- **Diversity Score:** [Assessment of idea variety]
+- **Actionability:** [Number of ideas ready for immediate consideration]
+
+**Example Report Output:**
+
+```markdown
+# Brainstorming Session Report
+Date: 2025-01-14
+Technique: SCAMPER
+Project: Project Management App Feature Exploration
+
+## Ideas Generated
+Total Ideas: 18
+Categories: Visual Collaboration (6), Simplification (5), Integration (4), Innovation (3)
+
+Top Ideas:
+1. Visual kanban boards replacing traditional task lists
+2. Merged calendar-task view for unified planning
+3. Dynamic priority adjustment based on deadlines
+4. Simplified permissions for faster team setup
+5. Task tracking doubles as time tracking
+
+## Key Insights
+- Strong theme around visual collaboration emerged
+- Simplicity over complexity was recurring benefit
+- Integration with existing tools highly valued
+- Traditional task list paradigm may be limiting
+
+## Next Steps
+1. Develop visual kanban concept in product-brief
+2. Prototype merged calendar-task view
+3. Research simplified permission models
+4. Include top 5 ideas in PRD feature requirements
+
+## Output Files
+- `.bmad/brainstorming-session-2025-01-14.md` (complete session)
+- `.bmad/sprints/current/bmm-workflow-status.yaml` (updated)
 ```
-/bmad:core:workflows:brainstorming
-```
 
-**Session:**
-```
-Facilitator: "Let's use SCAMPER to brainstorm features for your project management app."
-
-Substitute: "What if we replace traditional task lists with visual kanban boards?"
-Combine: "What if we merged calendar and task management into one view?"
-Adapt: "How could we adapt collaboration features from chat apps?"
-Modify: "What if task priorities were dynamic based on deadlines?"
-Put to other uses: "Could the task tracking also serve as time tracking?"
-Eliminate: "What if we removed complex permission systems for simplicity?"
-Reverse: "What if projects organized tasks instead of tasks organizing projects?"
-
-[Ideas captured and organized in session output]
-```
-
-**Output:** `brainstorming-session-2025-01-14.md` with:
-- 15+ feature ideas generated
-- Organized by SCAMPER category
-- Key insights: Visual collaboration and simplicity themes emerged
-- Next steps: Explore visual kanban and simplified permissions in product-brief
-
-### Example 2: Architecture Brainstorming with Six Thinking Hats
-
-**Using Business Analyst:**
-```yaml
-subagent_type: bmad-analyst
-prompt: |
-  I need help brainstorming architecture approaches for a real-time collaboration platform.
-
-  **Project Context:**
-  Building a collaborative whiteboard tool (like Miro/Figma) with real-time multi-user editing.
-
-  **What I need to ideate:**
-  - Architecture patterns for real-time sync
-  - Technology stack options
-  - Scalability approaches
-
-  **Brainstorming Technique:** Six Thinking Hats
-
-  Please facilitate a structured brainstorming session exploring different perspectives on the architecture.
-```
-
-**Session:**
-```
-Analyst (White Hat - Facts): "Real-time collaboration requires conflict-free data structures. Options: CRDT, OT, Event Sourcing."
-
-Analyst (Yellow Hat - Benefits): "CRDTs allow offline editing and eventual consistency. No central server needed for conflict resolution."
-
-Analyst (Black Hat - Risks): "CRDTs have large memory overhead. Complex to implement correctly. Limited support in libraries."
-
-Analyst (Green Hat - Creativity): "What if we used hybrid approach? CRDT for canvas state, OT for text editing?"
-
-Analyst (Red Hat - Intuition): "CRDT feels like the future-proof approach. Industry is moving that direction."
-
-Analyst (Blue Hat - Process): "Let's prototype CRDT with existing library (Yjs, Automerge) before committing."
-
-[Multi-perspective analysis captured]
-```
-
-**Output:** Business Analyst creates `brainstorming-session-2025-01-14.md` with:
-- Architecture options analyzed from 6 perspectives
-- Hybrid approach emerged as promising
-- Recommended approach: Prototype with Yjs CRDT library
-- Next steps: Technical spike, then architecture workflow
-
-### Example 3: Problem-Solving with Reverse Brainstorming
-
-**Using Slash Command:**
-```
-/bmad:core:workflows:brainstorming
-```
-
-**Session:**
-```
-Facilitator: "Let's use Reverse Brainstorming to identify risks in your e-commerce platform."
-
-Facilitator: "How could we make checkout as frustrating as possible?"
-
-- "Require account creation before seeing cart"
-- "Hide shipping costs until final step"
-- "Make payment form complex with many fields"
-- "Use unclear error messages"
-- "Lose cart data on page refresh"
-- "Require password reset on every login"
-
-Facilitator: "Now let's reverse these into positive requirements:"
-
-✅ Allow guest checkout
-✅ Show shipping costs early
-✅ Simplify payment (autofill, saved cards)
-✅ Clear, helpful error messages
-✅ Persist cart across sessions
-✅ Secure but convenient authentication
-
-[Problems reversed into requirements]
-```
-
-**Output:** `brainstorming-session-2025-01-14.md` with:
-- 12 potential problems identified
-- Reversed into positive requirements
-- Key insight: Transparency and simplicity are critical
-- Next steps: Incorporate requirements into product-brief
-
-## Notes
-
-**Project-specific context:**
-- Brainstorm-project is optimized for software/product projects
-- General brainstorming workflow (core) works for any topic
-- Project context helps facilitator ask relevant questions
-
-**Brainstorming principles:**
+**Brainstorming Principles Applied:**
 - Quantity over quality (generate many ideas)
 - No judgment during ideation (all ideas welcome)
 - Build on others' ideas (yes, and...)
 - Visual thinking helps (diagrams, sketches)
 - Diverse perspectives create better ideas
 
-**Integration with other workflows:**
-- **product-brief** - Use brainstorming results to inform product vision
-- **PRD** - Incorporate brainstormed features into requirements
-- **architecture** - Use architecture brainstorming to explore options
-- **research** - Brainstorm research questions before conducting research
+**Troubleshooting Notes:**
 
-**Output location:**
-- Brainstorming sessions saved to `{documentation_dir}/brainstorming-session-{date}.md`
-- All ideas preserved (no filtering)
-- Organized by technique structure
-- Next steps and insights included
+| Issue | Solution |
+|-------|----------|
+| Slash command not available | Use Business Analyst alternative approach |
+| Not generating enough ideas | Try SCAMPER, set quantity goal (20+ ideas), allow wild ideas |
+| Ideas too similar/conventional | Use Reverse Brainstorming or Role Storming from unconventional perspectives |
+| Need team brainstorming | Run slash command in shared session, AI facilitates team input |
+| Results not actionable | Ask facilitator to prioritize, identify 3-5 most promising, create action items |
 
-## Troubleshooting
-
-**Issue:** Slash command not available
-
-**Solution:**
-- Check BMAD plugin installation
-- Verify `/bmad:core:workflows:brainstorming` exists
-- Use Business Analyst alternative approach instead
-
-**Issue:** Not generating enough ideas
-
-**Solution:**
-- Try different technique (SCAMPER often generates most ideas)
-- Set quantity goal (aim for 20+ ideas)
-- Allow wild ideas (don't self-censor)
-- Build on each idea before moving to next
-
-**Issue:** Ideas are too similar or conventional
-
-**Solution:**
-- Use Reverse Brainstorming to break conventional thinking
-- Use Role Storming from unconventional perspectives
-- Apply SCAMPER "Reverse" and "Eliminate" aggressively
-
-**Issue:** Need team brainstorming (not just solo)
-
-**Solution:**
-- Run slash command in shared session
-- Capture team members' ideas in the session
-- Facilitator (AI) asks questions, team responds
-- Works well for remote async brainstorming
-
-**Issue:** Results not actionable
-
-**Solution:**
-- After brainstorming, ask facilitator to prioritize ideas
-- Identify 3-5 most promising directions
-- Create action items for each promising idea
-- Integrate top ideas into product-brief or PRD
-
-## Output Files
-
-- `{documentation_dir}/brainstorming-session-{date}.md` - Complete session results
-- `{sprint_artifacts}/bmm-workflow-status.yaml` - Updated with brainstorm-project completion (if tracking)
-
-## Related Workflows
-
+**Related Workflows:**
 - **product-brief** - Use brainstorming results to inform product vision
 - **research** - Brainstorm research questions before conducting research
 - **prd** - Incorporate brainstormed features into requirements

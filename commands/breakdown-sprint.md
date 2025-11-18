@@ -54,9 +54,6 @@ Break each story in a sprint into granular, actionable development tasks that re
 
 **Prerequisites**: Ensure sprint planning completed (`/bmad:sprint-planning`), sprint artifacts exist, stories created, and standards copied to `{bmad_dir}/standards/`.
 
-**Usage**:
-- `/bmad:breakdown-sprint` - Breaks down current sprint
-- `/bmad:breakdown-sprint sprint-2` - Breaks down specific sprint
 
 ### 1. Identify Target Sprint
 

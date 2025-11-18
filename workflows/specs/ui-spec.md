@@ -1,20 +1,41 @@
 # UI Specification Workflow
 
 ## Purpose
-Create comprehensive UI specifications including visual design system, component library, screen designs, and design tokens.
 
-## Prerequisites
-- UX spec exists in `{documentation_dir}/design/ux-spec.md`
-- PRD exists in `{documentation_dir}/product/PRD.md`
-- Project initialized with workflow-init
+Create comprehensive UI specifications including visual design system, component library, screen designs, and design tokens. This workflow transforms UX specifications and product requirements into detailed visual design documentation that guides development teams in implementing consistent, accessible, and responsive user interfaces.
 
-## Inputs
+## Variables
+
+- `{documentation_dir}` - Root directory for project documentation
+- `{documentation_language}` - Language for documentation output (e.g., English, Spanish)
+- `{project_name}` - Name of the project being documented
+
+## Instructions
+
+### Prerequisites
+Before starting this workflow, ensure:
+1. UX spec exists in `{documentation_dir}/design/ux-spec.md`
+2. PRD exists in `{documentation_dir}/product/PRD.md`
+3. Project initialized with workflow-init
+
+### Inputs Required
 - UX specification (user flows, interaction patterns)
 - Product brief (brand guidelines, if any)
 - PRD (features and requirements)
 - Target platforms (web, mobile, desktop)
 
-## Process
+### Validation Checklist
+Before marking as complete, verify:
+- [ ] All design tokens are defined with consistent naming
+- [ ] Color contrast meets WCAG AA standards
+- [ ] Component library covers all UI elements from UX flows
+- [ ] All interactive states are specified for each component
+- [ ] Responsive behavior is defined for all breakpoints
+- [ ] Animations enhance UX without causing motion sickness
+- [ ] Accessibility requirements are specific and measurable
+- [ ] Design tokens can be exported for implementation
+
+## Workflow
 
 ### Step 1: Define Visual Design Principles
 1. Establish design direction:
@@ -25,6 +46,7 @@ Create comprehensive UI specifications including visual design system, component
 3. Set spacing and layout principles
 
 ### Step 2: Create Design Tokens
+
 1. **Color System**:
    - Primary colors (brand colors)
    - Secondary/accent colors
@@ -56,7 +78,9 @@ Create comprehensive UI specifications including visual design system, component
    - Elevation system for z-index
 
 ### Step 3: Design Component Library
+
 For each component type, specify:
+
 1. **Visual States**:
    - Default
    - Hover
@@ -110,6 +134,7 @@ For each component type, specify:
 - **Icon**: Sizes, colors, variants
 
 ### Step 4: Define Screen Layouts
+
 For each major screen/view from UX flows:
 1. Layout structure (header, sidebar, main, footer)
 2. Grid system and responsive breakpoints
@@ -118,6 +143,7 @@ For each major screen/view from UX flows:
 5. Responsive behavior (desktop, tablet, mobile)
 
 ### Step 5: Specify Animations and Transitions
+
 1. **Transition Timing**:
    - Duration scale (fast: 150ms, base: 200ms, slow: 300ms)
    - Easing functions (ease-in, ease-out, ease-in-out, spring)
@@ -131,6 +157,7 @@ For each major screen/view from UX flows:
    - Focus animations
 
 ### Step 6: Define Responsive Behavior
+
 1. **Breakpoints**:
    - Mobile: 0-640px
    - Tablet: 641-1024px
@@ -145,13 +172,14 @@ For each major screen/view from UX flows:
    - Image/media handling
 
 ### Step 7: Accessibility Specifications
+
 1. **Color Contrast**: All text meets WCAG AA (AAA preferred)
 2. **Focus Indicators**: Visible on all interactive elements
 3. **Touch Targets**: Minimum 44x44px on mobile
 4. **Text Sizes**: Minimum 16px for body text
 5. **Icon Sizes**: Minimum 24x24px for interactive icons
 
-## Output Structure
+### Step 8: Generate Complete Documentation
 
 Generate `{documentation_dir}/design/ui-spec.md` with the following structure:
 
@@ -377,23 +405,49 @@ Generate `{documentation_dir}/design/ui-spec.md` with the following structure:
 - **Design Token Format**: [CSS variables, JSON, Tailwind config]
 ```
 
-## Validation Checklist
+## Report
 
-- [ ] All design tokens are defined with consistent naming
-- [ ] Color contrast meets WCAG AA standards
-- [ ] Component library covers all UI elements from UX flows
-- [ ] All interactive states are specified for each component
-- [ ] Responsive behavior is defined for all breakpoints
-- [ ] Animations enhance UX without causing motion sickness
+### Output File
+Write the complete UI specification to: `{documentation_dir}/design/ui-spec.md` (in `{documentation_language}`)
+
+### Completion Summary
+Upon completion, provide a summary including:
+
+1. **Design System Overview**:
+   - Design direction and visual principles established
+   - Number of design tokens defined (colors, typography, spacing, etc.)
+   - Design token format used (CSS variables, JSON, Tailwind config)
+
+2. **Component Library Coverage**:
+   - Total number of components specified
+   - Component categories covered (Core, Feedback, Navigation, Layout, Data Display)
+   - All interactive states documented per component
+
+3. **Responsive Design**:
+   - Breakpoints defined
+   - Number of screen layouts specified
+   - Responsive patterns documented
+
+4. **Accessibility Compliance**:
+   - WCAG conformance level (AA/AAA)
+   - Accessibility features documented
+   - Touch target and text size standards confirmed
+
+5. **Validation Status**:
+   - Checklist completion status
+   - Any items requiring stakeholder review
+   - Dependencies identified for implementation
+
+6. **Next Steps**:
+   - Create component library in code (following standards in `.bmad/standards/`)
+   - Generate design tokens file (CSS/JSON)
+   - Validate with stakeholders and UX team
+   - Use for epic and story breakdown
+
+### Deliverable Confirmation
+Confirm the following have been created:
+- [ ] `{documentation_dir}/design/ui-spec.md` exists and is complete
+- [ ] All sections (1-10) are populated with project-specific details
+- [ ] Design tokens are ready for export to implementation
+- [ ] Component specifications include all required states and variants
 - [ ] Accessibility requirements are specific and measurable
-- [ ] Design tokens can be exported for implementation
-
-## Output
-Write to: `{documentation_dir}/design/ui-spec.md` (in `{documentation_language}`)
-
-## Next Steps
-After completing UI spec:
-1. Create component library in code (following standards in `.bmad/standards/`)
-2. Generate design tokens file (CSS/JSON)
-3. Validate with stakeholders and UX team
-4. Use for epic and story breakdown

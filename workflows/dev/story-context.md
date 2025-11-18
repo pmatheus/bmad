@@ -4,66 +4,63 @@ description: Assemble comprehensive Story Context XML with acceptance criteria, 
 
 # Story Context
 
-Generates a dynamic Story Context file for a drafted story by gathering acceptance criteria, tasks, relevant documentation, existing code references, interfaces, constraints, and testing guidance.
-
 ## Purpose
 
 Creates a Story Context XML file that serves as the single source of truth for story implementation. The context file prevents hallucinations by grounding the Developer agent in complete, structured information.
 
 **Key Principle:** Story Context is anti-hallucination insurance. It provides complete, grounded context so the Developer agent never invents code that conflicts with existing patterns or requirements.
 
-## Quick Start
+**What this workflow does:**
+- Finds the first story with status "drafted"
+- Gathers relevant documentation (5-15 references)
+- Analyzes existing code for reuse opportunities
+- Extracts dependencies and frameworks
+- Generates testing ideas mapped to acceptance criteria
+- Creates a structured `.context.xml` file
+- Updates story status from "drafted" to "ready-for-dev"
+- Auto-continues to dev-story workflow
 
-```bash
-# Prerequisites: stories created and drafted
-/bmad:phase-4:story-context
+## Variables
 
-# Workflow will:
-# 1. Find first story with status "drafted"
-# 2. Gather relevant docs (5-15 references)
-# 3. Analyze existing code (reuse over rebuild)
-# 4. Extract dependencies and frameworks
-# 5. Generate testing ideas mapped to ACs
-# 6. Create .context.xml file
-# 7. Update status: drafted → ready-for-dev
-# 8. Auto-continue to dev-story
-```
+The following variables are used throughout this workflow:
 
-## Prerequisites
-
-See [shared/prerequisites.md#phase-4-story-context](../shared/prerequisites.md)
-
-**Workflow-specific:**
-- [ ] Stories created and drafted
-- [ ] Sprint status tracking active
-- [ ] Story must have status "drafted"
+| Variable | Description | Source | Example |
+|----------|-------------|--------|---------|
+| `{sprint_artifacts}` | Path to sprint artifacts directory | Configuration file `.bmad/config.yaml` | `.bmad/sprints/sprint-001` |
+| `{epic_id}` | Epic identifier | Story file metadata | `E001` |
+| `{story_id}` | Story identifier | Story file metadata | `S001` |
+| `{story_key}` | Combined epic-story-name key | Sprint status YAML | `E001-S001-user-authentication` |
+| `{story_title}` | Human-readable story title | Story file | `User Authentication` |
+| `{context_file}` | Path to generated context XML | Derived from story_key | `{sprint_artifacts}/stories/{story_key}.context.xml` |
+| `{relative_story_path}` | Project-relative path to story | Story file location | `.bmad/sprints/sprint-001/stories/E001-S001-user-authentication.md` |
+| `{as_a}` | User role from story | Story file user story section | `registered user` |
+| `{i_want}` | Capability from story | Story file user story section | `to log in securely` |
+| `{so_that}` | Benefit from story | Story file user story section | `my data is protected` |
+| `{current_date}` | Current timestamp | System date | `2025-11-18` |
 
 ## Instructions
 
-### Context Assembly Overview
+### Prerequisites
 
-**Process Flow:**
-1. Story Discovery → Find first "drafted" story
-2. Documentation Gathering → Scan docs for relevant content
-3. Code Analysis → Find existing code to reuse
-4. Dependencies Discovery → Extract frameworks and libraries
-5. Testing Standards → Map test ideas to ACs
-6. XML Generation → Create structured context file
-7. Status Update → drafted → ready-for-dev
-8. Auto-Continue → Immediately run dev-story
+See [shared/prerequisites.md#phase-4-story-context](../shared/prerequisites.md)
 
-### 1. Load Configuration and Find Story
+**Workflow-specific requirements:**
+- Stories created and drafted
+- Sprint status tracking active
+- At least one story with status "drafted"
+
+### Step-by-Step Instructions
+
+**1. Load Configuration and Find Story**
 
 See [shared/common-operations.md#load-configuration](../shared/common-operations.md)
 
-**Find first drafted story:**
-
-From `{sprint_artifacts}/sprint-status.yaml`, find first story where:
+Find the first drafted story from `{sprint_artifacts}/sprint-status.yaml` where:
 - Key matches pattern: `{epic}-{story}-{name}`
 - NOT an epic or retrospective
 - Status equals "drafted"
 
-**If no drafted stories found:**
+If no drafted stories found:
 ```
 📋 No drafted stories found in sprint-status.yaml
 
@@ -73,11 +70,15 @@ Next Steps:
 ```
 → HALT
 
-### 2. Parse Story File
+**2. Parse Story File**
 
-**Extract from story markdown:**
+Extract from the story markdown file:
 
-**Metadata:** Epic ID, Story ID, Story Title, Current Status
+**Metadata:**
+- Epic ID
+- Story ID
+- Story Title
+- Current Status
 
 **User Story:**
 ```markdown
@@ -85,7 +86,6 @@ As a [role]
 I want [capability]
 So that [benefit]
 ```
-
 Extract: `as_a`, `i_want`, `so_that`
 
 **Acceptance Criteria:**
@@ -94,7 +94,6 @@ Extract: `as_a`, `i_want`, `so_that`
 - [ ] AC1: Description
 - [ ] AC2: Description
 ```
-
 Extract all AC items (maintain exact wording, NO invention)
 
 **Tasks:**
@@ -104,29 +103,24 @@ Extract all AC items (maintain exact wording, NO invention)
   - [ ] Subtask 1.1
 - [ ] Task 2
 ```
-
 Extract all tasks and subtasks
 
-### 3. Check for Existing Context File
+**3. Check for Existing Context File**
 
-**Context file path:** `{sprint_artifacts}/stories/{story_key}.context.xml`
+Context file path: `{sprint_artifacts}/stories/{story_key}.context.xml`
 
-**If file exists:**
-
-Use AskUserQuestion tool:
+If file exists, use AskUserQuestion tool:
 - Option 1: Replace - Generate new context file (overwrites)
 - Option 2: Verify - Validate existing context against checklist
 - Option 3: Cancel - Exit without changes
 
-**If "Verify":** Jump to validation step, check existing context, report results, end
-**If "Cancel":** HALT
-**If "Replace":** Continue to generate new context
+If "Verify": Jump to validation step, check existing context, report results, end
+If "Cancel": HALT
+If "Replace": Continue to generate new context
 
-### 4. Collect Relevant Documentation
+**4. Collect Relevant Documentation**
 
-**Document discovery strategy:**
-
-Scan documentation for items relevant to story domain using keywords from: story title, acceptance criteria, tasks
+Document discovery strategy: Scan documentation for items relevant to story domain using keywords from story title, acceptance criteria, and tasks.
 
 **Authoritative sources (priority order):**
 1. Tech Spec (Level 0-1) - Comprehensive technical context
@@ -155,13 +149,16 @@ Scan documentation for items relevant to story domain using keywords from: story
 </docs>
 ```
 
-### 5. Analyze Existing Code
+**5. Analyze Existing Code**
 
-**Code discovery strategy:**
+Code discovery strategy: Search source tree for modules, files, and symbols matching story intent, AC keywords, and task keywords.
 
-Search source tree for modules, files, and symbols matching: story intent, AC keywords, task keywords
-
-**Look for:** Controllers, services, components, utilities, tests, models/schemas, API routes, database migrations
+**Look for:**
+- Controllers, services, components, utilities
+- Tests
+- Models/schemas
+- API routes
+- Database migrations
 
 **Identify existing interfaces/APIs to reuse:**
 - REST endpoints
@@ -170,10 +167,10 @@ Search source tree for modules, files, and symbols matching: story intent, AC ke
 - Class interfaces
 - Type definitions
 
-**Extract development constraints:**
-- From Dev Notes section in story
-- From architecture patterns
-- From existing code patterns
+**Extract development constraints from:**
+- Dev Notes section in story
+- Architecture patterns
+- Existing code patterns
 - Testing requirements
 - Coding standards
 
@@ -205,11 +202,9 @@ Search source tree for modules, files, and symbols matching: story intent, AC ke
 </constraints>
 ```
 
-### 6. Gather Dependencies and Frameworks
+**6. Gather Dependencies and Frameworks**
 
-**Detect dependency manifests:**
-
-Look for and parse:
+Detect dependency manifests and parse:
 - **Node.js**: `package.json` (dependencies, devDependencies)
 - **Python**: `pyproject.toml`, `requirements.txt`
 - **Go**: `go.mod`
@@ -236,11 +231,13 @@ Look for and parse:
 </dependencies>
 ```
 
-### 7. Testing Standards and Ideas
+**7. Testing Standards and Ideas**
 
-**Extract testing standards:**
-
-From: Architecture docs, testing documentation, existing test files, Dev Notes in story
+Extract testing standards from:
+- Architecture docs
+- Testing documentation
+- Existing test files
+- Dev Notes in story
 
 **Capture:**
 - Test frameworks (Jest, Playwright, Vitest, etc.)
@@ -249,9 +246,7 @@ From: Architecture docs, testing documentation, existing test files, Dev Notes i
 - Coverage requirements
 - Testing layers (unit, integration, e2e)
 
-**Generate test ideas:**
-
-Map each acceptance criterion to initial test ideas:
+**Generate test ideas** - Map each acceptance criterion to initial test ideas:
 - What needs to be tested?
 - Happy path tests
 - Edge case tests
@@ -282,9 +277,9 @@ Map each acceptance criterion to initial test ideas:
 </tests>
 ```
 
-### 8. Generate Story Context XML
+**8. Generate Story Context XML**
 
-**Create XML file:** `{sprint_artifacts}/stories/{story_key}.context.xml`
+Create XML file: `{sprint_artifacts}/stories/{story_key}.context.xml`
 
 **Structure:**
 
@@ -348,9 +343,9 @@ Map each acceptance criterion to initial test ideas:
 
 **Critical:** All paths must be **project-relative**, not absolute.
 
-### 9. Validate Context File
+**9. Validate Context File**
 
-**Validation checklist:**
+Validation checklist:
 
 - [ ] Story fields (asA/iWant/soThat) captured
 - [ ] Acceptance criteria list matches story draft exactly (no invention)
@@ -365,13 +360,13 @@ Map each acceptance criterion to initial test ideas:
 - [ ] All paths are project-relative (not absolute)
 - [ ] No invented information (all grounded in source)
 
-**If validation fails:** Report specific issues, fix issues, re-validate
+If validation fails: Report specific issues, fix issues, re-validate
 
-### 10. Update Story File and Status
+**10. Update Story File and Status**
 
 See [shared/common-operations.md#update-story-file](../shared/common-operations.md)
 
-**Update story file:**
+Update story file:
 1. Update Status line: `Status: drafted` → `Status: ready-for-dev`
 2. Add/update Dev Agent Record section:
 
@@ -385,41 +380,44 @@ See [shared/common-operations.md#update-story-file](../shared/common-operations.
 _Will be populated during implementation_
 ```
 
-**Update sprint-status.yaml:**
+Update sprint-status.yaml:
 
 See [shared/common-operations.md#update-sprint-status](../shared/common-operations.md)
 
 Update: `development_status[{story_key}] = "ready-for-dev"`
 
-### 11. Report Completion
+## Workflow
 
+### Context Assembly Process Flow
+
+1. **Story Discovery** → Find first "drafted" story from sprint status
+2. **Documentation Gathering** → Scan docs for relevant content (5-15 references)
+3. **Code Analysis** → Find existing code to reuse
+4. **Dependencies Discovery** → Extract frameworks and libraries from manifests
+5. **Testing Standards** → Map test ideas to acceptance criteria
+6. **XML Generation** → Create structured context file
+7. **Validation** → Verify context against quality checklist
+8. **Status Update** → Mark story as "ready-for-dev" in both story file and sprint status
+9. **Auto-Continue** → Immediately run dev-story workflow
+
+### Quick Start Example
+
+```bash
+# Prerequisites: stories created and drafted
+/bmad:phase-4:story-context
+
+# Workflow will:
+# 1. Find first story with status "drafted"
+# 2. Gather relevant docs (5-15 references)
+# 3. Analyze existing code (reuse over rebuild)
+# 4. Extract dependencies and frameworks
+# 5. Generate testing ideas mapped to ACs
+# 6. Create .context.xml file
+# 7. Update status: drafted → ready-for-dev
+# 8. Auto-continue to dev-story
 ```
-✅ Story context generated successfully!
 
-**Story Details:**
-- Story: {epic_id}.{story_id} - {story_title}
-- Story Key: {story_key}
-- Context File: {context_file}
-- Status: drafted → ready-for-dev
-
-**Context Includes:**
-- Documentation artifacts: {count} documents
-- Code references: {count} files
-- Interfaces: {count} APIs/interfaces
-- Dependencies: {count} packages
-- Testing ideas: {count} test scenarios
-- Development constraints: {count} rules
-
-**Next Steps:**
-1. Review the context file: {context_file}
-2. Run /bmad:phase-4:dev-story to implement the story
-3. Generate context for more drafted stories if needed
-
-**Quality Check:**
-All validation items passed ✓
-```
-
-### 12. Auto-Continue to Story Implementation
+### Auto-Continue Behavior
 
 **Purpose:** Enable seamless workflow continuation to story implementation.
 
@@ -449,7 +447,7 @@ Use SlashCommand tool with command: `/bmad:phase-4:dev-story`
 
 **Rationale:** Story context generation exists specifically to feed the dev agent. Once context is ready, there's no reason to pause - implementation should proceed immediately. This reduces friction and maintains workflow momentum.
 
-## Key Constraints
+### Key Constraints
 
 - **Anti-hallucination:** All information grounded in actual project files
 - **Reuse over rebuild:** Existing code explicitly referenced
@@ -459,13 +457,99 @@ Use SlashCommand tool with command: `/bmad:phase-4:dev-story`
 - **No invention:** If information missing, noted as "unknown"
 - **JIT generation:** Run for each drafted story as needed
 
-## Auto-Continue
+## Report
 
-**ALWAYS auto-continue** to dev-story after context generation.
+### Completion Report Format
 
-Story context + dev-story is a continuous flow. Once context is ready, implementation proceeds immediately. This reduces friction and maintains workflow momentum.
+When the workflow completes successfully, report:
 
-## Notes
+```
+✅ Story context generated successfully!
+
+**Story Details:**
+- Story: {epic_id}.{story_id} - {story_title}
+- Story Key: {story_key}
+- Context File: {context_file}
+- Status: drafted → ready-for-dev
+
+**Context Includes:**
+- Documentation artifacts: {count} documents
+- Code references: {count} files
+- Interfaces: {count} APIs/interfaces
+- Dependencies: {count} packages
+- Testing ideas: {count} test scenarios
+- Development constraints: {count} rules
+
+**Next Steps:**
+1. Review the context file: {context_file}
+2. Run /bmad:phase-4:dev-story to implement the story
+3. Generate context for more drafted stories if needed
+
+**Quality Check:**
+All validation items passed ✓
+```
+
+### Verification Report Format
+
+When verifying an existing context file, report:
+
+```
+🔍 Context Verification Results
+
+**Story:** {epic_id}.{story_id} - {story_title}
+**Context File:** {context_file}
+
+**Validation Results:**
+✓ Story fields captured correctly
+✓ Acceptance criteria match story (no invention)
+✓ Tasks/subtasks complete
+✓ Documentation references: {count} (target: 5-15)
+✓ Code references: {count}
+✓ Interfaces extracted: {count}
+✓ Constraints documented: {count}
+✓ Dependencies listed: {count}
+✓ Testing standards present
+✓ XML structure valid
+✓ All paths are project-relative
+✓ No invented information detected
+
+**Overall:** {PASS/FAIL}
+
+{If FAIL, list specific issues found}
+```
+
+### Error/Halt Report Format
+
+When the workflow cannot proceed, report:
+
+```
+❌ Story Context Workflow Halted
+
+**Reason:** {specific reason}
+
+**Current State:**
+- Stories scanned: {count}
+- Drafted stories found: {count}
+- {other relevant state information}
+
+**Action Required:**
+{Specific steps user needs to take}
+
+**Suggested Next Steps:**
+1. {Step 1}
+2. {Step 2}
+```
+
+### Reporting Guidelines
+
+- **Transparency:** Always show what was analyzed and what was found
+- **Specificity:** Use exact counts, file paths, and identifiers
+- **Actionability:** If there's a problem, tell user exactly what to do
+- **Traceability:** Reference the context file path for review
+- **Validation:** Always confirm quality check passed
+- **Continuity:** Indicate auto-continue to dev-story is happening
+
+### Notes
 
 - **Single source of truth:** Developer agent uses this file, not original story
 - **Anti-hallucination insurance:** Complete grounded context prevents invention

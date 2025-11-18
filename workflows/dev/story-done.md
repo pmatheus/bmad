@@ -4,21 +4,13 @@ description: Mark a story as done after review - updates story file, adds comple
 
 # Story Done Workflow
 
-## What This Does
+## Purpose
 
-Marks a story as done (Definition of Done complete) by:
-1. Updating the story file status to `done`
-2. Adding completion notes to Dev Agent Record section
-3. Updating `sprint-status.yaml` to track completion
-4. Preserving sprint status file structure and order
-5. Suggesting next steps (next story or epic retrospective)
+Marks a story as done (Definition of Done complete) by updating the story file status to `done`, adding completion notes to Dev Agent Record section, and updating `sprint-status.yaml` to track completion while preserving file structure and order.
 
 **Simple status update workflow - run after code review approval.**
 
----
-
-## Prerequisites
-
+**Prerequisites:**
 - BMAD plugin installed (`/bmad:bmm:workflows:workflow-init` run)
 - `sprint-planning` workflow run (creates `sprint-status.yaml`)
 - At least one story with status `review` (completed via `code-review`)
@@ -26,23 +18,24 @@ Marks a story as done (Definition of Done complete) by:
 
 ---
 
-## How It Works
+## Variables
 
-```
-1. Read sprint-status.yaml → Find reviewed stories
-2. Auto-select first reviewed story (or use provided path)
-3. Update story file: Status → done
-4. Add completion notes to Dev Agent Record
-5. Update sprint-status.yaml: review → done
-6. Suggest next steps (next story or epic retrospective)
-```
+The following variables are used in this workflow:
 
-**Key behavior:**
-- Reads COMPLETE sprint-status.yaml (preserves order and structure)
-- Updates both story file AND sprint status (dual sync)
-- Adds completion timestamp and notes
-- Auto-advances to first reviewed story (no selection needed)
-- Never downgrades status (review → done only)
+- `{documentation_dir}`: Directory where `sprint-status.yaml` is located (from `.bmad/config.yaml`)
+- `{sprint_artifacts}`: Directory where story files are stored in `stories/` subdirectory (from `.bmad/config.yaml`)
+- `{user_name}`: User's name for personalized messages (from `.bmad/config.yaml`)
+- `{date}`: Current date (system-generated)
+- `{story_key}`: Story identifier matching pattern `number-number-name` (e.g., `1-2-user-auth`)
+- `{story_id}`: Story ID from story file metadata (e.g., `1.2`)
+- `{story_title}`: Story title from story file metadata (e.g., `User Authentication`)
+
+**Configuration File** (`.bmad/config.yaml`):
+```yaml
+documentation_dir: "docs/bmad"      # Where sprint-status.yaml is located
+sprint_artifacts: "docs/bmad"       # Where stories/ subdirectory is located
+user_name: "Developer"              # For personalized messages
+```
 
 ---
 
@@ -50,15 +43,7 @@ Marks a story as done (Definition of Done complete) by:
 
 ### Step 1: Load Configuration
 
-Read configuration from `.bmad/config.yaml`:
-
-```yaml
-documentation_dir: path/to/output
-sprint_artifacts: path/to/stories
-user_name: User's name
-```
-
-**Variables needed:**
+Read configuration from `.bmad/config.yaml` to obtain:
 - `documentation_dir`: Where sprint-status.yaml is located
 - `sprint_artifacts`: Where story files are stored (in `stories/` subdirectory)
 - `user_name`: For personalized messages
@@ -67,17 +52,20 @@ user_name: User's name
 ### Step 2: Find Reviewed Story
 
 **If story path provided directly:**
-- Use the provided path
-- Read COMPLETE story file and parse sections
-- Extract `story_key` from filename or story metadata
-- Verify Status is `review` - if not, HALT with:
-  ```
-  Story status must be "review" to mark as done
-  ```
-- Skip to Step 3
+1. Use the provided path
+2. Read COMPLETE story file and parse sections
+3. Extract `story_key` from filename or story metadata
+4. Verify Status is `review` - if not, HALT with error message:
+   ```
+   Story status must be "review" to mark as done
+   Current status: {current_status}
+
+   Required flow:
+   in-progress → code-review → review → story-done → done
+   ```
+5. Skip to Step 3
 
 **If no story path provided:**
-
 1. Load COMPLETE file: `{documentation_dir}/sprint-status.yaml`
 2. Read ALL lines from beginning to end (preserve order)
 3. Parse `development_status` section
@@ -87,6 +75,7 @@ user_name: User's name
    - Status value equals `"review"`
 
 **If no reviewed story found:**
+Display message and HALT:
 ```
 📋 No stories with status "review" found
 
@@ -97,21 +86,17 @@ All stories are either still in development or already done.
 2. Run `code-review` if stories need review first
 3. Check sprint-status.yaml for current story states
 ```
-**HALT**
 
 **If reviewed story found:**
-- Use the first reviewed story automatically (no user selection needed)
-- Find matching story file in `{sprint_artifacts}/stories/` using `story_key` pattern
-- Read the COMPLETE story file
+1. Use the first reviewed story automatically (no user selection needed)
+2. Find matching story file in `{sprint_artifacts}/stories/` using `story_key` pattern
+3. Read the COMPLETE story file
 
 ### Step 3: Update Story File
 
 1. Extract `story_id` and `story_title` from story file metadata
 2. Find the "Status:" line (usually near top of file)
-3. Update story file:
-   ```markdown
-   Status: done
-   ```
+3. Update story file to `Status: done`
 4. Add completion notes to Dev Agent Record section:
    - Find "## Dev Agent Record" section
    - Add completion notes:
@@ -141,7 +126,7 @@ All stories are either still in development or already done.
 1. Load COMPLETE file: `{documentation_dir}/sprint-status.yaml`
 2. Find `development_status` key matching `{story_key}`
 3. Verify current status is `"review"` (expected previous state)
-4. Update:
+4. Update to:
    ```yaml
    development_status:
      {story_key}: "done"
@@ -149,6 +134,7 @@ All stories are either still in development or already done.
 5. Save file, preserving ALL comments and structure including STATUS DEFINITIONS
 
 **If story key not found:**
+Display warning:
 ```
 ⚠️ Story file updated, but could not update sprint-status: {story_key} not found
 
@@ -164,7 +150,87 @@ development_status:
 
 ### Step 5: Confirm Completion
 
-Display success message:
+Display success message with next steps (see Report section below).
+
+---
+
+## Workflow
+
+The workflow follows this execution sequence:
+
+```
+1. Read sprint-status.yaml → Find reviewed stories
+2. Auto-select first reviewed story (or use provided path)
+3. Update story file: Status → done
+4. Add completion notes to Dev Agent Record
+5. Update sprint-status.yaml: review → done
+6. Suggest next steps (next story or epic retrospective)
+```
+
+**Key Behavior:**
+- Reads COMPLETE sprint-status.yaml (preserves order and structure)
+- Updates both story file AND sprint status (dual sync)
+- Adds completion timestamp and notes
+- Auto-advances to first reviewed story (no selection needed)
+- Never downgrades status (review → done only)
+
+**Key Principles:**
+
+### 1. Auto-Advance to First Reviewed Story
+- Automatically selects first story with status `review`
+- No user interaction needed - streamlines the workflow
+- After code review, the next logical step is marking approved story as done
+
+### 2. Preserve Sprint Status Structure
+- Always read COMPLETE sprint-status.yaml file
+- Read ALL lines from beginning to end
+- Never skip content or sections
+- Preserve order of stories
+- Preserve all comments and STATUS DEFINITIONS
+- Never reorder or restructure
+
+### 3. Dual Sync (Story File + Sprint Status)
+- Always update both:
+  1. Story file Status field
+  2. sprint-status.yaml development_status entry
+- Prevents inconsistencies between story files and tracking
+
+### 4. Add Completion Evidence
+- Always add completion notes:
+  - Timestamp of completion
+  - Confirmation that DoD is met
+  - Adds to Dev Agent Record section
+- Provides audit trail and completion evidence
+
+### 5. Never Downgrade Status
+- Direction: review → done only
+- Not allowed:
+  - done → review ❌
+  - done → in-progress ❌
+  - in-progress → done ❌ (must go through review first)
+- Status only moves forward through the lifecycle
+
+**Status Flow:**
+```
+story-ready (ready-for-dev)
+  ↓
+story-context (optional)
+  ↓
+dev-story (in-progress)
+  ↓
+code-review (review)
+  ↓
+story-done (done) ← THIS WORKFLOW
+  ↓
+retrospective (if epic complete)
+```
+
+---
+
+## Report
+
+Upon successful completion, display the following message to the user:
+
 ```
 **Story Approved and Marked Done, {user_name}!**
 
@@ -187,56 +253,21 @@ Display success message:
    - Epic retrospective will verify all stories are done
 ```
 
----
+**Modified Files:**
+1. **Story File** (`{sprint_artifacts}/stories/{story_key}.md`)
+   - Status updated to `done`
+   - Completion notes added to Dev Agent Record section
 
-## Key Principles
+2. **Sprint Status** (`{documentation_dir}/sprint-status.yaml`)
+   - Development status updated from `review` to `done`
 
-### 1. Auto-Advance to First Reviewed Story
-
-**Behavior:** Automatically selects first story with status `review`
-
-**No user interaction needed** - streamlines the workflow
-
-**Why:** After code review, the next logical step is marking approved story as done. First reviewed story is the natural choice.
-
-### 2. Preserve Sprint Status Structure
-
-**Critical:** Always read COMPLETE sprint-status.yaml file:
-- Read ALL lines from beginning to end
-- Never skip content or sections
-- Preserve order of stories
-- Preserve all comments and STATUS DEFINITIONS
-- Never reorder or restructure
-
-**Why:** Sprint status is the single source of truth for story tracking.
-
-### 3. Dual Sync (Story File + Sprint Status)
-
-**Always update both:**
-1. Story file Status field
-2. sprint-status.yaml development_status entry
-
-**Why:** Prevents inconsistencies between story files and tracking.
-
-### 4. Add Completion Evidence
-
-**Always add completion notes:**
-- Timestamp of completion
-- Confirmation that DoD is met
-- Adds to Dev Agent Record section
-
-**Why:** Provides audit trail and completion evidence.
-
-### 5. Never Downgrade Status
-
-**Direction:** review → done only
-
-**Not allowed:**
-- done → review ❌
-- done → in-progress ❌
-- in-progress → done ❌ (must go through review first)
-
-**Why:** Status only moves forward through the lifecycle.
+**Success Criteria:**
+- ✅ Story file updated with `Status: done`
+- ✅ Completion notes added to Dev Agent Record section
+- ✅ sprint-status.yaml updated with matching status
+- ✅ File structure preserved (all comments, order, definitions intact)
+- ✅ User receives clear next steps (next story or retrospective)
+- ✅ No errors if story not found (clear messaging instead)
 
 ---
 
@@ -572,78 +603,6 @@ Completion notes not added
 
 **Status management:**
 - `/bmad:bmm:workflows:story-ready` - Mark drafted story as ready for dev
-
-**Navigation:**
-```
-story-ready (ready-for-dev)
-  ↓
-story-context (optional)
-  ↓
-dev-story (in-progress)
-  ↓
-code-review (review)
-  ↓
-story-done (done) ← YOU ARE HERE
-  ↓
-retrospective (if epic complete)
-```
-
----
-
-## Success Criteria
-
-✅ **Story file updated** with `Status: done`
-
-✅ **Completion notes added** to Dev Agent Record section
-
-✅ **sprint-status.yaml updated** with matching status
-
-✅ **File structure preserved** (all comments, order, definitions intact)
-
-✅ **User receives clear next steps** (next story or retrospective)
-
-✅ **No errors** if story not found (clear messaging instead)
-
----
-
-## Configuration
-
-Reads from `.bmad/config.yaml`:
-
-```yaml
-documentation_dir: "docs/bmad"                # Where sprint-status.yaml is located
-sprint_artifacts: "docs/bmad"             # Where stories/ subdirectory is located
-user_name: "Developer"                    # For personalized messages
-```
-
-**Note:** Story files are in `{sprint_artifacts}/stories/` subdirectory.
-
----
-
-## Output Files
-
-### Modified Files
-
-**1. Story File** (`{sprint_artifacts}/stories/{story_key}.md`)
-```markdown
-Status: done  # ← Updated
-
-## Dev Agent Record
-
-[existing content...]
-
-### Completion Notes  # ← ADDED
-**Completed:** {date}
-**Definition of Done:** All acceptance criteria met, code reviewed, tests passing
-```
-
-**2. Sprint Status** (`{documentation_dir}/sprint-status.yaml`)
-```yaml
-development_status:
-  {story_key}: "done"  # ← Updated from "review"
-```
-
-**No new files created - only status updates and completion notes.**
 
 ---
 

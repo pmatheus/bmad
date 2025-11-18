@@ -4,12 +4,11 @@ description: Generate comprehensive epic-level technical specifications with NFR
 
 # Epic Tech Context
 
-Creates detailed technical specifications for individual epics by delegating to the Architect agent with full PRD and architecture context.
+## Purpose
 
-## What This Does
+This workflow generates a **comprehensive technical specification** for a single epic by delegating to the Architect agent with full PRD and architecture context.
 
-This workflow generates a **comprehensive technical specification** for a single epic, including:
-
+**Key outputs:**
 - Overview and scope tied to PRD goals
 - Detailed design (services, data models, APIs, workflows)
 - Non-functional requirements (performance, security, reliability, observability)
@@ -19,10 +18,7 @@ This workflow generates a **comprehensive technical specification** for a single
 
 **Key Principle:** JIT (Just-In-Time) - Run this workflow for each epic as needed, not all at once. This keeps context fresh and reduces cognitive load.
 
-## Prerequisites
-
-Before running this workflow:
-
+**Prerequisites:**
 - [ ] BMAD plugin installed in Claude Code
 - [ ] Project initialized (`/bmad:meta:workflow-init`)
 - [ ] PRD created (`/bmad:phase-2:prd`)
@@ -30,70 +26,56 @@ Before running this workflow:
 - [ ] Epics created (`/bmad:phase-2:create-epics-and-stories`)
 - [ ] Sprint planning initialized (`/bmad:phase-4:sprint-planning`)
 
-**Required files:**
+## Variables
+
+The following variables are used throughout this workflow:
+
+| Variable | Source | Description | Example |
+|----------|--------|-------------|---------|
+| `{documentation_dir}` | `.bmad/config.yaml` | Where documentation files are stored | `.bmad` |
+| `{user_name}` | `.bmad/config.yaml` | Author name for tech specs | `"John Developer"` |
+| `{sprint_artifacts}` | `.bmad/config.yaml` | Where sprint artifacts are stored | `.bmad/sprint-artifacts` |
+| `{bmad_folder}` | `.bmad/config.yaml` | BMAD installation location | `.bmad` |
+| `{project_name}` | `.bmad/config.yaml` | Project name | `"Healthcare Portal"` |
+| `{epic_id}` | User input or auto-suggested | Epic identifier (e.g., epic-2) | `epic-3` |
+| `{epic_title}` | Extracted from epic document | Human-readable epic name | `"User Authentication System"` |
+| `{current date}` | System date | Current date for documentation | `2025-11-18` |
+| `{output_file}` | Generated | Tech spec output path | `{sprint_artifacts}/tech-spec-epic-{epic_id}.md` |
+
+**Configuration file location:** `.bmad/config.yaml`
+
+**Required input files:**
 - `.bmad/config.yaml` - Project configuration
-- `.bmad/PRD.md` (or `.bmad/PRD/index.md` if sharded)
-- `.bmad/architecture.md` (or `.bmad/architecture/index.md` if sharded)
-- `{documentation_dir}/epics.md` OR `{documentation_dir}/epics/epic-{N}.md` (sharded)
-- `{sprint_artifacts}/sprint-status.yaml` - Epic tracking
+- `.bmad/PRD.md` OR `.bmad/PRD/index.md` (with sections) - Product requirements
+- `.bmad/architecture.md` OR `.bmad/architecture/index.md` (with sections) - System architecture
+- `{documentation_dir}/epics.md` OR `{documentation_dir}/epics/epic-{N}.md` (sharded) - Epic definitions
+- `{sprint_artifacts}/sprint-status.yaml` - Epic tracking and status
 
-## How It Works
-
-### Document Discovery (Selective Epic Loading)
-
-**Efficiency Optimization:** This workflow loads **only the specific epic needed**, not all epics. This provides huge gains when epics are sharded.
-
-**Epic Discovery:**
-1. Read `sprint-status.yaml` to find next "backlog" epic
-2. If epics are sharded (`epics/index.md` exists):
-   - Load ONLY `epics/epic-{N}.md` for the target epic
-   - Skip loading other epic files
-3. If whole document exists (`epics.md`), load and extract relevant epic
-
-**Other Documents (full load):**
-- PRD: Load whole document or all sharded sections
-- Architecture: Load whole document or all sharded sections
-- UX Design (if exists): Load for UI-focused epics
-- GDD (if exists): Load for game projects
-
-**Priority:** Whole document first, then sharded version if available.
-
-### Delegation to Architect
-
-The workflow delegates to the **bmad-architect** agent who:
-1. Reviews PRD and architecture for context
-2. Extracts the specific epic's requirements
-3. Creates comprehensive technical specification
-4. Maps acceptance criteria to components
-5. Identifies dependencies and risks
-6. Defines test strategy
-
-### Status Tracking
-
-Updates `sprint-status.yaml`:
-- Epic status: `backlog` → `contexted`
-- Indicates epic is ready for story creation
+**Optional input files:**
+- `.bmad/ux-design.md` OR `.bmad/ux-design/index.md` (with sections) - UX design specifications
+- `.bmad/GDD.md` OR `.bmad/GDD/index.md` (with sections) - Game design document (game projects)
 
 ## Instructions
 
-### Step 1: Load Configuration
+### 1. Load Configuration
 
 Read project configuration from `.bmad/config.yaml`:
 
 ```javascript
 {
   documentation_dir: string,      // Where docs are stored (e.g., .bmad)
-  user_name: string,          // Author name
-  sprint_artifacts: string,   // Where sprint files go
-  bmad_folder: string         // BMAD install location
+  user_name: string,              // Author name
+  sprint_artifacts: string,       // Where sprint files go
+  bmad_folder: string,            // BMAD install location
+  project_name: string            // Project name
 }
 ```
 
-### Step 2: Discover Next Epic
+### 2. Discover Next Epic
 
 **Read sprint status file:**
 
-Look for: `{sprint_artifacts}/sprint-status.yaml` OR `{sprint_artifacts}/sprint-status.yaml`
+Look for: `{sprint_artifacts}/sprint-status.yaml`
 
 **Find next epic:**
 - Read ALL `development_status` entries
@@ -121,7 +103,7 @@ Do you want to re-context an existing epic? Enter epic_id or quit.
 - Store as `epic_id`
 - Extract `epic_title` from epic document
 
-### Step 3: Validate Epic Exists
+### 3. Validate Epic Exists
 
 Check that epic exists in `sprint-status.yaml`:
 
@@ -152,7 +134,11 @@ Continuing to regenerate tech spec...
 ```
 → Continue (allows re-running)
 
-### Step 4: Load Input Documents
+### 4. Load Input Documents
+
+**Document loading priority:** Whole document first, then sharded version if available.
+
+**Efficiency Optimization:** When epics are sharded, load **only the specific epic needed**, not all epics. This provides huge token savings.
 
 **Load PRD (whole or sharded):**
 
@@ -166,24 +152,40 @@ Priority order:
 1. `.bmad/architecture.md` (whole document)
 2. `.bmad/architecture/index.md` + all sections (sharded)
 
-**Load Epic (selective):**
+**Load Epic (selective - for efficiency):**
 
 If sharded:
 - Read `{documentation_dir}/epics/index.md`
 - Load ONLY `{documentation_dir}/epics/epic-{epic_id}.md`
-- Skip other epic files
+- Skip other epic files (huge token savings)
 
 If whole:
 - Read `{documentation_dir}/epics.md`
-- Extract Epic {epic_id} section
+- Extract Epic {epic_id} section only
 
-**Load UX Design (if exists):**
+**Example efficiency gain:**
+```
+# Inefficient (old way)
+Load epics/epic-1.md (200 lines)
+Load epics/epic-2.md (150 lines)
+Load epics/epic-3.md (180 lines)  ← Need this one
+Load epics/epic-4.md (220 lines)
+Total: 750 lines
+
+# Efficient (new way)
+Load epics/epic-3.md (180 lines)  ← Only what's needed
+Total: 180 lines
+
+Savings: 570 lines (76% reduction)
+```
+
+**Load UX Design (optional, if exists):**
 
 Priority order:
 1. `.bmad/ux-design.md` (whole document)
 2. `.bmad/ux-design/index.md` + all sections (sharded)
 
-**Load GDD (if exists - game projects):**
+**Load GDD (optional, if exists - game projects):**
 
 Priority order:
 1. `.bmad/GDD.md` (whole document)
@@ -199,7 +201,7 @@ Please provide file paths or run the missing workflows first.
 ```
 → HALT and wait for user
 
-### Step 5: Delegate to Architect
+### 5. Delegate to Architect
 
 Use the **Task tool** to delegate to bmad-architect:
 
@@ -446,7 +448,7 @@ Quality: [validation status]
 }
 ```
 
-### Step 6: Update Epic Status
+### 6. Update Epic Status
 
 After architect completes the tech spec:
 
@@ -472,342 +474,136 @@ development_status:
 ⚠️ Could not update epic status: epic-{epic_id} not found
 ```
 
-### Step 7: Report Completion
+## Workflow
+
+### Execution Sequence
 
 ```
-✅ Tech Spec Generated Successfully!
-
-**Epic Details:**
-- Epic ID: {epic_id}
-- Epic Title: {epic_title}
-- Tech Spec File: {output_file}
-- Epic Status: contexted (was backlog)
-
-**Note:** This is a JIT (Just-In-Time) workflow - run again for other epics as needed.
-
-**Next Steps:**
-1. Run `/bmad:phase-4:create-story` to begin implementing stories under this epic
-2. OR run `/bmad:phase-4:epic-tech-context` again for the next backlog epic
+1. Configuration Load
+   ↓
+2. Epic Discovery & Selection
+   ├─→ Suggest first "backlog" epic
+   ├─→ User confirms or specifies different epic_id
+   └─→ Extract epic_title from document
+   ↓
+3. Epic Validation
+   ├─→ Check epic exists in sprint-status.yaml
+   ├─→ If not found: HALT with error
+   └─→ If already contexted: Continue (allow regeneration)
+   ↓
+4. Document Loading (Selective & Efficient)
+   ├─→ Load PRD (whole or all sharded sections)
+   ├─→ Load Architecture (whole or all sharded sections)
+   ├─→ Load ONLY target epic (not all epics if sharded)
+   ├─→ Load UX Design (optional, if exists)
+   ├─→ Load GDD (optional, if exists for games)
+   └─→ If required docs missing: HALT with error
+   ↓
+5. Architect Delegation (via Task tool)
+   ├─→ bmad-architect receives all context
+   ├─→ Creates comprehensive tech spec with:
+   │   ├─→ Overview & scope
+   │   ├─→ Detailed design (services, models, APIs, workflows)
+   │   ├─→ Non-functional requirements
+   │   ├─→ Dependencies & integrations
+   │   ├─→ Acceptance criteria (authoritative)
+   │   ├─→ Traceability mapping
+   │   ├─→ Risks, assumptions, questions
+   │   └─→ Test strategy
+   └─→ Saves to: {sprint_artifacts}/tech-spec-epic-{epic_id}.md
+   ↓
+6. Status Update
+   ├─→ Load sprint-status.yaml
+   ├─→ Update epic status: backlog → contexted
+   └─→ Preserve file structure and formatting
+   ↓
+7. Completion Report
+   └─→ Display success with file location and next steps
 ```
 
-## Key Principles
+### Key Principles
 
-### 1. Just-In-Time (JIT) Specification
-
-**Don't context all epics at once:**
-- Context one epic at a time
+**1. Just-In-Time (JIT) Specification**
+- Context one epic at a time (not all at once)
 - Keep specification fresh and relevant
 - Reduce cognitive load
 - Allow for learning from previous epics
+- Avoid upfront planning overhead
 
-**Benefits:**
-- Fresh context when actually needed
-- Can incorporate learnings from previous epics
-- Reduces upfront planning overhead
-- Maintains focus
-
-### 2. Selective Epic Loading
-
-**Efficiency for large projects:**
+**2. Selective Epic Loading**
 - When epics are sharded, load ONLY the target epic
 - Don't load all epic files into context
-- Huge token savings for multi-epic projects
+- Huge token savings for multi-epic projects (often 70-80% reduction)
+- Other documents (PRD, Architecture) are loaded in full
 
-**Example:**
-```
-# Inefficient (old way)
-Load epics/epic-1.md (200 lines)
-Load epics/epic-2.md (150 lines)
-Load epics/epic-3.md (180 lines)  ← Need this one
-Load epics/epic-4.md (220 lines)
-Total: 750 lines
-
-# Efficient (new way)
-Load epics/epic-3.md (180 lines)  ← Only what's needed
-Total: 180 lines
-
-Savings: 570 lines (76% reduction)
-```
-
-### 3. Grounded in Source Documents
-
-**No invention:**
+**3. Grounded in Source Documents**
 - All design decisions come from PRD and architecture
 - Traceability required for every AC
 - If information is missing, flag it as open question
 - Maintain consistency with previous epic tech specs
+- No invention - everything from source documents
 
-### 4. Comprehensive NFRs
-
-**Non-functional requirements are critical:**
+**4. Comprehensive NFRs**
 - Performance: Measurable targets
 - Security: Concrete requirements
 - Reliability: Specific SLAs
 - Observability: Required signals
+- Not optional: Every epic needs NFRs
 
-**Not optional:** Every epic needs NFRs, not just "functional" epics.
-
-### 5. Test-Driven Design
-
-**Test strategy before implementation:**
+**5. Test-Driven Design**
+- Test strategy before implementation
 - How will we test each AC?
 - What edge cases need coverage?
 - What test levels are needed?
 - What frameworks will we use?
+- Prevents "we'll test it later" syndrome
 
-**Prevents "we'll test it later" syndrome.**
+### Document Discovery Flow
 
-## Examples
-
-### Example 1: SaaS Analytics Dashboard - Real-Time Data Visualization Epic
-
-**Context:**
-- Project: SaaS Analytics Platform (T3 Stack)
-- Epic 3: Real-Time Data Visualization
-- PRD: 300 lines, Architecture: 250 lines, Epic: 80 lines
-- Files: Whole documents (not sharded)
-
-**Workflow execution:**
-
-1. **Discovery:**
-   ```
-   📋 Next Epic Suggested: Epic 3: Real-Time Data Visualization
-
-   Use this epic?
-   → User selects "Yes"
-   ```
-
-2. **Document loading:**
-   - Load `.bmad/PRD.md` (whole document)
-   - Load `.bmad/architecture.md` (whole document)
-   - Extract Epic 3 from `{documentation_dir}/epics.md`
-   - No UX design doc needed (data visualization)
-
-3. **Delegation to bmad-architect:**
-   - Reviews PRD goals for dashboard
-   - Reviews architecture: tRPC, Prisma, WebSockets
-   - Creates tech spec with:
-     - Services: WebSocket service, Data aggregation service, Cache layer
-     - Data models: ChartData, Dashboard, Widget schemas
-     - APIs: 8 tRPC endpoints (getData, subscribe, updateWidget, etc.)
-     - NFRs: 100ms latency target, 1000 concurrent users, AES-256 for sensitive data
-     - Dependencies: Recharts, Socket.io, Redis
-     - ACs: 12 testable criteria
-     - Traceability: Maps each AC to component and test
-
-4. **Output:**
-   - File: `{sprint_artifacts}/tech-spec-epic-3.md` (450 lines)
-   - Epic status: backlog → contexted
-
-5. **Result:**
-   ```
-   ✅ Tech Spec Generated Successfully!
-
-   Epic: Epic 3 - Real-Time Data Visualization
-   File: {sprint_artifacts}/tech-spec-epic-3.md
-   ACs: 12 | Components: 3 | APIs: 8 | Risks: 4
-
-   Next: Run /bmad:phase-4:create-story for Epic 3
-   ```
-
-### Example 2: Healthcare Patient Portal - HIPAA Compliance Epic
-
-**Context:**
-- Project: Healthcare Patient Portal
-- Epic 5: HIPAA-Compliant Audit Logging
-- PRD: 800 lines (sharded), Architecture: 600 lines (sharded), Epic: 120 lines
-- Files: Sharded documents
-
-**Workflow execution:**
-
-1. **Discovery:**
-   ```
-   📋 Next Epic Suggested: Epic 5: HIPAA-Compliant Audit Logging
-
-   Use this epic?
-   → User selects "Yes"
-   ```
-
-2. **Document loading (sharded):**
-   - Load `.bmad/PRD/index.md` + all sections (800 lines total)
-   - Load `.bmad/architecture/index.md` + all sections (600 lines total)
-   - Load ONLY `{documentation_dir}/epics/epic-5.md` (120 lines) ← Selective loading
-   - Skip loading epic-1.md through epic-4.md (saves ~400 lines)
-
-3. **Delegation to bmad-architect:**
-   - Reviews PRD: HIPAA requirements, audit trail needs
-   - Reviews architecture: Event sourcing, immutable logs, encryption
-   - Creates tech spec with:
-     - Services: Audit service, Event store, Compliance validator
-     - Data models: AuditEvent, ComplianceLog, AccessRecord schemas
-     - APIs: 6 audit endpoints (logEvent, queryAudit, exportCompliance, etc.)
-     - NFRs:
-       - Performance: Log 10,000 events/sec
-       - Security: AES-256 encryption at rest, TLS 1.3 in transit, FIPS 140-2
-       - Reliability: 99.99% uptime, tamper-proof logs
-       - Observability: Real-time compliance dashboards
-     - Dependencies: Event Store DB, HashiCorp Vault, AWS KMS
-     - ACs: 18 testable criteria (HIPAA-focused)
-     - Traceability: Maps each AC to HIPAA requirement and test
-     - Risks: 7 compliance risks with mitigation strategies
-
-4. **Output:**
-   - File: `{sprint_artifacts}/tech-spec-epic-5.md` (650 lines)
-   - Epic status: backlog → contexted
-   - Includes explicit HIPAA compliance mappings
-
-5. **Result:**
-   ```
-   ✅ Tech Spec Generated Successfully!
-
-   Epic: Epic 5 - HIPAA-Compliant Audit Logging
-   File: {sprint_artifacts}/tech-spec-epic-5.md
-   ACs: 18 | Components: 5 | APIs: 6 | Risks: 7
-
-   Compliance: HIPAA requirements mapped
-
-   Next: Run /bmad:phase-4:create-story for Epic 5
-   ```
-
-### Example 3: Mobile Fitness App - Offline-First Data Sync Epic
-
-**Context:**
-- Project: Mobile Fitness Tracker (React Native + Expo)
-- Epic 2: Offline-First Workout Sync
-- PRD: 500 lines, Architecture: 400 lines, Epic: 100 lines, UX Design: 200 lines
-- Files: Whole documents with UX design
-
-**Workflow execution:**
-
-1. **Discovery:**
-   ```
-   📋 Next Epic Suggested: Epic 2: Offline-First Workout Sync
-
-   Use this epic?
-   → User selects "Yes"
-   ```
-
-2. **Document loading:**
-   - Load `.bmad/PRD.md` (whole document)
-   - Load `.bmad/architecture.md` (whole document)
-   - Extract Epic 2 from `{documentation_dir}/epics.md`
-   - Load `.bmad/ux-design.md` (UX-heavy project - critical context)
-
-3. **Delegation to bmad-architect:**
-   - Reviews PRD: Offline-first requirements, sync strategy
-   - Reviews architecture: SQLite, background sync, conflict resolution
-   - Reviews UX: Sync indicators, conflict UI, offline badges
-   - Creates tech spec with:
-     - Services: Sync engine, Conflict resolver, Device sensor service
-     - Data models: Workout, Exercise, SyncQueue, ConflictLog schemas
-     - APIs: 10 endpoints (syncWorkout, resolveConflict, getSyncStatus, etc.)
-     - NFRs:
-       - Performance: Sync 1000 workouts in <10 sec, sensor read at 100Hz
-       - Security: E2E encryption, biometric auth
-       - Reliability: 100% offline functionality, graceful degradation
-       - Observability: Sync status, conflict logs, sensor health
-     - Dependencies: WatermelonDB, Expo SQLite, NetInfo, React Query
-     - ACs: 15 testable criteria (offline scenarios)
-     - Traceability: Maps ACs to UX flows and components
-     - Risks: Conflict resolution edge cases, battery drain
-
-4. **Output:**
-   - File: `{sprint_artifacts}/tech-spec-epic-2.md` (580 lines)
-   - Epic status: backlog → contexted
-   - Includes UX-driven design decisions
-
-5. **Result:**
-   ```
-   ✅ Tech Spec Generated Successfully!
-
-   Epic: Epic 2 - Offline-First Workout Sync
-   File: {sprint_artifacts}/tech-spec-epic-2.md
-   ACs: 15 | Components: 4 | APIs: 10 | Risks: 5
-
-   UX Design: Integrated (sync indicators, conflict UI)
-
-   Next: Run /bmad:phase-4:create-story for Epic 2
-   ```
-
-## Troubleshooting
-
-### Sprint status file not found
-
-**Error:**
 ```
-⚠️ sprint-status.yaml not found
+PRD Loading:
+  Check: .bmad/PRD.md (whole)
+    ├─→ Found: Load entire document
+    └─→ Not found:
+        └─→ Check: .bmad/PRD/index.md (sharded)
+            ├─→ Found: Load index + all sections
+            └─→ Not found: ERROR - halt workflow
+
+Architecture Loading:
+  Check: .bmad/architecture.md (whole)
+    ├─→ Found: Load entire document
+    └─→ Not found:
+        └─→ Check: .bmad/architecture/index.md (sharded)
+            ├─→ Found: Load index + all sections
+            └─→ Not found: ERROR - halt workflow
+
+Epic Loading (SELECTIVE):
+  Check: {documentation_dir}/epics/index.md (sharded)
+    ├─→ Found: Load ONLY epics/epic-{epic_id}.md
+    │   └─→ Skip loading other epic files (efficiency!)
+    └─→ Not found:
+        └─→ Check: {documentation_dir}/epics.md (whole)
+            ├─→ Found: Load and extract Epic {epic_id} section
+            └─→ Not found: ERROR - halt workflow
+
+UX Design Loading (OPTIONAL):
+  Check: .bmad/ux-design.md (whole)
+    ├─→ Found: Load entire document
+    └─→ Not found:
+        └─→ Check: .bmad/ux-design/index.md (sharded)
+            ├─→ Found: Load index + all sections
+            └─→ Not found: Skip (not required)
+
+GDD Loading (OPTIONAL - games only):
+  Check: .bmad/GDD.md (whole)
+    ├─→ Found: Load entire document
+    └─→ Not found:
+        └─→ Check: .bmad/GDD/index.md (sharded)
+            ├─→ Found: Load index + all sections
+            └─→ Not found: Skip (not required)
 ```
 
-**Solution:**
-Run `/bmad:phase-4:sprint-planning` to initialize sprint tracking.
-
-### Epic not in sprint status
-
-**Error:**
-```
-⚠️ Epic {epic_id} not found in sprint-status.yaml
-```
-
-**Cause:** Sprint planning hasn't registered this epic.
-
-**Solution:**
-Run `/bmad:phase-4:sprint-planning` to scan epics and create status file.
-
-### PRD or Architecture missing
-
-**Error:**
-```
-⚠️ Missing required documents:
-- PRD: Not found
-- Architecture: Not found
-```
-
-**Solution:**
-1. Run `/bmad:phase-2:prd` to create PRD
-2. Run `/bmad:phase-3:architecture` to create architecture
-3. Then re-run this workflow
-
-### Epic has no acceptance criteria
-
-**Warning:**
-```
-ℹ️ Epic {epic_id} has no explicit acceptance criteria in PRD/Epic
-```
-
-**Solution:**
-- Architect will flag this in "Open Questions"
-- Update PRD or epic document with ACs
-- Re-run workflow to include them
-
-### Sharded documents partially loaded
-
-**Warning:**
-```
-⚠️ Found sharded PRD but some sections are missing
-```
-
-**Solution:**
-- Check `.bmad/PRD/index.md` for expected sections
-- Verify all section files exist
-- Re-run `/bmad:phase-2:prd` if sections are missing
-
-### Dependency manifest scan finds nothing
-
-**Warning:**
-```
-ℹ️ No dependency manifests found in repository
-```
-
-**This is OK for:**
-- Brownfield projects (dependencies already established)
-- Projects using monorepo tools (dependencies elsewhere)
-- Documentation-only projects
-
-**Otherwise:**
-- Verify repository structure
-- Architect will note this in "Open Questions"
-
-## Related Workflows
+### Related Workflows
 
 **Before this workflow:**
 1. `/bmad:meta:workflow-init` - Initialize project structure
@@ -822,10 +618,10 @@ Run `/bmad:phase-4:sprint-planning` to scan epics and create status file.
 3. `/bmad:phase-4:dev-story` - Implement stories
 
 **Parallel workflows:**
-- `/bmad:phase-4:epic-tech-context` - Run for each epic (JIT)
+- `/bmad:phase-4:epic-tech-context` - Run for each epic (JIT approach)
 - `/bmad:workflow-status` - Check current phase
 
-## Success Criteria
+### Success Criteria
 
 A successful tech spec includes:
 
@@ -863,32 +659,280 @@ A successful tech spec includes:
 - [ ] Epic status updated to "contexted"
 - [ ] File is well-formatted markdown
 
-## Notes
+### Troubleshooting
 
-- **JIT workflow:** Run for each epic as needed, not all at once
-- **Selective loading:** Only loads the specific epic needed when sharded
-- **Delegation:** Full work done by bmad-architect agent
-- **Traceability:** Every AC must map to implementation
-- **NFRs required:** Not optional, every epic needs them
-- **Test-first:** Test strategy before implementation
-- **Grounded:** No invention, everything from source documents
-- **Repeatable:** Can re-run for same epic to regenerate
+**Sprint status file not found:**
+```
+⚠️ sprint-status.yaml not found
+```
+→ Solution: Run `/bmad:phase-4:sprint-planning` to initialize sprint tracking.
 
-## Configuration
+**Epic not in sprint status:**
+```
+⚠️ Epic {epic_id} not found in sprint-status.yaml
+```
+→ Cause: Sprint planning hasn't registered this epic.
+→ Solution: Run `/bmad:phase-4:sprint-planning` to scan epics and create status file.
 
-Reads from `.bmad/config.yaml`:
+**PRD or Architecture missing:**
+```
+⚠️ Missing required documents:
+- PRD: Not found
+- Architecture: Not found
+```
+→ Solution:
+1. Run `/bmad:phase-2:prd` to create PRD
+2. Run `/bmad:phase-3:architecture` to create architecture
+3. Then re-run this workflow
 
-```yaml
-documentation_dir: .bmad
-user_name: "Your Name"
-sprint_artifacts: .bmad/sprint-artifacts
-bmad_folder: .bmad
-project_name: "Project Name"
+**Epic has no acceptance criteria:**
+```
+ℹ️ Epic {epic_id} has no explicit acceptance criteria in PRD/Epic
+```
+→ Solution:
+- Architect will flag this in "Open Questions"
+- Update PRD or epic document with ACs
+- Re-run workflow to include them
+
+**Sharded documents partially loaded:**
+```
+⚠️ Found sharded PRD but some sections are missing
+```
+→ Solution:
+- Check `.bmad/PRD/index.md` for expected sections
+- Verify all section files exist
+- Re-run `/bmad:phase-2:prd` if sections are missing
+
+**Dependency manifest scan finds nothing:**
+```
+ℹ️ No dependency manifests found in repository
+```
+→ This is OK for:
+- Brownfield projects (dependencies already established)
+- Projects using monorepo tools (dependencies elsewhere)
+- Documentation-only projects
+→ Otherwise: Verify repository structure; Architect will note in "Open Questions"
+
+## Report
+
+### Completion Report Format
+
+When the workflow completes successfully, provide this report:
+
+```
+✅ Tech Spec Generated Successfully!
+
+**Epic Details:**
+- Epic ID: {epic_id}
+- Epic Title: {epic_title}
+- Tech Spec File: {output_file}
+- Epic Status: contexted (was backlog)
+
+**Tech Spec Contents:**
+- Sections: [number] of 10 required sections completed
+- Acceptance Criteria: [count]
+- Components/Services: [count]
+- API Endpoints: [count]
+- Data Models: [count]
+- Dependencies: [count]
+- Risks Identified: [count]
+- Open Questions: [count]
+
+**Quality Validation:**
+- Traceability: [All ACs mapped / Some ACs missing traceability]
+- NFRs Coverage: [Performance, Security, Reliability, Observability]
+- Test Strategy: [Defined / Needs refinement]
+
+**Note:** This is a JIT (Just-In-Time) workflow - run again for other epics as needed.
+
+**Next Steps:**
+1. Review the tech spec at: {output_file}
+2. Run `/bmad:phase-4:create-story` to begin implementing stories under this epic
+3. OR run `/bmad:phase-4:epic-tech-context` again for the next backlog epic
 ```
 
-**Sprint status file:**
-- Primary: `{sprint_artifacts}/sprint-status.yaml`
-- Fallback: `{sprint_artifacts}/sprint-status.yaml`
+### Error Report Format
 
-**Tech spec output:**
-- `{sprint_artifacts}/tech-spec-epic-{epic_id}.md`
+If the workflow encounters errors, report:
+
+```
+❌ Tech Spec Generation Failed
+
+**Error Type:** [Configuration / Missing Documents / Validation]
+
+**Issue:**
+[Clear description of what went wrong]
+
+**Required Action:**
+[Specific steps to resolve the issue]
+
+**Files Checked:**
+- Configuration: [path] [✓ Found / ✗ Not found]
+- PRD: [path] [✓ Found / ✗ Not found]
+- Architecture: [path] [✓ Found / ✗ Not found]
+- Epic: [path] [✓ Found / ✗ Not found]
+- Sprint Status: [path] [✓ Found / ✗ Not found]
+
+**Suggested Commands:**
+[List of workflows to run to resolve the issue]
+```
+
+### Progress Updates
+
+During execution, provide these progress updates:
+
+**Step 1 - Configuration:**
+```
+📋 Loading configuration...
+✓ Config loaded from: .bmad/config.yaml
+```
+
+**Step 2 - Epic Discovery:**
+```
+🔍 Scanning sprint status...
+📋 Next Epic Suggested: Epic {epic_id}: {epic_title}
+```
+
+**Step 3 - Validation:**
+```
+✓ Epic {epic_id} validated in sprint status
+```
+
+**Step 4 - Document Loading:**
+```
+📚 Loading input documents...
+✓ PRD loaded: [path] ([size] lines)
+✓ Architecture loaded: [path] ([size] lines)
+✓ Epic loaded: [path] ([size] lines)
+[✓ UX Design loaded: [path] ([size] lines)] (if applicable)
+[✓ GDD loaded: [path] ([size] lines)] (if applicable)
+```
+
+**Step 5 - Delegation:**
+```
+🏗️ Delegating to bmad-architect...
+[Architect is creating comprehensive tech spec...]
+```
+
+**Step 6 - Status Update:**
+```
+✓ Sprint status updated: Epic {epic_id} → contexted
+```
+
+### Example Reports
+
+**Example 1: SaaS Analytics Dashboard**
+```
+✅ Tech Spec Generated Successfully!
+
+**Epic Details:**
+- Epic ID: epic-3
+- Epic Title: Real-Time Data Visualization
+- Tech Spec File: .bmad/sprint-artifacts/tech-spec-epic-3.md
+- Epic Status: contexted (was backlog)
+
+**Tech Spec Contents:**
+- Sections: 10 of 10 required sections completed
+- Acceptance Criteria: 12
+- Components/Services: 3 (WebSocket service, Data aggregation service, Cache layer)
+- API Endpoints: 8 (tRPC)
+- Data Models: 5 (ChartData, Dashboard, Widget, User, Session)
+- Dependencies: 6 (Recharts, Socket.io, Redis, Next.js, tRPC, Prisma)
+- Risks Identified: 4
+- Open Questions: 2
+
+**Quality Validation:**
+- Traceability: All 12 ACs mapped to components and tests
+- NFRs Coverage: Performance (100ms latency), Security (AES-256), Reliability (99.9%), Observability (full)
+- Test Strategy: Defined (unit, integration, e2e with Jest, Playwright, k6)
+
+**Next Steps:**
+1. Review the tech spec at: .bmad/sprint-artifacts/tech-spec-epic-3.md
+2. Run `/bmad:phase-4:create-story` to begin implementing stories under this epic
+3. OR run `/bmad:phase-4:epic-tech-context` again for the next backlog epic
+```
+
+**Example 2: Healthcare HIPAA Compliance**
+```
+✅ Tech Spec Generated Successfully!
+
+**Epic Details:**
+- Epic ID: epic-5
+- Epic Title: HIPAA-Compliant Audit Logging
+- Tech Spec File: .bmad/sprint-artifacts/tech-spec-epic-5.md
+- Epic Status: contexted (was backlog)
+
+**Tech Spec Contents:**
+- Sections: 10 of 10 required sections completed
+- Acceptance Criteria: 18 (HIPAA-focused)
+- Components/Services: 5 (Audit service, Event store, Compliance validator, Export service, Alert service)
+- API Endpoints: 6
+- Data Models: 4 (AuditEvent, ComplianceLog, AccessRecord, ExportJob)
+- Dependencies: 7 (Event Store DB, HashiCorp Vault, AWS KMS, FIPS modules)
+- Risks Identified: 7 (compliance-focused)
+- Open Questions: 3
+
+**Quality Validation:**
+- Traceability: All 18 ACs mapped with HIPAA requirement references
+- NFRs Coverage: Performance (10k events/sec), Security (FIPS 140-2, AES-256, TLS 1.3), Reliability (99.99%), Observability (compliance dashboards)
+- Test Strategy: Defined (includes HIPAA compliance testing, penetration testing, audit trail validation)
+
+**Compliance Note:** All HIPAA requirements mapped to acceptance criteria and test strategy.
+
+**Next Steps:**
+1. Review the tech spec at: .bmad/sprint-artifacts/tech-spec-epic-5.md
+2. Review HIPAA compliance mappings in traceability section
+3. Run `/bmad:phase-4:create-story` to begin implementing stories under this epic
+```
+
+**Example 3: Error - Missing Documents**
+```
+❌ Tech Spec Generation Failed
+
+**Error Type:** Missing Documents
+
+**Issue:**
+Required architecture document not found in project.
+
+**Required Action:**
+Create system architecture before generating epic tech specs.
+
+**Files Checked:**
+- Configuration: .bmad/config.yaml ✓ Found
+- PRD: .bmad/PRD.md ✓ Found
+- Architecture: .bmad/architecture.md ✗ Not found
+- Architecture (sharded): .bmad/architecture/index.md ✗ Not found
+- Epic: .bmad/epics.md ✓ Found
+- Sprint Status: .bmad/sprint-artifacts/sprint-status.yaml ✓ Found
+
+**Suggested Commands:**
+1. Run `/bmad:phase-3:architecture` to create system architecture
+2. Then re-run `/bmad:phase-4:epic-tech-context`
+```
+
+### Notes on Reporting
+
+**Always include:**
+- Clear success/failure indicator
+- Epic identification (ID and title)
+- File location (absolute path)
+- Quantitative metrics (counts)
+- Next actionable steps
+
+**Progress indicators:**
+- Use emoji sparingly but consistently
+- Provide clear status updates during long operations
+- Show what's being loaded/processed
+- Indicate when waiting for subagent completion
+
+**Error messages:**
+- Be specific about what's missing or wrong
+- Provide concrete resolution steps
+- List related files and their status
+- Suggest exact commands to run
+
+**Quality validation:**
+- Summarize completeness of key sections
+- Highlight any gaps or concerns
+- Confirm traceability coverage
+- Note compliance or special requirements
